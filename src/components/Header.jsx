@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './Header.css';
 
 function Header() {
@@ -6,30 +7,30 @@ function Header() {
       <nav>
         <ul className="nav-left">
           <li>
-            <a href="/">STRONA GŁÓWNA</a>
+            <Link to="/">Home</Link>
           </li>
           <li>
-            <a href="/lekcje">LEKCJE</a>
+            <Link to="/lekcje">Lekcje</Link>
           </li>
           <li>
-            <a href="/poradnik">PORADNIK JĘZYKOWY</a>
+            <Link to="/poradnik">Poradnik</Link>
           </li>
           <li>
-            <a href="/kultura">KULTURA I CIEKAWOSTKI</a>
+            <Link to="/kultura">Kultura</Link>
           </li>
           <li>
-            <a href="/ebooki">E-BOOKI</a>
+            <Link to="/ebooki">Ebooki</Link>
           </li>
           <li>
-            <a href="/wyjazdy">WYJAZDY Z JOGĄ</a>
+            <Link to="/wyjazdy">Wyjazdy</Link>
           </li>
         </ul>
         <ul className="nav-right">
           <li>
-            <a href="/logowanie">LOGOWANIE</a>
+            <Link to="/logowanie">Logowanie</Link>
           </li>
           <li>
-            <a href="/rejestracja">REJESTRACJA</a>
+            <Link to="/rejestracja">Rejestracja</Link>
           </li>
         </ul>
       </nav>

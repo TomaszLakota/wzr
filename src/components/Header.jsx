@@ -13,16 +13,16 @@ function Header() {
             <Link to="/lekcje">Lekcje</Link>
           </li>
           <li>
-            <Link to="/poradnik">Poradnik</Link>
+            <Link to="/poradnik">Poradnik językowy</Link>
           </li>
           <li>
-            <Link to="/kultura">Kultura</Link>
+            <Link to="/kultura">Kultura i ciekawostki</Link>
           </li>
           <li>
-            <Link to="/ebooki">Ebooki</Link>
+            <Link to="/ebooki">E-booki</Link>
           </li>
           <li>
-            <Link to="/wyjazdy">Wyjazdy</Link>
+            <Link to="/wyjazdy">Wyjazdy z jogą</Link>
           </li>
         </ul>
         <ul className="nav-right">

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createStores } from './config/storage.js';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -15,25 +16,52 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.post('/api/users', async (req, res) => {
-  const { email, password } = req.body;
+app.post('/api/register', async (req, res) => {
+  const { email, password, name } = req.body;
+  
+  // Input validation
+  if (!email || !password || !name) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format' });
+  }
+
+  // Password strength validation
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+  }
   
   try {
     const existingUser = await users.get(email);
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res.status(400).json({ error: 'Email already registered' });
     }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = {
       email,
-      password, // Note: Hash this in production!
+      name,
+      password: hashedPassword,
       createdAt: Date.now()
     };
 
     await users.set(email, user);
-    res.status(201).json({ message: 'User created' });
+    
+    // Return user data without password
+    const { password: _, ...userWithoutPassword } = user;
+    res.status(201).json({
+      message: 'Registration successful',
+      user: userWithoutPassword
+    });
   } catch (error) {
-    console.error('Error creating user:', error);
+    console.error('Error registering user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -1,6 +1,6 @@
 import { Form } from 'react-router-dom';
 import { useState } from 'react';
-import './Register.css';
+import './Register.scss';
 
 function Register() {
   const [error, setError] = useState(null);

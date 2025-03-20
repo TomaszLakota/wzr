@@ -4,21 +4,20 @@ import KeyvRedis from '@keyv/redis';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 export const createStores = () => {
-  // Configure store based on environment
-  const store = isDevelopment
-    ? undefined // undefined or {} will use in-memory storage
-    : new KeyvRedis(process.env.REDIS_URL);
+  try {
+    const store = isDevelopment ? undefined : new KeyvRedis(process.env.REDIS_URL);
 
-  const options = isDevelopment ? {} : { store };
+    const options = isDevelopment ? {} : { store };
 
-  const users = new Keyv({ ...options, namespace: 'users' });
-  const products = new Keyv({ ...options, namespace: 'products' });
-  const orders = new Keyv({ ...options, namespace: 'orders' });
+    const users = new Keyv({ ...options, namespace: 'users' });
+    const products = new Keyv({ ...options, namespace: 'products' });
+    const orders = new Keyv({ ...options, namespace: 'orders' });
 
-  // Log connection errors
-  users.on('error', err => 
-    console.error(`Storage Error (${isDevelopment ? 'memory' : 'redis'}):`, err)
-  );
+    users.on('error', (err) => console.error('Storage Error:', err));
 
-  return { users, products, orders };
+    return { users, products, orders };
+  } catch (error) {
+    console.error('Store initialization error:', error);
+    throw error;
+  }
 };

@@ -8,6 +8,15 @@ import YogaTrips from './pages/YogaTrips';
 import Ebooks from './pages/Ebooks';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import PaymentSuccess from './pages/PaymentSuccess';
+import Library from './pages/Library';
+import React from 'react';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import LessonsPage from './pages/LessonsPage';
+
+// Load Stripe outside of component render to avoid recreating the Stripe object on re-renders
+const stripePromise = loadStripe(import.meta.env.STRIPE_PUBLISHABLE_KEY);
 
 const router = createBrowserRouter([
   {
@@ -38,6 +47,14 @@ const router = createBrowserRouter([
         element: <Ebooks />,
       },
       {
+        path: '/platnosc/sukces',
+        element: <PaymentSuccess />,
+      },
+      {
+        path: '/biblioteka',
+        element: <Library />,
+      },
+      {
         path: '/logowanie',
         element: <Login />,
       },
@@ -50,7 +67,11 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <Elements stripe={stripePromise}>
+      <RouterProvider router={router} />
+    </Elements>
+  );
 }
 
 export default App;

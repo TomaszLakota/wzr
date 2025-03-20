@@ -24,5 +24,7 @@ dist-ssr
 *.sw?
 
 # Other
-.env
-.env.production
+server/.env
+server/.env.production
+.cursor/mcp.json
+server/.env.production

@@ -1,23 +1,12 @@
 ---
 description: 
 globs: 
-alwaysApply: false
----
----
-description: 
-globs: 
-alwaysApply: false
----
----
-description: 
-globs: 
 alwaysApply: true
 ---
-
 # Rules!
 
 - All labels and texts in UI must be exclusively in polish
-- use mcp [mcp.json](mdc:c:/Users/tomas/.cursor/mcp.json) for stripe interactions
+- you can use mcp [mcp.json](mdc:c:/Users/tomas/.cursor/mcp.json) for stripe interactions, but don't expect them to work in the project we're building
 - Our server files are in the /server folder
 - When running terminal commands make sure you're in the right folder and use commands that work with windows 10
 

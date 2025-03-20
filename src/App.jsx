@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Library from './pages/Library';
+import Profile from './pages/Profile';
 import React from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
       {
         path: '/rejestracja',
         element: <Register />,
+      },
+      {
+        path: '/profil',
+        element: <Profile />,
       },
     ],
   },

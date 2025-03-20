@@ -12,30 +12,20 @@ const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate checking auth status
     const checkAuthStatus = async () => {
       try {
-        // In reality, you would fetch from your API
+        // TODO: Implement actual API call
         // const response = await fetch('/api/auth/status');
         // const data = await response.json();
+        // setIsLoggedIn(data.isLoggedIn);
+        // setIsSubscribed(data.isSubscribed);
         
-        // For demo purposes
-        const mockAuthCheck = new Promise(resolve => {
-          setTimeout(() => {
-            resolve({ 
-              isLoggedIn: localStorage.getItem('isLoggedIn') === 'true',
-              isSubscribed: localStorage.getItem('isSubscribed') === 'true'
-            });
-          }, 500);
-        });
-        
-        const { isLoggedIn, isSubscribed } = await mockAuthCheck;
-        
-        setIsLoggedIn(isLoggedIn);
-        setIsSubscribed(isSubscribed);
+        // Tymczasowa implementacja
+        setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
+        setIsSubscribed(localStorage.getItem('isSubscribed') === 'true');
         setIsLoading(false);
       } catch (error) {
-        console.error('Error checking auth status:', error);
+        console.error('Błąd podczas sprawdzania statusu autoryzacji:', error);
         setIsLoading(false);
       }
     };
@@ -57,15 +47,12 @@ const Lessons = () => {
     if (isLoggedIn && !isSubscribed && !isLoading) {
       const getClientSecret = async () => {
         try {
-          // This would be a real API call in your actual implementation
+          // TODO: Implement actual API call
           // const response = await fetch('/api/setup-subscription-intent');
           // const data = await response.json();
           // setClientSecret(data.clientSecret);
-          
-          // For demo purposes
-          setClientSecret('mock_client_secret');
         } catch (error) {
-          console.error('Error fetching client secret:', error);
+          console.error('Błąd podczas pobierania klucza klienta:', error);
         }
       };
       
@@ -74,59 +61,59 @@ const Lessons = () => {
   }, [isLoggedIn, isSubscribed, isLoading]);
 
   if (isLoading) {
-    return <div className="loading">Loading...</div>;
+    return <div className="loading">Ładowanie...</div>;
   }
 
   // Show lessons content if user is logged in and subscribed
   if (isLoggedIn && isSubscribed) {
     return (
       <div className="lessons-page">
-        <h1>Premium Lessons</h1>
+        <h1>Lekcje Premium</h1>
         <div className="lessons-container">
           <div className="lesson-section">
-            <h2>Beginner Lessons</h2>
+            <h2>Lekcje dla Początkujących</h2>
             <ul className="lesson-list">
               <li className="lesson-item">
-                <h3>Introduction to Basics</h3>
-                <p>Learn fundamental concepts and vocabulary</p>
-                <a href="#lesson-1" className="lesson-link">Start Lesson</a>
+                <h3>Wprowadzenie do Podstaw</h3>
+                <p>Poznaj podstawowe koncepcje i słownictwo</p>
+                <a href="#lesson-1" className="lesson-link">Rozpocznij Lekcję</a>
               </li>
               <li className="lesson-item">
-                <h3>Essential Phrases</h3>
-                <p>Master everyday expressions and greetings</p>
-                <a href="#lesson-2" className="lesson-link">Start Lesson</a>
+                <h3>Podstawowe Zwroty</h3>
+                <p>Opanuj codzienne wyrażenia i powitania</p>
+                <a href="#lesson-2" className="lesson-link">Rozpocznij Lekcję</a>
               </li>
             </ul>
           </div>
           
           <div className="lesson-section">
-            <h2>Intermediate Lessons</h2>
+            <h2>Lekcje Średniozaawansowane</h2>
             <ul className="lesson-list">
               <li className="lesson-item">
-                <h3>Conversation Skills</h3>
-                <p>Develop fluency in common scenarios</p>
-                <a href="#lesson-3" className="lesson-link">Start Lesson</a>
+                <h3>Umiejętności Konwersacji</h3>
+                <p>Rozwiń płynność w typowych sytuacjach</p>
+                <a href="#lesson-3" className="lesson-link">Rozpocznij Lekcję</a>
               </li>
               <li className="lesson-item">
-                <h3>Grammar Structures</h3>
-                <p>Build complex sentences with confidence</p>
-                <a href="#lesson-4" className="lesson-link">Start Lesson</a>
+                <h3>Struktury Gramatyczne</h3>
+                <p>Buduj złożone zdania z pewnością siebie</p>
+                <a href="#lesson-4" className="lesson-link">Rozpocznij Lekcję</a>
               </li>
             </ul>
           </div>
           
           <div className="lesson-section">
-            <h2>Advanced Lessons</h2>
+            <h2>Lekcje Zaawansowane</h2>
             <ul className="lesson-list">
               <li className="lesson-item">
-                <h3>Cultural Insights</h3>
-                <p>Understand language in cultural context</p>
-                <a href="#lesson-5" className="lesson-link">Start Lesson</a>
+                <h3>Wgląd w Kulturę</h3>
+                <p>Zrozum język w kontekście kulturowym</p>
+                <a href="#lesson-5" className="lesson-link">Rozpocznij Lekcję</a>
               </li>
               <li className="lesson-item">
-                <h3>Advanced Topics</h3>
-                <p>Master complex language structures</p>
-                <a href="#lesson-6" className="lesson-link">Start Lesson</a>
+                <h3>Zaawansowane Tematy</h3>
+                <p>Opanuj złożone struktury językowe</p>
+                <a href="#lesson-6" className="lesson-link">Rozpocznij Lekcję</a>
               </li>
             </ul>
           </div>

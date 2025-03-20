@@ -12,14 +12,12 @@ const SubscriptionPromo = ({ isLoggedIn }) => {
   const navigate = useNavigate();
 
   const subscriptionDetails = {
-    name: 'Premium Lessons Access',
-    price: '€9.99/month',
-    description: 'Unlock all premium lessons and learn at your own pace',
+    name: 'Dostęp do Lekcji Premium',
+    price: '90zł miesięcznie',
+    description: 'Odblokuj wszystkie lekcje premium i ucz się we własnym tempie',
     features: [
-      'Access to all premium lessons',
-      'Weekly new content updates',
-      'Advanced practice materials',
-      'Interactive learning tools'
+      'Dostęp do wszystkich lekcji',
+      'Cotygodniowe aktualizacje treści'
     ]
   };
 
@@ -80,9 +78,9 @@ const SubscriptionPromo = ({ isLoggedIn }) => {
   return (
     <div className="subscription-promo">
       <div className="promo-content">
-        <h2>Unlock Premium Lessons</h2>
+        <h2>Odblokuj Lekcje Premium</h2>
         <p className="promo-description">
-          Take your learning to the next level with our premium lessons subscription.
+          Podnieś swój poziom nauki dzięki naszej subskrypcji lekcji.
         </p>
         
         <div className="subscription-card">
@@ -101,7 +99,7 @@ const SubscriptionPromo = ({ isLoggedIn }) => {
               className="subscribe-button" 
               onClick={() => isLoggedIn ? setShowPaymentForm(true) : navigate('/logowanie?redirect=lekcje')}
             >
-              {isLoggedIn ? 'Subscribe Now' : 'Login to Subscribe'}
+              {isLoggedIn ? 'Subskrybuj Teraz' : 'Zaloguj się, aby Subskrybować'}
             </button>
           ) : (
             <form onSubmit={handleSubscribe} className="payment-form">
@@ -112,27 +110,20 @@ const SubscriptionPromo = ({ isLoggedIn }) => {
                 disabled={!stripe || loading} 
                 className="payment-button"
               >
-                {loading ? 'Processing...' : 'Complete Subscription'}
+                {loading ? 'Przetwarzanie...' : 'Subskrybuj'}
               </button>
               <button 
                 type="button"
                 onClick={() => setShowPaymentForm(false)}
                 className="cancel-button"
               >
-                Cancel
+                Anuluj
               </button>
             </form>
           )}
         </div>
 
-        <div className="sample-lessons">
-          <h3>Preview of Premium Content</h3>
-          <ul>
-            <li>Advanced Conversation Techniques</li>
-            <li>Mastering Grammar Structures</li>
-            <li>Cultural Insights and Expressions</li>
-          </ul>
-        </div>
+       
       </div>
     </div>
   );

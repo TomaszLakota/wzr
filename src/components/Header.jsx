@@ -1,13 +1,40 @@
 import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import './Header.scss';
 
 function Header() {
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      
+      if (token && userData) {
+        setIsLoggedIn(true);
+        setUser(JSON.parse(userData));
+      } else {
+        setIsLoggedIn(false);
+        setUser(null);
+      }
+    };
+    
+    checkAuthStatus();
+    // Listen for storage changes (in case user logs in/out in another tab)
+    window.addEventListener('storage', checkAuthStatus);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuthStatus);
+    };
+  }, []);
+
   return (
     <header className="header">
       <nav>
         <ul className="nav-left">
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/">Strona główna</Link>
           </li>
           <li>
             <Link to="/lekcje">Lekcje</Link>
@@ -26,12 +53,20 @@ function Header() {
           </li>
         </ul>
         <ul className="nav-right">
-          <li>
-            <Link to="/logowanie">Logowanie</Link>
-          </li>
-          <li>
-            <Link to="/rejestracja">Rejestracja</Link>
-          </li>
+          {isLoggedIn ? (
+            <li>
+              <Link to="/profil">{user?.name || 'Profil'}</Link>
+            </li>
+          ) : (
+            <>
+              <li>
+                <Link to="/logowanie">Logowanie</Link>
+              </li>
+              <li>
+                <Link to="/rejestracja">Rejestracja</Link>
+              </li>
+            </>
+          )}
         </ul>
       </nav>
     </header>

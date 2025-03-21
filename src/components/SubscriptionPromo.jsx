@@ -1,129 +1,158 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import '../styles/subscription.css';
 
 const SubscriptionPromo = ({ isLoggedIn }) => {
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
+  const [error, setError] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-
+  
   const subscriptionDetails = {
-    name: 'Dostęp do Lekcji Premium',
+    name: 'Dostęp do Lekcji',
     price: '90zł miesięcznie',
-    description: 'Odblokuj wszystkie lekcje premium i ucz się we własnym tempie',
+    description: 'Podnieś swój poziom nauki dzięki naszej subskrypcji lekcji',
     features: [
       'Dostęp do wszystkich lekcji',
-      'Cotygodniowe aktualizacje treści'
+      'Cotygodniowe aktualizacje treści',
+      'Materiały dodatkowe do pobrania',
+      'Anuluj w dowolnym momencie'
     ]
   };
-
-  const handleSubscribe = async (event) => {
+  
+  const handleSubmit = async (event) => {
     event.preventDefault();
-
-    if (!isLoggedIn) {
-      navigate('/logowanie?redirect=lekcje');
-      return;
-    }
-
+    
     if (!stripe || !elements) {
       return;
     }
-
-    setLoading(true);
-    setErrorMessage(null);
-
+    
+    setProcessing(true);
+    
     try {
-      // Call your backend to create the subscription
-      const response = await fetch('/api/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: 'price_premium_monthly', // Your single subscription price ID
-        }),
+      const cardElement = elements.getElement(CardElement);
+      
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
       });
-
-      const data = await response.json();
-
-      if (data.error) {
-        setErrorMessage(data.error.message);
-        setLoading(false);
+      
+      if (error) {
+        setError(error.message);
+        setProcessing(false);
         return;
       }
-
-      // Confirm the subscription setup
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/lekcje`,
-        },
-      });
-
-      if (error) {
-        setErrorMessage(error.message);
+      
+      // Use the client secret from the parent component to confirm the payment
+      const { error: confirmError } = await stripe.confirmCardPayment(
+        window.clientSecret,
+        {
+          payment_method: paymentMethod.id,
+        }
+      );
+      
+      if (confirmError) {
+        setError(confirmError.message);
+        setProcessing(false);
+        return;
       }
+      
+      // If we get here, payment succeeded!
+      setSuccess(true);
+      setError(null);
+      
+      // Update local storage to reflect subscription
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        user.subscribed = true;
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+      
+      // Redirect to lessons page
+      setTimeout(() => {
+        window.location.href = '/lekcje';
+      }, 2000);
     } catch (err) {
-      setErrorMessage('An unexpected error occurred.');
-      console.error(err);
+      console.error('Błąd podczas przetwarzania płatności:', err);
+      setError('Wystąpił błąd podczas przetwarzania płatności. Prosimy spróbować ponownie.');
+      setProcessing(false);
     }
-
-    setLoading(false);
   };
-
+  
+  if (success) {
+    return (
+      <div className="subscription-promo">
+        <div className="success-message">
+          <h2>Płatność Zaakceptowana!</h2>
+          <p>Dziękujemy za subskrypcję! Przekierowujemy Cię do lekcji...</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="subscription-promo">
       <div className="promo-content">
-        <h2>Odblokuj Lekcje Premium</h2>
+        <h2>Odblokuj Lekcje</h2>
         <p className="promo-description">
           Podnieś swój poziom nauki dzięki naszej subskrypcji lekcji.
         </p>
-        
+          
         <div className="subscription-card">
           <h3>{subscriptionDetails.name}</h3>
           <p className="price">{subscriptionDetails.price}</p>
           <p>{subscriptionDetails.description}</p>
-          
+            
           <ul className="feature-list">
             {subscriptionDetails.features.map((feature, index) => (
               <li key={index}>{feature}</li>
             ))}
           </ul>
-
-          {!showPaymentForm ? (
-            <button 
-              className="subscribe-button" 
-              onClick={() => isLoggedIn ? setShowPaymentForm(true) : navigate('/logowanie?redirect=lekcje')}
-            >
-              {isLoggedIn ? 'Subskrybuj Teraz' : 'Zaloguj się, aby Subskrybować'}
-            </button>
-          ) : (
-            <form onSubmit={handleSubscribe} className="payment-form">
-              <PaymentElement />
-              {errorMessage && <div className="error-message">{errorMessage}</div>}
+  
+          {isLoggedIn ? (
+            <form className="payment-form" onSubmit={handleSubmit}>
+              <div className="card-element-container">
+                <CardElement 
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: '16px',
+                        color: '#424770',
+                        '::placeholder': {
+                          color: '#aab7c4',
+                        },
+                      },
+                      invalid: {
+                        color: '#9e2146',
+                      },
+                    },
+                  }}
+                />
+              </div>
+                
+              {error && <div className="error-message">{error}</div>}
+                
               <button 
                 type="submit" 
-                disabled={!stripe || loading} 
+                disabled={!stripe || processing} 
                 className="payment-button"
               >
-                {loading ? 'Przetwarzanie...' : 'Subskrybuj'}
-              </button>
-              <button 
-                type="button"
-                onClick={() => setShowPaymentForm(false)}
-                className="cancel-button"
-              >
-                Anuluj
+                {processing ? 'Przetwarzanie...' : 'Subskrybuj'}
               </button>
             </form>
+          ) : (
+            <button 
+              className="subscribe-button" 
+              onClick={() => navigate('/logowanie?redirect=lekcje')}
+            >
+              Zaloguj się, aby Subskrybować
+            </button>
           )}
         </div>
-
-       
       </div>
     </div>
   );

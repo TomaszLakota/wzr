@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import SubscriptionPromo from '../components/SubscriptionPromo';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { Link } from 'react-router-dom';
 import '../styles/subscription.css';
 
-// Assuming you'll have this from your auth system
+// Create a proper auth hook that uses the API
 const useAuth = () => {
-  // This is a placeholder - replace with your actual auth logic
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,15 +11,47 @@ const useAuth = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // TODO: Implement actual API call
-        // const response = await fetch('/api/auth/status');
-        // const data = await response.json();
-        // setIsLoggedIn(data.isLoggedIn);
-        // setIsSubscribed(data.isSubscribed);
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
         
-        // Tymczasowa implementacja
-        setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
-        setIsSubscribed(localStorage.getItem('isSubscribed') === 'true');
+        if (!token || !userData) {
+          setIsLoggedIn(false);
+          setIsSubscribed(false);
+          setIsLoading(false);
+          return;
+        }
+        
+        setIsLoggedIn(true);
+        
+        // Parse user data to check if subscribed flag exists
+        const user = JSON.parse(userData);
+        if (user.subscribed !== undefined) {
+          setIsSubscribed(user.subscribed);
+          setIsLoading(false);
+          return;
+        }
+        
+        // If not in user data, check API
+        const response = await fetch('/api/subscriptions/subscription-status', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setIsSubscribed(data.isSubscribed);
+          
+          // Update local user data with subscription status
+          if (userData) {
+            const updatedUser = { ...user, subscribed: data.isSubscribed };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+        } else {
+          console.error('Błąd podczas sprawdzania statusu subskrypcji');
+        }
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Błąd podczas sprawdzania statusu autoryzacji:', error);
@@ -36,39 +65,73 @@ const useAuth = () => {
   return { isLoggedIn, isSubscribed, isLoading };
 };
 
-const stripePromise = loadStripe(import.meta.env.STRIPE_PUBLISHABLE_KEY);
-
 const Lessons = () => {
   const { isLoggedIn, isSubscribed, isLoading } = useAuth();
-  const [clientSecret, setClientSecret] = useState('');
+  const [redirectLoading, setRedirectLoading] = useState(false);
   
-  useEffect(() => {
-    // Only fetch client secret if user is logged in but not subscribed
-    if (isLoggedIn && !isSubscribed && !isLoading) {
-      const getClientSecret = async () => {
-        try {
-          // TODO: Implement actual API call
-          // const response = await fetch('/api/setup-subscription-intent');
-          // const data = await response.json();
-          // setClientSecret(data.clientSecret);
-        } catch (error) {
-          console.error('Błąd podczas pobierania klucza klienta:', error);
-        }
-      };
-      
-      getClientSecret();
+  const handleSubscribe = async () => {
+    if (!isLoggedIn) {
+      // Redirect to login page if user is not logged in
+      window.location.href = '/logowanie?redirect=lekcje';
+      return;
     }
-  }, [isLoggedIn, isSubscribed, isLoading]);
+    
+    setRedirectLoading(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/subscriptions/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          priceId: import.meta.env.STRIPE_SUBSCRIPTION_PRICE_ID || "price_1R1C8u2cdengCFrj8fAJanCN",
+          successUrl: `${window.location.origin}/lekcje?success=true`,
+          cancelUrl: `${window.location.origin}/lekcje?canceled=true`
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        alert('Nie udało się utworzyć sesji płatności. Prosimy spróbować ponownie.');
+        setRedirectLoading(false);
+      }
+    } catch (error) {
+      console.error('Błąd podczas tworzenia sesji płatności:', error);
+      alert('Wystąpił błąd. Prosimy spróbować ponownie.');
+      setRedirectLoading(false);
+    }
+  };
 
   if (isLoading) {
     return <div className="loading">Ładowanie...</div>;
+  }
+
+  // Check if user just completed subscription purchase
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('success') === 'true') {
+    return (
+      <div className="lessons-page">
+        <div className="success-message">
+          <h2>Dziękujemy za subskrypcję!</h2>
+          <p>Twoja subskrypcja została pomyślnie aktywowana.</p>
+          <Link to="/lekcje" className="lesson-link">Przejdź do lekcji</Link>
+        </div>
+      </div>
+    );
   }
 
   // Show lessons content if user is logged in and subscribed
   if (isLoggedIn && isSubscribed) {
     return (
       <div className="lessons-page">
-        <h1>Lekcje Premium</h1>
+        <h1>Lekcje</h1>
         <div className="lessons-container">
           <div className="lesson-section">
             <h2>Lekcje dla Początkujących</h2>
@@ -122,11 +185,39 @@ const Lessons = () => {
     );
   }
 
-  // Show promo if user is not logged in or not subscribed
+  // Show subscription promo for non-subscribed users
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <SubscriptionPromo isLoggedIn={isLoggedIn} />
-    </Elements>
+    <div className="subscription-promo">
+      <div className="promo-content">
+        <h2>Odblokuj Lekcje</h2>
+        <p className="promo-description">
+          Podnieś swój poziom nauki dzięki naszej subskrypcji lekcji.
+        </p>
+          
+        <div className="subscription-card">
+          <h3>Dostęp do Lekcji</h3>
+          <p className="price">90zł miesięcznie</p>
+          <p>Podnieś swój poziom nauki dzięki naszej subskrypcji lekcji</p>
+            
+          <ul className="feature-list">
+            <li>Dostęp do wszystkich lekcji</li>
+            <li>Cotygodniowe aktualizacje treści</li>
+            <li>Materiały dodatkowe do pobrania</li>
+            <li>Anuluj w dowolnym momencie</li>
+          </ul>
+          
+          <button 
+            className="subscribe-button" 
+            onClick={handleSubscribe}
+            disabled={redirectLoading}
+          >
+            {redirectLoading 
+              ? 'Przekierowywanie...' 
+              : isLoggedIn ? 'Subskrybuj Teraz' : 'Zaloguj się, aby Subskrybować'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

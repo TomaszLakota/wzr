@@ -7,6 +7,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Import routes
 const apiRoutes = require('./routes/api');
+const subscriptionRoutes = require('./routes/subscription');
 
 // Initialize express
 const app = express();
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 
 // API routes
 app.use('/api', apiRoutes);
+app.use('/api/subscription', subscriptionRoutes);
 
 // Stripe webhook handler
 app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
@@ -36,19 +38,85 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
     case 'checkout.session.completed':
       const session = event.data.object;
 
-      // Get the payment intent from the session
-      const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+      // Handle subscription checkout completion
+      if (session.mode === 'subscription') {
+        try {
+          const customer = await stripe.customers.retrieve(session.customer);
 
-      // Update payment intent with session metadata for later reference
-      await stripe.paymentIntents.update(session.payment_intent, {
-        metadata: {
-          ...paymentIntent.metadata,
-          session_id: session.id,
-          type: session.metadata.type || 'ebook',
-        },
-      });
+          // Update the user's subscription status
+          if (customer && customer.metadata.userId) {
+            const userRecord = await global.stores.users.get(customer.metadata.userId);
+            if (userRecord) {
+              userRecord.subscribed = true;
+              await global.stores.users.set(customer.metadata.userId, userRecord);
+              console.log(`Updated subscription status for user ${customer.metadata.userId}`);
+            }
+          }
+        } catch (error) {
+          console.error(`Error updating user subscription status: ${error.message}`);
+        }
+      } else {
+        // Handle one-time payment (like ebook purchase)
+        // Get the payment intent from the session
+        const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+
+        // Update payment intent with session metadata for later reference
+        await stripe.paymentIntents.update(session.payment_intent, {
+          metadata: {
+            ...paymentIntent.metadata,
+            session_id: session.id,
+            type: session.metadata.type || 'ebook',
+          },
+        });
+      }
 
       console.log(`Payment successful for session ${session.id}`);
+      break;
+
+    case 'invoice.payment_succeeded':
+      // Handle successful subscription payment
+      const invoice = event.data.object;
+      if (
+        invoice.billing_reason === 'subscription_create' ||
+        invoice.billing_reason === 'subscription_cycle'
+      ) {
+        const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+        const customer = await stripe.customers.retrieve(invoice.customer);
+
+        if (customer.metadata.userId) {
+          try {
+            // Update user subscription status in your database
+            const userRecord = await global.stores.users.get(customer.metadata.userId);
+            if (userRecord) {
+              userRecord.subscribed = true;
+              await global.stores.users.set(customer.metadata.userId, userRecord);
+              console.log(`Updated subscription status for user ${customer.metadata.userId}`);
+            }
+          } catch (error) {
+            console.error(`Error updating user subscription status: ${error.message}`);
+          }
+        }
+      }
+      break;
+
+    case 'customer.subscription.deleted':
+      // Handle subscription cancellation
+      const cancelledSubscription = event.data.object;
+      const cancelledCustomer = await stripe.customers.retrieve(cancelledSubscription.customer);
+
+      if (cancelledCustomer.metadata.userId) {
+        try {
+          // Update user subscription status in your database
+          const userRecord = await global.stores.users.get(cancelledCustomer.metadata.userId);
+          if (userRecord) {
+            userRecord.subscribed = false;
+            await global.stores.users.set(cancelledCustomer.metadata.userId, userRecord);
+            console.log(`Subscription cancelled for user ${cancelledCustomer.metadata.userId}`);
+          }
+        } catch (error) {
+          console.error(`Error updating user subscription status: ${error.message}`);
+        }
+      }
       break;
 
     default:

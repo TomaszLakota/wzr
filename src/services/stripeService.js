@@ -1,7 +1,7 @@
 // Real service that fetches from the backend API
 
 // API base URL - adjust according to your environment
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.API_URL || 'http://localhost:3000/api';
 
 /**
  * Get products from the backend

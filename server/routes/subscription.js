@@ -90,6 +90,12 @@ router.get('/subscription-status', authenticateToken, async (req, res) => {
 
     const isSubscribed = subscriptions.data.length > 0;
 
+    // Update user record with subscription status
+    if (userRecord) {
+      userRecord.subscribed = isSubscribed;
+      await global.stores.users.set(user.email, userRecord);
+    }
+
     res.json({
       isSubscribed,
       subscriptionDetails: isSubscribed
@@ -104,6 +110,94 @@ router.get('/subscription-status', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error checking subscription status:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Create a customer portal session
+router.post('/create-portal-session', authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Get the Stripe customer ID
+    const userRecord = await global.stores.users.get(user.email);
+    const customerId = userRecord?.stripeCustomerId;
+
+    if (!customerId) {
+      return res.status(400).json({ error: 'No Stripe customer found for this user' });
+    }
+
+    // Create a portal session
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${process.env.FRONTEND_URL}/profil`,
+    });
+
+    // Return the URL of the portal
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Error creating portal session:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Create a checkout session for subscription
+router.post('/create-checkout-session', authenticateToken, async (req, res) => {
+  try {
+    const { priceId, successUrl, cancelUrl } = req.body;
+    const user = req.user;
+
+    if (!priceId) {
+      return res.status(400).json({ error: 'Price ID is required' });
+    }
+
+    // Get or create a Stripe customer for this user
+    let customerId = user.stripeCustomerId;
+
+    if (!customerId) {
+      // Create a customer in Stripe
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.name,
+        metadata: {
+          userId: user.email, // Using email as the user ID based on your system
+        },
+      });
+
+      customerId = customer.id;
+
+      // Update the user record with the Stripe customer ID
+      try {
+        const userRecord = await global.stores.users.get(user.email);
+        userRecord.stripeCustomerId = customerId;
+        await global.stores.users.set(user.email, userRecord);
+      } catch (error) {
+        console.error('Error updating user with Stripe customer ID:', error);
+      }
+    }
+
+    // Create the checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: successUrl || `${process.env.FRONTEND_URL}/lekcje?success=true`,
+      cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/lekcje?canceled=true`,
+      customer: customerId,
+      client_reference_id: user.email,
+      metadata: {
+        userId: user.email,
+      },
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
     res.status(400).json({ error: error.message });
   }
 });

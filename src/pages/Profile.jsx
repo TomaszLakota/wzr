@@ -5,6 +5,8 @@ import '../styles/profile.css';
 function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [portalUrl, setPortalUrl] = useState('');
+  const [portalLoading, setPortalLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,6 +32,34 @@ function Profile() {
     navigate('/');
   };
 
+  const handleManageSubscription = async () => {
+    try {
+      setPortalLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('/api/subscription/create-portal-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Nie udało się utworzyć sesji zarządzania subskrypcją.');
+      }
+    } catch (error) {
+      console.error('Błąd podczas tworzenia sesji zarządzania subskrypcją:', error);
+      alert('Wystąpił błąd podczas próby zarządzania subskrypcją.');
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="profile-container">Ładowanie...</div>;
   }
@@ -48,9 +78,24 @@ function Profile() {
           <label>Email:</label>
           <p>{user?.email || 'Nie podano'}</p>
         </div>
+
+        <div className="profile-field">
+          <label>Status subskrypcji:</label>
+          <p>{user?.subscribed ? 'Aktywna' : 'Brak aktywnej subskrypcji'}</p>
+        </div>
       </div>
       
       <div className="profile-actions">
+        {user?.subscribed && (
+          <button 
+            className="manage-subscription-button" 
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+          >
+            {portalLoading ? 'Ładowanie...' : 'Zarządzaj subskrypcją'}
+          </button>
+        )}
+        
         <button 
           className="logout-button" 
           onClick={handleLogout}

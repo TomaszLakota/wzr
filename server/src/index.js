@@ -2,8 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createStores } from './config/storage.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import subscriptionRoutes from '../routes/subscription.js';
 import productRoutes from '../routes/products.js';
 import apiRoutes from './routes/api.js';
@@ -58,30 +56,56 @@ try {
   // Initialize products directly at startup
   const initializeProducts = async () => {
     try {
-      // Define the test ebook product directly here to avoid circular imports
-      const testEbookProduct = {
-        id: 'prod_Rydzf2Xagl0dem',
-        name: 'test ebook',
-        description: 'Test ebook product',
-        images: [],
+      // Fetch products from Stripe API
+      const stripeProducts = await stripeClient.products.list({
         active: true,
-        price: {
-          id: 'price_1R4gmL2cdengCFrj8rPznlZu',
-          currency: 'pln',
-          unit_amount: 2900,
-          formatted: '29 zł',
-        },
-      };
+        limit: 100,
+      });
 
-      // Check if product already exists
-      const existingProduct = await products.get(testEbookProduct.id);
+      console.log(`Fetched ${stripeProducts.data.length} products from Stripe`);
 
-      if (!existingProduct) {
-        // Store the test ebook product
-        await products.set(testEbookProduct.id, testEbookProduct);
-        console.log(`Product ${testEbookProduct.id} initialized in the store`);
-      } else {
-        console.log(`Product ${testEbookProduct.id} already exists in the store`);
+      // Process each product
+      for (const product of stripeProducts.data) {
+        try {
+          // Get prices for this product
+          const prices = await stripeClient.prices.list({
+            product: product.id,
+            active: true,
+            limit: 1,
+          });
+
+          if (prices.data.length > 0) {
+            const price = prices.data[0];
+
+            // Create a product record with the price
+            const productRecord = {
+              id: product.id,
+              name: product.name,
+              description: product.description || '',
+              images: product.images || [],
+              active: product.active,
+              price: {
+                id: price.id,
+                currency: price.currency,
+                unit_amount: price.unit_amount,
+                formatted: `${(price.unit_amount / 100).toFixed(0)} zł`,
+              },
+            };
+
+            // Store the product in our database
+            await products.set(product.id, productRecord);
+            console.log(`Product ${product.id} initialized in the store`);
+          } else {
+            console.log(`No active prices found for product ${product.id}`);
+          }
+        } catch (priceError) {
+          console.error(`Error fetching prices for product ${product.id}:`, priceError);
+        }
+      }
+
+      // If no products were found, log a message
+      if (stripeProducts.data.length === 0) {
+        console.log('No active products found in Stripe');
       }
     } catch (error) {
       console.error('Error initializing products:', error);

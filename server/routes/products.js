@@ -1,41 +1,69 @@
 import express from 'express';
 import { authenticateToken } from '../src/middleware/auth.js';
 import dotenv from 'dotenv';
+import stripe from 'stripe';
 
 dotenv.config();
 
 const router = express.Router();
-
-// The test ebook product from Stripe
-export const testEbookProduct = {
-  id: 'prod_Rydzf2Xagl0dem',
-  name: 'test ebook',
-  description: 'Test ebook product',
-  images: [],
-  active: true,
-  price: {
-    id: 'price_1R4gmL2cdengCFrj8rPznlZu',
-    currency: 'pln',
-    unit_amount: 2900,
-    formatted: '29 zł',
-  },
-};
+const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
 // Initialize products in the store
 router.get('/init-products', async (req, res) => {
   try {
     const { products } = global.stores;
 
-    // Check if products already exist
-    const existingProduct = await products.get(testEbookProduct.id);
+    // Fetch products from Stripe API
+    const stripeProducts = await stripeClient.products.list({
+      active: true,
+      limit: 10,
+    });
 
-    if (!existingProduct) {
-      // Store the test ebook product
-      await products.set(testEbookProduct.id, testEbookProduct);
-      console.log(`Product ${testEbookProduct.id} initialized in the store`);
+    console.log(`Fetched ${stripeProducts.data.length} products from Stripe`);
+
+    let initializedCount = 0;
+
+    // Process each product
+    for (const product of stripeProducts.data) {
+      try {
+        // Get prices for this product
+        const prices = await stripeClient.prices.list({
+          product: product.id,
+          active: true,
+          limit: 1,
+        });
+
+        if (prices.data.length > 0) {
+          const price = prices.data[0];
+
+          // Create a product record with the price
+          const productRecord = {
+            id: product.id,
+            name: product.name,
+            description: product.description || '',
+            images: product.images || [],
+            active: product.active,
+            price: {
+              id: price.id,
+              currency: price.currency,
+              unit_amount: price.unit_amount,
+              formatted: `${(price.unit_amount / 100).toFixed(0)} zł`,
+            },
+          };
+
+          // Store the product in our database
+          await products.set(product.id, productRecord);
+          initializedCount++;
+        }
+      } catch (priceError) {
+        console.error(`Error fetching prices for product ${product.id}:`, priceError);
+      }
     }
 
-    res.status(200).json({ message: 'Products initialized successfully' });
+    res.status(200).json({
+      message: 'Products initialized successfully',
+      count: initializedCount,
+    });
   } catch (error) {
     console.error('Error initializing products:', error);
     res.status(500).json({ error: 'Failed to initialize products' });
@@ -47,11 +75,17 @@ router.get('/', async (req, res) => {
   try {
     const { products } = global.stores;
 
-    // In a real app, you would have a way to list all keys or retrieve all products
-    // For this example, we'll just return the test ebook product
-    const testProduct = await products.get(testEbookProduct.id);
+    // Use iterator() to get all products
+    const productList = [];
 
-    res.json([testProduct]);
+    // Retrieve each product using the iterator
+    for await (const [key, value] of products.iterator()) {
+      if (value && value.active) {
+        productList.push(value);
+      }
+    }
+
+    res.json(productList);
   } catch (error) {
     console.error('Error fetching products:', error);
     res.status(500).json({ error: 'Failed to fetch products' });

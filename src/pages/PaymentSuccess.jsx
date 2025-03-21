@@ -32,6 +32,10 @@ function PaymentSuccess() {
         // Verify payment status using either payment_intent or session_id
         const status = await verifyPaymentStatus(paymentIntentId || sessionId);
         setPaymentStatus(status);
+
+        if(status.success) {
+          window.dispatchEvent(new Event('authChange'));
+        }
       } catch (error) {
         console.error('Błąd weryfikacji płatności:', error);
         setPaymentStatus({

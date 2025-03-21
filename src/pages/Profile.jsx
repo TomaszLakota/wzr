@@ -7,10 +7,11 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [portalUrl, setPortalUrl] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem('token');
       const userData = localStorage.getItem('user');
       
@@ -19,8 +20,35 @@ function Profile() {
         return;
       }
       
-      setUser(JSON.parse(userData));
-      setLoading(false);
+      // Parse the local user data
+      const parsedUserData = JSON.parse(userData);
+      setUser(parsedUserData);
+      
+      try {
+        // Fetch fresh user data from the server
+        const response = await fetch(`/api/users/${parsedUserData.email}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const freshUserData = await response.json();
+          setUser(freshUserData);
+          
+          // Update local storage with fresh data
+          localStorage.setItem('user', JSON.stringify(freshUserData));
+        } else {
+          console.error('Nie udało się pobrać danych użytkownika z serwera.');
+        }
+      } catch (err) {
+        console.error('Błąd podczas pobierania danych użytkownika:', err);
+        setError('Wystąpił błąd podczas ładowania danych. Spróbuj ponownie później.');
+      } finally {
+        setLoading(false);
+      }
     };
     
     checkAuth();
@@ -54,11 +82,11 @@ function Profile() {
       if (response.ok && data.url) {
         window.location.href = data.url;
       } else {
-        alert('Nie udało się utworzyć sesji zarządzania subskrypcją.');
+        setError('Nie udało się utworzyć sesji zarządzania subskrypcją.');
       }
     } catch (error) {
       console.error('Błąd podczas tworzenia sesji zarządzania subskrypcją:', error);
-      alert('Wystąpił błąd podczas próby zarządzania subskrypcją.');
+      setError('Wystąpił błąd podczas próby zarządzania subskrypcją.');
     } finally {
       setPortalLoading(false);
     }
@@ -71,6 +99,8 @@ function Profile() {
   return (
     <div className="profile-container">
       <h1>Twój profil</h1>
+      
+      {error && <div className="error-message">{error}</div>}
       
       <div className="profile-details">
         <div className="profile-field">

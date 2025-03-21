@@ -1,5 +1,69 @@
 import stripeClient from '../config/stripeConfig.js';
 
+// Helper function to check and update subscription status
+const checkAndUpdateSubscription = async (userRecord) => {
+  console.log(`[USER-SUB-CHECK] Checking subscription for customer: ${userRecord.email}`);
+
+  // Return early if no Stripe customer ID exists
+  if (!userRecord.stripeCustomerId) {
+    console.log(`[USER-SUB-CHECK] No Stripe customer ID for user: ${userRecord.email}`);
+    return { ...userRecord, isSubscribed: false };
+  }
+
+  try {
+    console.log(
+      `[USER-SUB-CHECK] Fetching subscriptions for customer: ${userRecord.stripeCustomerId}`
+    );
+    const subscriptions = await stripeClient.subscriptions.list({
+      customer: userRecord.stripeCustomerId,
+      limit: 100,
+    });
+
+    console.log(`[USER-SUB-CHECK] Found ${subscriptions.data.length} subscriptions`);
+
+    // Find active subscriptions
+    const activeSubscriptions = subscriptions.data.filter(
+      (sub) => sub.status === 'active' || sub.status === 'trialing'
+    );
+
+    console.log(`[USER-SUB-CHECK] Found ${activeSubscriptions.length} active subscriptions`);
+
+    // Determine if user is subscribed
+    const isSubscribed = activeSubscriptions.length > 0;
+    const previousStatus = userRecord.isSubscribed || false;
+    const currentSubId = userRecord.stripeSubscriptionId || '';
+    const newSubId =
+      isSubscribed && activeSubscriptions.length > 0 ? activeSubscriptions[0].id : '';
+
+    // Only update user record if status or subscription ID changed
+    if (isSubscribed !== previousStatus || (isSubscribed && newSubId !== currentSubId)) {
+      // Create new object with updated values rather than modifying the original
+      const updatedUserRecord = {
+        ...userRecord,
+        isSubscribed: isSubscribed,
+      };
+
+      if (isSubscribed && activeSubscriptions.length > 0) {
+        updatedUserRecord.stripeSubscriptionId = activeSubscriptions[0].id;
+        console.log(`[USER-SUB-CHECK] Setting subscription ID to: ${activeSubscriptions[0].id}`);
+      }
+
+      console.log(
+        `[USER-SUB-CHECK] Updated subscription status from ${previousStatus} to ${isSubscribed}`
+      );
+
+      return updatedUserRecord;
+    }
+
+    // Return original record if nothing changed
+    return userRecord;
+  } catch (error) {
+    console.error(`[USER-SUB-CHECK] Error checking subscription: ${error.message}`);
+    // Return original record if there's an error
+    return userRecord;
+  }
+};
+
 // Get user by email
 export const getUserByEmail = async (req, res) => {
   try {
@@ -14,7 +78,16 @@ export const getUserByEmail = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const { password: _, ...userWithoutPassword } = user;
+    // Check and update subscription status from Stripe
+    const updatedUser = await checkAndUpdateSubscription(user);
+
+    // Save updated user record if changed
+    if (JSON.stringify(user) !== JSON.stringify(updatedUser)) {
+      await users.set(req.params.email, updatedUser);
+      console.log(`[GET-USER] Updated user record with latest subscription status`);
+    }
+
+    const { password: _, ...userWithoutPassword } = updatedUser;
     res.json(userWithoutPassword);
   } catch (error) {
     console.error('Error fetching user:', error);
@@ -53,7 +126,7 @@ export const updateSubscriptionStatus = async (req, res) => {
       console.log(
         `[UPDATE-SUB] Fetching subscription for customer: ${userRecord.stripeCustomerId}`
       );
-      const subscription = await stripeClient.subscription.list({
+      const subscription = await stripeClient.subscriptions.list({
         customer: userRecord.stripeCustomerId,
         limit: 100,
       });

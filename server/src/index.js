@@ -11,6 +11,7 @@ import webhookRoutes from './routes/webhookRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { initializeProducts } from './services/productService.js';
+import { initializeTestUser } from './services/userService.js';
 
 dotenv.config();
 
@@ -56,6 +57,17 @@ try {
   initializeProducts()
     .then(() => {
       console.log('Product initialization completed');
+
+      // Initialize test user in development environment
+      if (process.env.NODE_ENV === 'development') {
+        initializeTestUser()
+          .then((result) => {
+            console.log('Test user initialization completed');
+          })
+          .catch((error) => {
+            console.error('Failed to initialize test user:', error);
+          });
+      }
 
       // Start the server after initialization is complete
       app.listen(port, () => {

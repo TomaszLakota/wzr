@@ -133,25 +133,49 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
 
 ### Main Server Files
 
-1. **server.js**
-
+1. **src/index.js**
    - Main entry point for the server
    - Sets up Express application
-   - Initializes middleware (cors, body-parser)
-   - Configures API routes
-   - Handles Stripe webhooks (checkout completion, subscription events)
+   - Initializes data stores and middleware
+   - Configures routes
    - Serves static files in production
 
-2. **src/index.js**
-   - Alternative main server file
-   - Configures Express application
-   - Sets up routes, middleware, and Stripe
-   - Initializes data stores
-   - Handles user registration, login, and authentication
+### Configuration
+
+2. **src/config/storage.js**
+
+   - Public functions:
+     - `createStores()`: Creates and initializes data storage mechanisms
+     - Configures SQLite (dev) and Redis (prod) storage
+
+3. **src/config/stripeConfig.js**
+   - Centralizes Stripe client configuration
+   - Exports initialized Stripe client for use across the application
+
+### Controllers
+
+4. **src/controllers/userController.js**
+
+   - Public functions:
+     - `getUserByEmail()`: Gets user details by email
+     - `updateSubscriptionStatus()`: Updates user subscription status
+
+5. **src/controllers/webhookController.js**
+   - Public functions:
+     - `handleStripeWebhook()`: Processes Stripe webhook events
+     - `handleCheckoutSessionCompleted()`: Handles completed checkout sessions
+     - `handleInvoicePaymentSucceeded()`: Handles successful invoice payments
+     - `handleSubscriptionDeleted()`: Handles subscription deletion events
+
+### Services
+
+6. **src/services/productService.js**
+   - Public functions:
+     - `initializeProducts()`: Fetches and initializes products from Stripe
 
 ### Route Files
 
-3. **routes/api.js**
+7. **src/routes/api.js**
 
    - Public functions:
      - `GET /api/ebooks`: Fetches all e-books with prices
@@ -161,7 +185,7 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
      - `GET /api/checkout/sessions/:sessionId/verify`: Verifies payment by session ID
      - `formatPrice()`: Helper function to format prices
 
-4. **routes/subscription.js**
+8. **src/routes/subscription.js**
 
    - Public functions:
      - `POST /api/subscription/create-subscription`: Creates subscription
@@ -170,31 +194,51 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
      - `POST /api/subscription/create-checkout-session`: Creates checkout session
      - `POST /api/subscription/force-check-subscription`: Forces update of subscription status
 
-5. **routes/products.js**
+9. **src/routes/products.js**
 
    - Handles product-related operations in Stripe
+   - Manages e-book products in the system
 
-6. **src/routes/auth.js**
-   - Public functions:
-     - `POST /api/register`: Registers new user
-     - `POST /api/login`: Authenticates user and issues JWT token
+10. **src/routes/auth.js**
+
+    - Public functions:
+      - `POST /api/register`: Registers new user
+      - `POST /api/login`: Authenticates user and issues JWT token
+
+11. **src/routes/userRoutes.js**
+
+    - Public functions:
+      - `GET /api/users/:email`: Gets user details
+      - `POST /api/users/update-subscription`: Updates user subscription status
+
+12. **src/routes/webhookRoutes.js**
+    - Public functions:
+      - `POST /webhook`: Processes Stripe webhook events
 
 ### Middleware
 
-7. **middleware/auth.js**
+13. **src/middleware/auth.js**
+    - Public functions:
+      - `authenticateToken()`: Middleware to validate JWT tokens and authenticate users
 
-   - Public functions:
-     - `authenticateToken()`: Middleware to validate JWT tokens and authenticate users
+## Code Organization Principles
 
-8. **src/middleware/auth.js**
-   - Contains authentication middleware for use with src/index.js
+- **Separation of Concerns**:
 
-### Configuration
+  - Controllers handle request/response logic
+  - Services handle business logic
+  - Routes define API endpoints
+  - Config centralizes configuration
 
-9. **src/config/storage.js**
-   - Public functions:
-     - `createStores()`: Creates and initializes data storage mechanisms
-     - Configures SQLite (dev) and Redis (prod) storage
+- **Modularity**:
+
+  - Related functionality is grouped together
+  - Each file has a single responsibility
+  - Dependencies are explicitly imported
+
+- **Central Configuration**:
+  - Stripe client is configured once and imported where needed
+  - Environment variables are loaded in relevant config files
 
 ## Error Handling
 

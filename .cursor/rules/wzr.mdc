@@ -24,6 +24,7 @@ alwaysApply: true
 
 ## Backend
 - available Endpoints are listed in [backend_endpoints.md](mdc:.cursor/backend_endpoints.md) make sure to keep the file updated 
+- no need to restart server after making changes
 
 
 

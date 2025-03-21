@@ -70,6 +70,9 @@ const SubscriptionPromo = ({ isLoggedIn }) => {
         const user = JSON.parse(userData);
         user.subscribed = true;
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // Dispatch custom event to notify Header component
+        window.dispatchEvent(new Event('authChange'));
       }
       
       // Redirect to lessons page

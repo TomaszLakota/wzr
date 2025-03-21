@@ -17,7 +17,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import LessonsPage from './pages/LessonsPage';
 
 // Load Stripe outside of component render to avoid recreating the Stripe object on re-renders
-const stripePromise = loadStripe(import.meta.env.STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const router = createBrowserRouter([
   {

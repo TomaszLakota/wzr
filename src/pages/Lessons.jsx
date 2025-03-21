@@ -47,6 +47,9 @@ const useAuth = () => {
           if (userData) {
             const updatedUser = { ...user, subscribed: data.isSubscribed };
             localStorage.setItem('user', JSON.stringify(updatedUser));
+            
+            // Dispatch custom event to notify Header component
+            window.dispatchEvent(new Event('authChange'));
           }
         } else {
           console.error('Błąd podczas sprawdzania statusu subskrypcji');
@@ -87,7 +90,7 @@ const Lessons = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          priceId: import.meta.env.STRIPE_SUBSCRIPTION_PRICE_ID || "price_1R1C8u2cdengCFrj8fAJanCN",
+          priceId: import.meta.env.VITE_STRIPE_SUBSCRIPTION_PRICE_ID || "price_1R1C8u2cdengCFrj8fAJanCN",
           successUrl: `${window.location.origin}/lekcje?success=true`,
           cancelUrl: `${window.location.origin}/lekcje?canceled=true`
         })

@@ -24,8 +24,17 @@ function Header() {
     // Listen for storage changes (in case user logs in/out in another tab)
     window.addEventListener('storage', checkAuthStatus);
     
+    // Create a custom event to handle logout in current tab
+    const handleAuthChange = () => {
+      checkAuthStatus();
+    };
+    
+    // Listen for custom auth change events
+    window.addEventListener('authChange', handleAuthChange);
+    
     return () => {
       window.removeEventListener('storage', checkAuthStatus);
+      window.removeEventListener('authChange', handleAuthChange);
     };
   }, []);
 

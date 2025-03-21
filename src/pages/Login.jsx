@@ -32,6 +32,9 @@ function Login() {
       // Store the token and user data
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Dispatch custom event to notify Header component
+      window.dispatchEvent(new Event('authChange'));
 
       // Redirect to home page or dashboard
       navigate('/');

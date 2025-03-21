@@ -34,9 +34,10 @@ export const createCheckoutSession = async (priceId) => {
       throw new Error('ID ceny jest wymagane');
     }
 
-    // Generate success URL - include base URL from window.location
+    // Generate success URL - ensure we have a complete URL with origin
     const baseUrl = window.location.origin;
     const successUrl = `${baseUrl}/platnosc/sukces`;
+    const cancelUrl = `${baseUrl}/ebooki`;
 
     // Get auth token from local storage or context
     const token = localStorage.getItem('authToken');
@@ -50,6 +51,7 @@ export const createCheckoutSession = async (priceId) => {
       body: JSON.stringify({
         priceId,
         successUrl,
+        cancelUrl,
       }),
     });
 

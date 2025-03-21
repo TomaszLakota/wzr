@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticateToken } from '../src/middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 import dotenv from 'dotenv';
 import stripe from 'stripe';
 

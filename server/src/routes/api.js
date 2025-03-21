@@ -69,11 +69,14 @@ router.get('/ebooks', async (req, res) => {
  */
 router.post('/checkout', async (req, res) => {
   try {
-    const { priceId, successUrl } = req.body;
+    const { priceId, successUrl, cancelUrl } = req.body;
 
     if (!priceId) {
       return res.status(400).json({ error: 'ID ceny jest wymagane' });
     }
+
+    // Get frontend URL from environment variable or use client-provided URL as fallback
+    const frontendUrl = process.env.FRONTEND_URL || (successUrl ? new URL(successUrl).origin : '');
 
     // Create checkout session
     const session = await stripeClient.checkout.sessions.create({
@@ -85,10 +88,8 @@ router.post('/checkout', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url:
-        successUrl ||
-        `${process.env.FRONTEND_URL}/platnosc/sukces?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/ebooki`,
+      success_url: successUrl || `${frontendUrl}/platnosc/sukces?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${frontendUrl}/ebooki`,
       metadata: {
         type: 'ebook',
       },

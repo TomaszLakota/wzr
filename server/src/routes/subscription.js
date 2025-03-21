@@ -8,7 +8,7 @@ const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Middleware to authenticate requests using your existing middleware
-import { authenticateToken } from '../src/middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 // Create a subscription
 router.post('/create-subscription', authenticateToken, async (req, res) => {

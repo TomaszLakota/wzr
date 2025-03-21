@@ -85,12 +85,12 @@ function Profile() {
 
         <div className="profile-field">
           <label>Status subskrypcji:</label>
-          <p>{user?.subscribed ? 'Aktywna' : 'Brak aktywnej subskrypcji'}</p>
+          <p>{user?.isSubscribed ? 'Aktywna' : 'Brak aktywnej subskrypcji'}</p>
         </div>
       </div>
       
       <div className="profile-actions">
-        {user?.subscribed && (
+        {user?.isSubscribed && (
           <button 
             className="manage-subscription-button" 
             onClick={handleManageSubscription}

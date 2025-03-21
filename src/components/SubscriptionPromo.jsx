@@ -68,7 +68,7 @@ const SubscriptionPromo = ({ isLoggedIn }) => {
       const userData = localStorage.getItem('user');
       if (userData) {
         const user = JSON.parse(userData);
-        user.subscribed = true;
+        user.isSubscribed = true;
         localStorage.setItem('user', JSON.stringify(user));
         
         // Dispatch custom event to notify Header component

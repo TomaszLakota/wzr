@@ -23,16 +23,16 @@ const useAuth = () => {
         
         setIsLoggedIn(true);
         
-        // Parse user data to check if subscribed flag exists
+        // Parse user data to check if isSubscribed flag exists
         const user = JSON.parse(userData);
-        if (user.subscribed !== undefined) {
-          setIsSubscribed(user.subscribed);
+        if (user.isSubscribed !== undefined) {
+          setIsSubscribed(user.isSubscribed);
           setIsLoading(false);
           return;
         }
         
         // If not in user data, check API
-        const response = await fetch('/api/subscriptions/subscription-status', {
+        const response = await fetch('/api/subscription/subscription-status', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -45,7 +45,7 @@ const useAuth = () => {
           
           // Update local user data with subscription status
           if (userData) {
-            const updatedUser = { ...user, subscribed: data.isSubscribed };
+            const updatedUser = { ...user, isSubscribed: data.isSubscribed };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             
             // Dispatch custom event to notify Header component
@@ -83,7 +83,7 @@ const Lessons = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/subscriptions/create-checkout-session', {
+      const response = await fetch('/api/subscription/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ const Lessons = () => {
     );
   }
 
-  // Show lessons content if user is logged in and subscribed
+  // Show lessons content if user is logged in and isSubscribed
   if (isLoggedIn && isSubscribed) {
     return (
       <div className="lessons-page">
@@ -188,7 +188,7 @@ const Lessons = () => {
     );
   }
 
-  // Show subscription promo for non-subscribed users
+  // Show subscription promo for non-isSubscribed users
   return (
     <div className="subscription-promo">
       <div className="promo-content">

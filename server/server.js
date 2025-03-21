@@ -1,13 +1,23 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import Stripe from 'stripe';
 
 // Import routes
-const apiRoutes = require('./routes/api');
-const subscriptionRoutes = require('./routes/subscription');
+import apiRoutes from './routes/api.js';
+import subscriptionRoutes from './routes/subscription.js';
+
+dotenv.config();
+
+// Get directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Initialize stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Initialize express
 const app = express();
@@ -47,7 +57,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
           if (customer && customer.metadata.userId) {
             const userRecord = await global.stores.users.get(customer.metadata.userId);
             if (userRecord) {
-              userRecord.subscribed = true;
+              userRecord.isSubscribed = true;
               await global.stores.users.set(customer.metadata.userId, userRecord);
               console.log(`Updated subscription status for user ${customer.metadata.userId}`);
             }
@@ -88,7 +98,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
             // Update user subscription status in your database
             const userRecord = await global.stores.users.get(customer.metadata.userId);
             if (userRecord) {
-              userRecord.subscribed = true;
+              userRecord.isSubscribed = true;
               await global.stores.users.set(customer.metadata.userId, userRecord);
               console.log(`Updated subscription status for user ${customer.metadata.userId}`);
             }
@@ -109,7 +119,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
           // Update user subscription status in your database
           const userRecord = await global.stores.users.get(cancelledCustomer.metadata.userId);
           if (userRecord) {
-            userRecord.subscribed = false;
+            userRecord.isSubscribed = false;
             await global.stores.users.set(cancelledCustomer.metadata.userId, userRecord);
             console.log(`Subscription cancelled for user ${cancelledCustomer.metadata.userId}`);
           }

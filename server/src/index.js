@@ -11,6 +11,7 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import stripe from 'stripe';
+import { authenticateToken } from './middleware/auth.js';
 
 dotenv.config();
 
@@ -49,7 +50,7 @@ try {
 
   // API Routes
   app.use('/api', apiRoutes);
-  app.use('/api/subscriptions', subscriptionRoutes);
+  app.use('/api/subscription', subscriptionRoutes);
   app.use('/api/products', productRoutes);
 
   // Initialize products directly at startup
@@ -188,6 +189,47 @@ try {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
 
+      // If user has a stripeCustomerId, check for active subscription
+      // to ensure subscription status is accurate
+      if (user.stripeCustomerId) {
+        console.log(`[LOGIN] User has Stripe customer ID: ${user.stripeCustomerId}`);
+        try {
+          const subscription = await stripeClient.subscription.list({
+            customer: user.stripeCustomerId,
+            limit: 100,
+          });
+
+          console.log(`[LOGIN] Found ${subscription.data.length} subscription for user`);
+
+          // Find active subscription
+          const activeSubscriptions = subscription.data.filter(
+            (sub) => sub.status === 'active' || sub.status === 'trialing'
+          );
+
+          console.log(`[LOGIN] User has ${activeSubscriptions.length} active subscription`);
+
+          // Update user subscription status if needed
+          const isSubscribed = activeSubscriptions.length > 0;
+
+          if (user.isSubscribed !== isSubscribed) {
+            console.log(
+              `[LOGIN] Updating subscription status from ${user.isSubscribed} to ${isSubscribed}`
+            );
+            user.isSubscribed = isSubscribed;
+
+            if (isSubscribed && activeSubscriptions.length > 0) {
+              user.stripeSubscriptionId = activeSubscriptions[0].id;
+              console.log(`[LOGIN] Setting subscription ID to: ${activeSubscriptions[0].id}`);
+            }
+
+            await users.set(email, user);
+            console.log(`[LOGIN] User subscription status updated`);
+          }
+        } catch (error) {
+          console.error(`[LOGIN] Error checking subscription status: ${error.message}`);
+        }
+      }
+
       // Generate JWT token
       const token = jwt.sign({ email: user.email, name: user.name }, JWT_SECRET, {
         expiresIn: '24h',
@@ -197,6 +239,9 @@ try {
       const { password: _, ...userWithoutPassword } = user;
 
       console.log(`Login successful for user: ${email}`);
+      console.log(
+        `User subscription status: ${user.isSubscribed ? 'Subscribed' : 'Not isSubscribed'}`
+      );
 
       res.json({
         message: 'Login successful',
@@ -212,24 +257,6 @@ try {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-
-  // Middleware to protect routes
-  const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-      if (err) {
-        return res.status(403).json({ error: 'Invalid or expired token' });
-      }
-      req.user = user;
-      next();
-    });
-  };
 
   // Protected route example
   app.get('/api/users/:email', authenticateToken, async (req, res) => {
@@ -252,15 +279,117 @@ try {
     }
   });
 
+  // Add a route to update user subscription status
+  app.post('/api/users/update-subscription', authenticateToken, async (req, res) => {
+    try {
+      const user = req.user;
+      console.log(`[UPDATE-SUB] Manually updating subscription status for user: ${user.email}`);
+
+      // Get user record
+      const userRecord = await users.get(user.email);
+      if (!userRecord) {
+        console.log(`[UPDATE-SUB] User not found: ${user.email}`);
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      console.log(`[UPDATE-SUB] Current user record: ${JSON.stringify(userRecord)}`);
+
+      // Check if user has Stripe customer ID
+      if (!userRecord.stripeCustomerId) {
+        console.log(`[UPDATE-SUB] User has no Stripe customer ID`);
+        return res.json({
+          success: false,
+          message: 'No Stripe customer found',
+          isSubscribed: false,
+        });
+      }
+
+      // Check for active subscription
+      try {
+        console.log(
+          `[UPDATE-SUB] Fetching subscription for customer: ${userRecord.stripeCustomerId}`
+        );
+        const subscription = await stripeClient.subscription.list({
+          customer: userRecord.stripeCustomerId,
+          limit: 100,
+        });
+
+        console.log(`[UPDATE-SUB] Found ${subscription.data.length} subscription`);
+
+        // Find active subscription
+        const activeSubscriptions = subscription.data.filter(
+          (sub) => sub.status === 'active' || sub.status === 'trialing'
+        );
+
+        console.log(`[UPDATE-SUB] Found ${activeSubscriptions.length} active subscription`);
+
+        const isSubscribed = activeSubscriptions.length > 0;
+        const previousStatus = userRecord.isSubscribed || false;
+
+        // Update subscription status
+        userRecord.isSubscribed = isSubscribed;
+
+        if (isSubscribed && activeSubscriptions.length > 0) {
+          userRecord.stripeSubscriptionId = activeSubscriptions[0].id;
+          console.log(`[UPDATE-SUB] Setting subscription ID to: ${activeSubscriptions[0].id}`);
+        }
+
+        // Save updated user
+        await users.set(user.email, userRecord);
+        console.log(
+          `[UPDATE-SUB] Updated user subscription status from ${previousStatus} to ${isSubscribed}`
+        );
+
+        // Verify update
+        const updatedUser = await users.get(user.email);
+        console.log(`[UPDATE-SUB] User record after update: ${JSON.stringify(updatedUser)}`);
+
+        return res.json({
+          success: true,
+          message: 'Subscription status updated',
+          isSubscribed,
+          previousStatus,
+          subscriptionDetails:
+            isSubscribed && activeSubscriptions.length > 0
+              ? {
+                  id: activeSubscriptions[0].id,
+                  status: activeSubscriptions[0].status,
+                  currentPeriodEnd: new Date(
+                    activeSubscriptions[0].current_period_end * 1000
+                  ).toISOString(),
+                }
+              : null,
+        });
+      } catch (error) {
+        console.error(`[UPDATE-SUB] Error checking subscription status: ${error.message}`);
+        return res.status(500).json({
+          success: false,
+          error: 'Error checking subscription status',
+        });
+      }
+    } catch (error) {
+      console.error(`[UPDATE-SUB] Error updating subscription status: ${error.message}`);
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error',
+      });
+    }
+  });
+
   // Stripe webhook handler
   app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
 
     try {
-      event = stripeClient.webhooks.constructEvent(req.body, sig, process.env.STRIPE_SECRET_KEY);
+      event = stripeClient.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_SECRET_KEY
+      );
+      console.log(`[WEBHOOK] Received Stripe event: ${event.type}`);
     } catch (err) {
-      console.error(`Webhook Error: ${err.message}`);
+      console.error(`[WEBHOOK] Webhook Error: ${err.message}`);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -268,24 +397,163 @@ try {
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object;
+        console.log(`[WEBHOOK] Checkout session completed: ${session.id}`);
+        console.log(`[WEBHOOK] Session details: ${JSON.stringify(session)}`);
 
-        // Get the payment intent from the session
-        const paymentIntent = await stripeClient.paymentIntents.retrieve(session.payment_intent);
+        try {
+          // For subscription checkouts
+          if (session.mode === 'subscription') {
+            console.log(`[WEBHOOK] Subscription checkout detected`);
+            const customerId = session.customer;
+            const subscriptionId = session.subscription;
 
-        // Update payment intent with session metadata for later reference
-        await stripeClient.paymentIntents.update(session.payment_intent, {
-          metadata: {
-            ...paymentIntent.metadata,
-            session_id: session.id,
-            type: session.metadata.type || 'ebook',
-          },
-        });
+            console.log(`[WEBHOOK] Customer ID: ${customerId}, Subscription ID: ${subscriptionId}`);
 
-        console.log(`Payment successful for session ${session.id}`);
+            // Get customer details to find the user
+            const customer = await stripeClient.customers.retrieve(customerId);
+            console.log(`[WEBHOOK] Customer details: ${JSON.stringify(customer)}`);
+
+            // Get the user from metadata or client_reference_id
+            const userId = customer.metadata.userId || session.client_reference_id;
+            console.log(`[WEBHOOK] User ID from metadata: ${userId}`);
+
+            if (userId) {
+              // Update the user's subscription status
+              const userRecord = await users.get(userId);
+              console.log(`[WEBHOOK] User record before update: ${JSON.stringify(userRecord)}`);
+
+              if (userRecord) {
+                userRecord.isSubscribed = true;
+                userRecord.stripeSubscriptionId = subscriptionId;
+                await users.set(userId, userRecord);
+                console.log(`[WEBHOOK] Updated subscription status for user ${userId}`);
+
+                // Verify the update
+                const updatedUser = await users.get(userId);
+                console.log(`[WEBHOOK] User record after update: ${JSON.stringify(updatedUser)}`);
+              } else {
+                console.log(`[WEBHOOK] User record not found for ${userId}`);
+              }
+            } else {
+              console.log(`[WEBHOOK] No user ID found in customer metadata or session`);
+            }
+          } else {
+            // For one-time payments
+            console.log(`[WEBHOOK] One-time payment checkout detected`);
+
+            // Get the payment intent from the session
+            const paymentIntent = await stripeClient.paymentIntents.retrieve(
+              session.payment_intent
+            );
+            console.log(`[WEBHOOK] Payment intent details: ${JSON.stringify(paymentIntent)}`);
+
+            // Update payment intent with session metadata for later reference
+            await stripeClient.paymentIntents.update(session.payment_intent, {
+              metadata: {
+                ...paymentIntent.metadata,
+                session_id: session.id,
+                type: session.metadata.type || 'ebook',
+              },
+            });
+          }
+        } catch (error) {
+          console.error(`[WEBHOOK] Error processing checkout session: ${error.message}`);
+          console.error(error);
+        }
+
+        console.log(`[WEBHOOK] Payment successful for session ${session.id}`);
+        break;
+
+      case 'invoice.payment_succeeded':
+        try {
+          const invoice = event.data.object;
+          console.log(`[WEBHOOK] Invoice payment succeeded: ${invoice.id}`);
+          console.log(`[WEBHOOK] Invoice details: ${JSON.stringify(invoice)}`);
+
+          if (
+            invoice.billing_reason === 'subscription_create' ||
+            invoice.billing_reason === 'subscription_cycle'
+          ) {
+            console.log(
+              `[WEBHOOK] Subscription invoice detected for reason: ${invoice.billing_reason}`
+            );
+
+            const subscription = await stripeClient.subscription.retrieve(invoice.subscription);
+            console.log(`[WEBHOOK] Subscription details: ${JSON.stringify(subscription)}`);
+
+            const customer = await stripeClient.customers.retrieve(invoice.customer);
+            console.log(`[WEBHOOK] Customer details: ${JSON.stringify(customer)}`);
+
+            const userId = customer.metadata.userId;
+            console.log(`[WEBHOOK] User ID from metadata: ${userId}`);
+
+            if (userId) {
+              const userRecord = await users.get(userId);
+              console.log(`[WEBHOOK] User record before update: ${JSON.stringify(userRecord)}`);
+
+              if (userRecord) {
+                userRecord.isSubscribed = true;
+                userRecord.stripeSubscriptionId = invoice.subscription;
+                await users.set(userId, userRecord);
+                console.log(`[WEBHOOK] Updated subscription status for user ${userId}`);
+
+                // Verify the update
+                const updatedUser = await users.get(userId);
+                console.log(`[WEBHOOK] User record after update: ${JSON.stringify(updatedUser)}`);
+              } else {
+                console.log(`[WEBHOOK] User record not found for ${userId}`);
+              }
+            } else {
+              console.log(`[WEBHOOK] No user ID found in customer metadata`);
+            }
+          }
+        } catch (error) {
+          console.error(`[WEBHOOK] Error processing invoice payment: ${error.message}`);
+          console.error(error);
+        }
+        break;
+
+      case 'customer.subscription.deleted':
+        try {
+          const cancelledSubscription = event.data.object;
+          console.log(`[WEBHOOK] Subscription deleted: ${cancelledSubscription.id}`);
+          console.log(`[WEBHOOK] Subscription details: ${JSON.stringify(cancelledSubscription)}`);
+
+          const cancelledCustomer = await stripeClient.customers.retrieve(
+            cancelledSubscription.customer
+          );
+          console.log(`[WEBHOOK] Customer details: ${JSON.stringify(cancelledCustomer)}`);
+
+          const userId = cancelledCustomer.metadata.userId;
+          console.log(`[WEBHOOK] User ID from metadata: ${userId}`);
+
+          if (userId) {
+            const userRecord = await users.get(userId);
+            console.log(`[WEBHOOK] User record before update: ${JSON.stringify(userRecord)}`);
+
+            if (userRecord) {
+              userRecord.isSubscribed = false;
+              userRecord.stripeSubscriptionId = null;
+              await users.set(userId, userRecord);
+              console.log(`[WEBHOOK] Updated subscription status for user ${userId}`);
+
+              // Verify the update
+              const updatedUser = await users.get(userId);
+              console.log(`[WEBHOOK] User record after update: ${JSON.stringify(updatedUser)}`);
+            } else {
+              console.log(`[WEBHOOK] User record not found for ${userId}`);
+            }
+          } else {
+            console.log(`[WEBHOOK] No user ID found in customer metadata`);
+          }
+        } catch (error) {
+          console.error(`[WEBHOOK] Error processing subscription cancellation: ${error.message}`);
+          console.error(error);
+        }
         break;
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        console.log(`[WEBHOOK] Unhandled event type ${event.type}`);
     }
 
     // Return a 200 response to acknowledge receipt of the event

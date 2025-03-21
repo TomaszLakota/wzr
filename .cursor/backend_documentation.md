@@ -129,9 +129,72 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
 }
 ```
 
-## Inconsistencies & Notes
+## File Structure and Purpose
 
-4. Products API from `products.js` isn't correctly registered in main server file
+### Main Server Files
+
+1. **server.js**
+
+   - Main entry point for the server
+   - Sets up Express application
+   - Initializes middleware (cors, body-parser)
+   - Configures API routes
+   - Handles Stripe webhooks (checkout completion, subscription events)
+   - Serves static files in production
+
+2. **src/index.js**
+   - Alternative main server file
+   - Configures Express application
+   - Sets up routes, middleware, and Stripe
+   - Initializes data stores
+   - Handles user registration, login, and authentication
+
+### Route Files
+
+3. **routes/api.js**
+
+   - Public functions:
+     - `GET /api/ebooks`: Fetches all e-books with prices
+     - `POST /api/checkout`: Creates checkout session
+     - `GET /api/payments/:paymentIntentId/verify`: Verifies payment status
+     - `GET /api/user/ebooks`: Gets user's purchased e-books
+     - `GET /api/checkout/sessions/:sessionId/verify`: Verifies payment by session ID
+     - `formatPrice()`: Helper function to format prices
+
+4. **routes/subscription.js**
+
+   - Public functions:
+     - `POST /api/subscription/create-subscription`: Creates subscription
+     - `GET /api/subscription/subscription-status`: Checks subscription status
+     - `POST /api/subscription/create-portal-session`: Creates customer portal session
+     - `POST /api/subscription/create-checkout-session`: Creates checkout session
+     - `POST /api/subscription/force-check-subscription`: Forces update of subscription status
+
+5. **routes/products.js**
+
+   - Handles product-related operations in Stripe
+
+6. **src/routes/auth.js**
+   - Public functions:
+     - `POST /api/register`: Registers new user
+     - `POST /api/login`: Authenticates user and issues JWT token
+
+### Middleware
+
+7. **middleware/auth.js**
+
+   - Public functions:
+     - `authenticateToken()`: Middleware to validate JWT tokens and authenticate users
+
+8. **src/middleware/auth.js**
+   - Contains authentication middleware for use with src/index.js
+
+### Configuration
+
+9. **src/config/storage.js**
+   - Public functions:
+     - `createStores()`: Creates and initializes data storage mechanisms
+     - Configures SQLite (dev) and Redis (prod) storage
 
 ## Error Handling
 

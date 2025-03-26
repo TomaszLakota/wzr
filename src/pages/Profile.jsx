@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/profile.css';
 
 function Profile() {
@@ -117,6 +117,14 @@ function Profile() {
           <label>Status subskrypcji:</label>
           <p>{user?.isSubscribed ? 'Aktywna' : 'Brak aktywnej subskrypcji'}</p>
         </div>
+
+        {user?.isAdmin && (
+          <div className="profile-field">
+            <label>Status:</label>
+            <p>Administrator</p>
+            <Link to="/admin" className="admin-link">Panel Administratora</Link>
+          </div>
+        )}
       </div>
       
       <div className="profile-actions">

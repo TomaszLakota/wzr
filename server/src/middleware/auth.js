@@ -31,4 +31,23 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-export { authenticateToken };
+/**
+ * Middleware to check if user is admin
+ */
+const isAdmin = async (req, res, next) => {
+  try {
+    const { users } = global.stores;
+    const user = await users.get(req.user.email);
+
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ error: 'Brak uprawnień administratora' });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
+export { authenticateToken, isAdmin };

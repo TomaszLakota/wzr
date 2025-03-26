@@ -50,14 +50,22 @@ router.post('/register', async (req, res) => {
       createdAt: Date.now(),
       stripeCustomerId: null,
       isSubscribed: false,
+      isAdmin: false,
     };
 
     await users.set(email, user);
 
     // Generate JWT token
-    const token = jwt.sign({ email: user.email, name: user.name }, JWT_SECRET, {
-      expiresIn: '24h',
-    });
+    const token = jwt.sign(
+      {
+        email: user.email,
+        name: user.name,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: '24h',
+      }
+    );
 
     // Return user data without password
     const { password: _, ...userWithoutPassword } = user;
@@ -141,9 +149,16 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ email: user.email, name: user.name }, JWT_SECRET, {
-      expiresIn: '24h',
-    });
+    const token = jwt.sign(
+      {
+        email: user.email,
+        name: user.name,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: '24h',
+      }
+    );
 
     // Return user data without password
     const { password: _, ...userWithoutPassword } = user;

@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Library from './pages/Library';
 import Profile from './pages/Profile';
+import AdminPanel from './pages/AdminPanel';
 import React from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: '/profil',
         element: <Profile />,
+      },
+      {
+        path: '/admin',
+        element: <AdminPanel />,
       },
     ],
   },

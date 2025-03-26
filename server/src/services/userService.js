@@ -26,6 +26,7 @@ export const initializeTestUser = async () => {
       stripeCustomerId: 'cus_Rz3rLxOUvWhrrF',
       stripeSubscriptionId: 'sub_1R55jf2cdengCFrjOXcPgwz4',
       isSubscribed: true,
+      isAdmin: true,
     };
 
     // Save the test user to the database

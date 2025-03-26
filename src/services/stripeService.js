@@ -104,6 +104,17 @@ export const verifyPaymentStatus = async (id) => {
 
     const data = await response.json();
 
+    // If payment is successful, update localStorage
+    if (data.status === 'succeeded') {
+      // Update local storage to reflect subscription
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        user.isSubscribed = true;
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+    }
+
     return {
       status: data.status,
       amount: data.amount,

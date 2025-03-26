@@ -119,12 +119,30 @@ const Lessons = () => {
   // Check if user just completed subscription purchase
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('success') === 'true') {
+    // Update local storage to set isSubscribed to true
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      user.isSubscribed = true;
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Dispatch custom event to notify Header component
+      window.dispatchEvent(new Event('authChange'));
+    }
+    
+    const handleGoToLessons = () => {
+      // Set isSubscribed directly in this component
+      setIsSubscribed(true);
+      // Navigate programmatically to ensure state updates before rendering
+      window.location.href = '/lekcje';
+    };
+    
     return (
       <div className="lessons-page">
         <div className="success-message">
           <h2>Dziękujemy za subskrypcję!</h2>
           <p>Twoja subskrypcja została pomyślnie aktywowana.</p>
-          <Link to="/lekcje" className="lesson-link">Przejdź do lekcji</Link>
+          <button onClick={handleGoToLessons} className="lesson-link">Przejdź do lekcji</button>
         </div>
       </div>
     );

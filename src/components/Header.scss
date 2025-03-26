@@ -3,6 +3,26 @@
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
 
+  nav {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  a {
+    text-decoration: none;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 400;
+    text-shadow: 0 0 0.1px var(--color-text);
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--color-text-light);
+    }
+  }
+
   .admin-only-link {
     color: #dc3545;
 
@@ -12,13 +32,6 @@
   }
 }
 
-.header nav {
-  display: flex;
-  justify-content: space-between;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
 .nav-left,
 .nav-right {
   display: flex;
@@ -26,17 +39,4 @@
   margin: 0;
   padding: 0;
   gap: 3rem;
-}
-
-.header a {
-  text-decoration: none;
-  color: var(--color-text);
-  font-size: 1rem;
-  font-weight: 400;
-  text-shadow: 0 0 0.1px var(--color-text);
-  transition: color 0.2s;
-}
-
-.header a:hover {
-  color: var(--color-text-light);
 }

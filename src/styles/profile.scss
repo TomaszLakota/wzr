@@ -5,13 +5,13 @@
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
 
-.profile-container h1 {
-  color: #0c2340;
-  margin-bottom: 2rem;
-  text-align: center;
-  font-size: 2rem;
+  h1 {
+    color: #0c2340;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 2rem;
+  }
 }
 
 .error-message {
@@ -36,16 +36,16 @@
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
-}
 
-.profile-field label {
-  font-weight: bold;
-  min-width: 150px;
-  margin-right: 1rem;
-}
+  label {
+    font-weight: bold;
+    min-width: 150px;
+    margin-right: 1rem;
+  }
 
-.profile-field p {
-  margin: 0;
+  p {
+    margin: 0;
+  }
 }
 
 .profile-actions {
@@ -64,14 +64,14 @@
   font-size: 1rem;
   transition: background-color 0.3s;
   margin-left: auto;
-}
 
-.logout-button:hover {
-  background-color: #d32f2f;
+  &:hover {
+    background-color: #d32f2f;
+  }
 }
 
 .manage-subscription-button {
-  background-color: #4285F4;
+  background-color: #4285f4;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -79,15 +79,15 @@
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.3s;
-}
 
-.manage-subscription-button:hover {
-  background-color: #2b68cb;
-}
+  &:hover {
+    background-color: #2b68cb;
+  }
 
-.manage-subscription-button:disabled {
-  background-color: #b0c2e1;
-  cursor: not-allowed;
+  &:disabled {
+    background-color: #b0c2e1;
+    cursor: not-allowed;
+  }
 }
 
 .admin-link {
@@ -99,10 +99,10 @@
   text-decoration: none;
   border-radius: 4px;
   transition: background-color 0.2s;
-}
 
-.admin-link:hover {
-  background-color: #0056b3;
+  &:hover {
+    background-color: #0056b3;
+  }
 }
 
 @media (max-width: 600px) {
@@ -110,13 +110,13 @@
     padding: 1rem;
     margin: 1rem;
   }
-  
+
   .profile-field {
     flex-direction: column;
+
+    label {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
   }
-  
-  .profile-field label {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-} 
+}

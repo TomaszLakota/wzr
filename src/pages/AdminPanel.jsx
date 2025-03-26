@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/adminPanel.scss';
 
 // Helper function to format subscription status in Polish
-const formatStatus = (status) => {
+const formatStatus = (status, cancelAt) => {
   const statusMap = {
-    'active': 'Aktywna',
+    'active': cancelAt ? 'Aktywna do' : 'Aktywna',
     'canceled': 'Anulowana',
     'incomplete': 'Niekompletna',
     'incomplete_expired': 'Wygasła',
@@ -22,47 +22,94 @@ function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [managingUser, setManagingUser] = useState(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  });
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/logowanie');
-          return;
-        }
-
-        const response = await fetch('/api/admin/users/subscriptions', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.status === 403) {
-          navigate('/');
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error('Nie udało się pobrać danych użytkowników');
-        }
-
-        const data = await response.json();
-        setUsers(data);
-      } catch (err) {
-        console.error('Error fetching users:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchUsers = async (page = 1) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/logowanie');
+        return;
       }
-    };
 
-    fetchUsers();
+      setLoading(true);
+      const response = await fetch(`/api/admin/users/subscriptions?page=${page}&limit=${pagination.limit}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 403) {
+        navigate('/');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać danych użytkowników');
+      }
+
+      const data = await response.json();
+      setUsers(data.users);
+      setPagination(prev => ({
+        ...prev,
+        page: data.pagination.page,
+        total: data.pagination.total,
+        totalPages: data.pagination.totalPages
+      }));
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManageSubscription = async (email) => {
+    try {
+      setManagingUser(email);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`/api/admin/users/${email}/portal`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Nie udało się utworzyć sesji zarządzania');
+      }
+
+      const data = await response.json();
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('Error managing subscription:', err);
+      setError(err.message);
+    } finally {
+      setManagingUser(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers(1);
   }, [navigate]);
 
-  if (loading) {
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchUsers(newPage);
+    }
+  };
+
+  if (loading && !users.length) {
     return <div className="admin-panel">Ładowanie...</div>;
   }
 
@@ -79,12 +126,10 @@ function AdminPanel() {
             <tr>
               <th>Imię</th>
               <th>Email</th>
-              <th>Data utworzenia konta</th>
               <th>Plan</th>
               <th>Status subskrypcji</th>
-              <th>Data rozpoczęcia</th>
-              <th>ID klienta Stripe</th>
-              <th>ID subskrypcji</th>
+              <th>Data rozp.</th>
+              <th>Akcje</th>
             </tr>
           </thead>
           <tbody>
@@ -92,22 +137,53 @@ function AdminPanel() {
               <tr key={user.email}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
-                <td>{new Date(user.createdAt).toLocaleDateString('pl-PL')}</td>
                 <td>{user.subscriptionPlan}</td>
-                <td className={`status-${user.subscriptionStatus}`}>
-                  {formatStatus(user.subscriptionStatus)}
+                <td className={`status-${user.subscriptionStatus}${user.cancelAt ? ' status-canceling' : ''}`}>
+                  {formatStatus(user.subscriptionStatus, user.cancelAt)}
+                  {user.cancelAt && (
+                    <span className="cancel-date">
+                      {new Date(user.cancelAt).toLocaleDateString('pl-PL')}
+                    </span>
+                  )}
                 </td>
                 <td>
                   {user.subscriptionStartDate 
                     ? new Date(user.subscriptionStartDate).toLocaleDateString('pl-PL')
                     : '-'}
                 </td>
-                <td>{user.stripeCustomerId}</td>
-                <td>{user.stripeSubscriptionId}</td>
+                <td>
+                  <button
+                    className="manage-button"
+                    onClick={() => handleManageSubscription(user.email)}
+                    disabled={managingUser === user.email}
+                  >
+                    {managingUser === user.email ? 'Ładowanie...' : 'Zarządzaj'}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {pagination.totalPages >= 1 && (
+          <div className="pagination">
+            <button 
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page === 1 || loading}
+            >
+              Poprzednia
+            </button>
+            <span className="page-info">
+              Strona {pagination.page} z {pagination.totalPages}
+            </span>
+            <button 
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages || loading}
+            >
+              Następna
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/subscription.css';
+import '../styles/subscription.scss';
 
 // Create a proper auth hook that uses the API
 const useAuth = () => {

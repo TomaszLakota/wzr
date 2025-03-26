@@ -2,6 +2,14 @@
   background-color: var(--color-background);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
+
+  .admin-only-link {
+    color: #dc3545;
+
+    &:hover {
+      color: #c82333;
+    }
+  }
 }
 
 .header nav {

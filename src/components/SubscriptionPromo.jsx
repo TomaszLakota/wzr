@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import '../styles/subscription.css';
+import '../styles/subscription.scss';
 
 const SubscriptionPromo = ({ isLoggedIn }) => {
   const stripe = useStripe();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import '../styles/profile.css';
+import '../styles/profile.scss';
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -122,7 +122,6 @@ function Profile() {
           <div className="profile-field">
             <label>Status:</label>
             <p>Administrator</p>
-            <Link to="/admin" className="admin-link">Panel Administratora</Link>
           </div>
         )}
       </div>

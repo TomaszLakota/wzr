@@ -60,6 +60,16 @@ function Header() {
           <li>
             <Link to="/wyjazdy">Wyjazdy z jogą</Link>
           </li>
+          {isLoggedIn && (
+            <li>
+              <Link to="/biblioteka">Biblioteka</Link>
+            </li>
+          )}
+          {user?.isAdmin && (
+            <li>
+              <Link to="/admin" className="admin-only-link">Panel Administratora</Link>
+            </li>
+          )}
         </ul>
         <ul className="nav-right">
           {isLoggedIn ? (

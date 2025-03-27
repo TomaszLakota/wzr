@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import LessonThumbnail from '../components/LessonThumbnail';
 import '../styles/subscription.scss';
 import './LessonsPage.scss';
+import apiClient from '../services/apiClient';
 
 // Create a proper auth hook that uses the API
 const useAuth = () => {
@@ -56,18 +57,7 @@ const LessonsPage = () => {
       setLessonsError(null);
       
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/lessons', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Nie udało się pobrać lekcji');
-        }
-        
-        const data = await response.json();
+        const data = await apiClient.get('/api/lessons');
         setLessons(data);
       } catch (error) {
         console.error('Error fetching lessons:', error);

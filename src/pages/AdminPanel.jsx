@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../services/apiClient';
 import '../styles/adminPanel.scss';
 
 // Helper function to format subscription status in Polish
@@ -33,30 +34,9 @@ function AdminPanel() {
 
   const fetchUsers = async (page = 1) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/logowanie');
-        return;
-      }
-
       setLoading(true);
-      const response = await fetch(`/api/admin/users/subscriptions?page=${page}&limit=${pagination.limit}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 403) {
-        navigate('/');
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Nie udało się pobrać danych użytkowników');
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get(`/api/admin/users/subscriptions?page=${page}&limit=${pagination.limit}`);
+      
       setUsers(data.users);
       setPagination(prev => ({
         ...prev,
@@ -75,22 +55,13 @@ function AdminPanel() {
   const handleManageSubscription = async (email) => {
     try {
       setManagingUser(email);
-      const token = localStorage.getItem('token');
+      const data = await apiClient.post(`/api/admin/users/${email}/portal`);
       
-      const response = await fetch(`/api/admin/users/${email}/portal`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
         throw new Error('Nie udało się utworzyć sesji zarządzania');
       }
-
-      const data = await response.json();
-      window.location.href = data.url;
     } catch (err) {
       console.error('Error managing subscription:', err);
       setError(err.message);

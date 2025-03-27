@@ -37,64 +37,72 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 
 ### Main Application Files
 
-1. **src/main.jsx**
+**src/main.jsx**
 
-   - Entry point for the React application
-   - Initializes React and renders the App component
+- Entry point for the React application
+- Initializes React and renders the App component
 
-2. **src/App.jsx**
-   - Main React application component
-   - Sets up routing and application layout
-   - Manages authentication state
-   - Provides context for user data
+**src/App.jsx**
+
+- Main React application component
+- Sets up routing and application layout
+- Manages authentication state
+- Provides context for user data
 
 ### Services
 
-3. **src/services/stripeService.js**
-   - Public functions:
-     - `getProducts()`: Fetches e-books from backend API
-     - `createCheckoutSession()`: Creates checkout session for product purchase
-     - `verifyPaymentStatus()`: Verifies payment status
-     - `getPurchasedEbooks()`: Gets user's purchased e-books
-     - `getSubscriptionStatus()`: Checks user subscription status
-     - `createSubscription()`: Creates new subscription
-     - `createPortalSession()`: Creates customer portal session for subscription management
+**src/services/stripeService.js**
+
+- Public functions:
+  - `getProducts()`: Fetches e-books from backend API
+  - `createCheckoutSession()`: Creates checkout session for product purchase
+  - `verifyPaymentStatus()`: Verifies payment status
+  - `getPurchasedEbooks()`: Gets user's purchased e-books
+  - `getSubscriptionStatus()`: Checks user subscription status
+  - `createSubscription()`: Creates new subscription
+  - `createPortalSession()`: Creates customer portal session for subscription management
+
+**src/services/apiClient.js**
+use it for all api calls
 
 ### Pages
 
-4. **src/pages/** (Directory)
-   - Page components for different routes in the application
-   - Includes:
-     - Home page
-     - E-book list page
-     - E-book details page
-     - Checkout page
-     - Payment success page
-     - User dashboard page
-     - Subscription management page
+**src/pages/** (Directory)
+
+- Page components for different routes in the application
+- Includes:
+  - Home page
+  - E-book list page
+  - E-book details page
+  - Checkout page
+  - Payment success page
+  - User dashboard page
+  - Subscription management page
 
 ### Components
 
-5. **src/components/** (Directory)
-   - Reusable UI components
-   - Includes:
-     - Navigation bar
-     - E-book card
-     - Payment button
-     - Subscription card
-     - User profile
-     - Loading indicator
-     - Authentication forms
+**src/components/** (Directory)
+
+- Reusable UI components
+- Includes:
+  - Navigation bar
+  - E-book card
+  - Payment button
+  - Subscription card
+  - User profile
+  - Loading indicator
+  - Authentication forms
 
 ### Styles
 
-6. **src/index.scss**
+**src/index.scss**
 
-   - Global stylesheet with color definitions and base styles
+- Global stylesheet with color definitions and base styles
 
-7. **src/styles/** (Directory)
-   - SCSS modules for component-specific styling
-   - Includes variables, mixins, and reusable style classes
+**src/styles/** (Directory)
+
+- SCSS modules for component-specific styling
+- Includes variables, mixins, and reusable style classes
 
 ### Assets
 

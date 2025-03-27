@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/profile.scss';
+import apiClient from '../services/apiClient';
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -67,19 +68,9 @@ function Profile() {
   const handleManageSubscription = async () => {
     try {
       setPortalLoading(true);
-      const token = localStorage.getItem('token');
+      const data = await apiClient.post('/api/subscription/create-portal-session');
       
-      const response = await fetch('/api/subscription/create-portal-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.url) {
+      if (data.url) {
         window.location.href = data.url;
       } else {
         setError('Nie udało się utworzyć sesji zarządzania subskrypcją.');

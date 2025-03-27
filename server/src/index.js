@@ -12,6 +12,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { initializeProducts } from './services/productService.js';
 import { initializeTestUser } from './services/userService.js';
+import { initializeLessons } from './services/lessonService.js';
 
 dotenv.config();
 
@@ -53,10 +54,11 @@ try {
   // Webhook routes (not nested under /api)
   app.use('/', webhookRoutes);
 
-  // Initialize products when the server starts
-  initializeProducts()
-    .then(() => {
+  // Initialize products and lessons when the server starts
+  Promise.all([initializeProducts(), initializeLessons()])
+    .then(([productsResult, lessonsResult]) => {
       console.log('Product initialization completed');
+      console.log('Lessons initialization completed');
 
       // Initialize test user in development environment
       if (process.env.NODE_ENV === 'development') {
@@ -76,7 +78,7 @@ try {
       });
     })
     .catch((error) => {
-      console.error('Failed to initialize products:', error);
+      console.error('Failed to initialize data:', error);
       // Continue starting the server even if initialization fails
       app.listen(port, () => {
         console.log(`Server running on http://localhost:${port}`);
@@ -95,6 +97,6 @@ try {
     });
   }
 } catch (error) {
-  console.error('Failed to start server:', error);
+  console.error('Server initialization error:', error);
   process.exit(1);
 }

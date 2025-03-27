@@ -25,10 +25,11 @@ export const createStores = () => {
     const users = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'users' }));
     const products = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'products' }));
     const orders = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'orders' }));
+    const lessons = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'lessons' }));
 
     users.on('error', (err) => console.error('Storage Error:', err));
 
-    return { users, products, orders };
+    return { users, products, orders, lessons };
   } catch (error) {
     console.error('Store initialization error:', error);
     throw error;

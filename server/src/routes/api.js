@@ -1,6 +1,7 @@
 import express from 'express';
 import stripe from 'stripe';
 import { authenticateToken } from '../middleware/auth.js';
+import { getAllLessons } from '../services/lessonService.js';
 
 const router = express.Router();
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
@@ -237,5 +238,16 @@ const formatPrice = (amount, currency) => {
     minimumFractionDigits: 2,
   }).format(amount / 100);
 };
+
+// Get all lessons
+router.get('/lessons', authenticateToken, async (req, res) => {
+  try {
+    const lessons = await getAllLessons();
+    res.json(lessons);
+  } catch (error) {
+    console.error('Error fetching lessons:', error);
+    res.status(500).json({ error: 'Błąd serwera podczas pobierania lekcji' });
+  }
+});
 
 export default router;

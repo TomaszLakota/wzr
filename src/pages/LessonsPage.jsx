@@ -11,120 +11,74 @@ const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
-        
-        if (!token || !userData) {
-          setIsLoggedIn(false);
-          setIsSubscribed(false);
-          setIsLoading(false);
-          return;
-        }
-        
-        setIsLoggedIn(true);
-        
-        // Parse user data to check if isSubscribed flag exists
-        const user = JSON.parse(userData);
-        if (user.isSubscribed !== undefined) {
-          setIsSubscribed(user.isSubscribed);
-          setIsLoading(false);
-          return;
-        }
-        
-        // If not in user data, check API
-        const response = await fetch('/api/subscription/subscription-status', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setIsSubscribed(data.isSubscribed);
-          
-          // Update local user data with subscription status
-          if (userData) {
-            const updatedUser = { ...user, isSubscribed: data.isSubscribed };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            
-            // Dispatch custom event to notify Header component
-            window.dispatchEvent(new Event('authChange'));
-          }
-        } else {
-          console.error('Błąd podczas sprawdzania statusu subskrypcji');
-        }
-        
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      
+      if (!token || !userData) {
+        setIsLoggedIn(false);
+        setIsSubscribed(false);
         setIsLoading(false);
-      } catch (error) {
-        console.error('Błąd podczas sprawdzania statusu autoryzacji:', error);
-        setIsLoading(false);
+        return;
       }
+      
+      const user = JSON.parse(userData);
+      setIsLoggedIn(true);
+      setIsSubscribed(user.isSubscribed);
+      setIsLoading(false);
     };
     
     checkAuthStatus();
+    window.addEventListener('authChange', checkAuthStatus);
+    window.addEventListener('storage', checkAuthStatus);
+    
+    return () => {
+      window.removeEventListener('authChange', checkAuthStatus);
+      window.removeEventListener('storage', checkAuthStatus);
+    };
   }, []);
   
   return { isLoggedIn, isSubscribed, isLoading };
 };
 
-// Mock data for lessons - replace with actual API call
-const mockLessons = [
-  {
-    id: 1,
-    title: 'Wprowadzenie do Podstaw',
-    description: 'Poznaj podstawowe koncepcje i słownictwo języka włoskiego',
-    level: 'Początkujący',
-    duration: '30 min',
-    thumbnailUrl: null
-  },
-  {
-    id: 2,
-    title: 'Podstawowe Zwroty',
-    description: 'Opanuj codzienne wyrażenia i powitania',
-    level: 'Początkujący',
-    duration: '45 min',
-    thumbnailUrl: null
-  },
-  {
-    id: 3,
-    title: 'Umiejętności Konwersacji',
-    description: 'Rozwiń płynność w typowych sytuacjach',
-    level: 'Średniozaawansowany',
-    duration: '60 min',
-    thumbnailUrl: null
-  },
-  {
-    id: 4,
-    title: 'Struktury Gramatyczne',
-    description: 'Buduj złożone zdania z pewnością siebie',
-    level: 'Średniozaawansowany',
-    duration: '50 min',
-    thumbnailUrl: null
-  },
-  {
-    id: 5,
-    title: 'Wgląd w Kulturę',
-    description: 'Zrozum język w kontekście kulturowym',
-    level: 'Zaawansowany',
-    duration: '40 min',
-    thumbnailUrl: null
-  },
-  {
-    id: 6,
-    title: 'Zaawansowane Tematy',
-    description: 'Opanuj złożone struktury językowe',
-    level: 'Zaawansowany',
-    duration: '55 min',
-    thumbnailUrl: null
-  }
-];
-
 const LessonsPage = () => {
   const { isLoggedIn, isSubscribed, isLoading } = useAuth();
   const [redirectLoading, setRedirectLoading] = useState(false);
+  const [lessons, setLessons] = useState([]);
+  const [lessonsLoading, setLessonsLoading] = useState(false);
+  const [lessonsError, setLessonsError] = useState(null);
+
+  useEffect(() => {
+    const fetchLessons = async () => {
+      if (!isLoggedIn || !isSubscribed) return;
+      
+      setLessonsLoading(true);
+      setLessonsError(null);
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/lessons', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Nie udało się pobrać lekcji');
+        }
+        
+        const data = await response.json();
+        setLessons(data);
+      } catch (error) {
+        console.error('Error fetching lessons:', error);
+        setLessonsError('Wystąpił błąd podczas ładowania lekcji');
+      } finally {
+        setLessonsLoading(false);
+      }
+    };
+    
+    fetchLessons();
+  }, [isLoggedIn, isSubscribed]);
   
   const handleSubscribe = async () => {
     if (!isLoggedIn) {
@@ -207,13 +161,19 @@ const LessonsPage = () => {
     return (
       <div className="lessons-page">
         <h1>Lekcje</h1>
-        <div className="lessons-grid">
-          {mockLessons.map(lesson => (
-            <Link to={`/lekcje/${lesson.id}`} key={lesson.id} className="lessons-grid__item">
-              <LessonThumbnail lesson={lesson} />
-            </Link>
-          ))}
-        </div>
+        {lessonsLoading ? (
+          <div className="loading">Ładowanie lekcji...</div>
+        ) : lessonsError ? (
+          <div className="error-message">{lessonsError}</div>
+        ) : (
+          <div className="lessons-grid">
+            {lessons.map(lesson => (
+              <Link to={`/lekcje/${lesson.id}`} key={lesson.id} className="lessons-grid__item">
+                <LessonThumbnail lesson={lesson} />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     );
   }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EbookCard from '../components/EbookCard';
 import './Ebooks.scss';
 import { getEbooks } from '../services/ebookService';
+import { createCheckoutSession } from '../services/stripeService';
 function Ebooks() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -11,10 +11,14 @@ function PaymentSuccess() {
     message: 'Weryfikacja płatności...'
   });
   const [loading, setLoading] = useState(true);
+  const [verificationAttempted, setVerificationAttempted] = useState(false);
 
   useEffect(() => {
     const verifyPayment = async () => {
+      if (verificationAttempted) return;
+      
       try {
+        setVerificationAttempted(true);
         // Get payment_intent or session_id from URL query params
         const paymentIntentId = searchParams.get('payment_intent');
         const sessionId = searchParams.get('session_id');
@@ -32,10 +36,6 @@ function PaymentSuccess() {
         // Verify payment status using either payment_intent or session_id
         const status = await verifyPaymentStatus(paymentIntentId || sessionId);
         setPaymentStatus(status);
-
-        if(status.success) {
-          window.dispatchEvent(new Event('authChange'));
-        }
       } catch (error) {
         console.error('Błąd weryfikacji płatności:', error);
         setPaymentStatus({
@@ -49,7 +49,13 @@ function PaymentSuccess() {
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, []);
+
+  useEffect(() => {
+    if (paymentStatus.success) {
+      window.dispatchEvent(new Event('authChange'));
+    }
+  }, [paymentStatus.success]);
 
   return (
     <div className="payment-success">

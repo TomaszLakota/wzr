@@ -48,6 +48,29 @@ const LessonsPage = () => {
   const [lessons, setLessons] = useState([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lessonsError, setLessonsError] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Check if user just completed subscription purchase
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSuccess = urlParams.get('success') === 'true';
+    
+    if (isSuccess) {
+      setShowSuccess(true);
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        user.isSubscribed = true;
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        window.dispatchEvent(new Event('authChange'));
+        
+        setTimeout(() => {
+          window.location.href = '/lekcje';
+        }, 3000);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -114,33 +137,12 @@ const LessonsPage = () => {
     return <div className="loading">Ładowanie...</div>;
   }
 
-  // Check if user just completed subscription purchase
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('success') === 'true') {
-    // Update local storage to set isSubscribed to true
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const user = JSON.parse(userData);
-      user.isSubscribed = true;
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      // Dispatch custom event to notify Header component
-      window.dispatchEvent(new Event('authChange'));
-    }
-    
-    const handleGoToLessons = () => {
-      // Set isSubscribed directly in this component
-      setIsSubscribed(true);
-      // Navigate programmatically to ensure state updates before rendering
-      window.location.href = '/lekcje';
-    };
-    
+  if (showSuccess) {
     return (
       <div className="lessons-page">
         <div className="success-message">
           <h2>Dziękujemy za subskrypcję!</h2>
           <p>Twoja subskrypcja została pomyślnie aktywowana.</p>
-          <button onClick={handleGoToLessons} className="lesson-link">Przejdź do lekcji</button>
         </div>
       </div>
     );

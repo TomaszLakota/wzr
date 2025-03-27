@@ -3,7 +3,7 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Culture from './pages/Culture';
 import LanguageGuide from './pages/LanguageGuide';
-import Lessons from './pages/Lessons';
+import LessonsPage from './pages/LessonsPage';
 import YogaTrips from './pages/YogaTrips';
 import Ebooks from './pages/Ebooks';
 import Login from './pages/Login';
@@ -15,7 +15,6 @@ import AdminPanel from './pages/AdminPanel';
 import React from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import LessonsPage from './pages/LessonsPage';
 
 // Load Stripe outside of component render to avoid recreating the Stripe object on re-renders
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -38,7 +37,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/lekcje',
-        element: <Lessons />,
+        element: <LessonsPage />,
       },
       {
         path: '/wyjazdy',

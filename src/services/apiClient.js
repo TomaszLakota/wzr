@@ -28,6 +28,9 @@ export const apiClient = {
     // Add authorization header if token exists
     const headers = {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     };
@@ -36,6 +39,7 @@ export const apiClient = {
     const response = await fetch(url, {
       ...options,
       headers,
+      cache: 'no-store',
     });
 
     return handleResponse(response);

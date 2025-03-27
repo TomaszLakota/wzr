@@ -2,18 +2,35 @@ import stripeClient from '../config/stripeConfig.js';
 
 // Process Stripe webhook events
 export const handleStripeWebhook = async (req, res) => {
+  console.log('[DEBUG] Webhook handler called');
+  console.log('[DEBUG] Stripe signature:', req.headers['stripe-signature']);
+  console.log('[DEBUG] Raw body available:', !!req.rawBody);
+  console.log('[DEBUG] Body type:', typeof req.body);
+
   const sig = req.headers['stripe-signature'];
   let event;
 
   try {
-    event = stripeClient.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_SECRET_KEY
-    );
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('[WEBHOOK] Error: STRIPE_WEBHOOK_SECRET is not configured');
+      return res.status(500).send('Webhook secret not configured');
+    }
+
+    if (!sig) {
+      console.error('[WEBHOOK] Error: No Stripe signature found in headers');
+      return res.status(400).send('No Stripe signature found');
+    }
+
+    if (!req.body) {
+      console.error('[WEBHOOK] Error: No raw body available');
+      return res.status(400).send('No raw body available');
+    }
+
+    event = stripeClient.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     console.log(`[WEBHOOK] Received Stripe event: ${event.type}`);
   } catch (err) {
     console.error(`[WEBHOOK] Webhook Error: ${err.message}`);
+    console.error('[WEBHOOK] Full error:', err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -83,115 +100,47 @@ const handleCheckoutSessionCompleted = async (session) => {
       } else {
         console.log(`[WEBHOOK] No user ID found in customer metadata or session`);
       }
-    } else {
+    } else if (session.mode === 'payment') {
       // For one-time payments
       console.log(`[WEBHOOK] One-time payment checkout detected`);
+      console.log(`[WEBHOOK] Session ID: ${session.id}`);
+      console.log(`[WEBHOOK] Payment Intent: ${session.payment_intent}`);
+      console.log(`[WEBHOOK] Customer: ${session.customer}`);
+      console.log(`[WEBHOOK] Session metadata:`, session.metadata);
 
       // Get the payment intent from the session
       const paymentIntent = await stripeClient.paymentIntents.retrieve(session.payment_intent);
-      console.log(`[WEBHOOK] Payment intent details: ${JSON.stringify(paymentIntent)}`);
+      console.log(`[WEBHOOK] Original payment intent metadata:`, paymentIntent.metadata);
 
       // Update payment intent with session metadata for later reference
-      await stripeClient.paymentIntents.update(session.payment_intent, {
-        metadata: {
-          ...paymentIntent.metadata,
-          session_id: session.id,
-          type: session.metadata.type || 'ebook',
-        },
-      });
+      const updatedPaymentIntent = await stripeClient.paymentIntents.update(
+        session.payment_intent,
+        {
+          metadata: {
+            ...paymentIntent.metadata,
+            session_id: session.id,
+            type: session.metadata.type || 'ebook',
+          },
+        }
+      );
+
+      console.log(`[WEBHOOK] Updated payment intent metadata:`, updatedPaymentIntent.metadata);
+      console.log(`[WEBHOOK] Payment intent ${session.payment_intent} update completed`);
     }
   } catch (error) {
     console.error(`[WEBHOOK] Error processing checkout session: ${error.message}`);
     console.error(error);
   }
 
-  console.log(`[WEBHOOK] Payment successful for session ${session.id}`);
+  console.log(`[WEBHOOK] Checkout session completed: ${session.id}`);
 };
 
 // Handle invoice.payment_succeeded event
 const handleInvoicePaymentSucceeded = async (invoice) => {
-  const { users } = global.stores;
-
-  try {
-    console.log(`[WEBHOOK] Invoice payment succeeded: ${invoice.id}`);
-    console.log(`[WEBHOOK] Invoice details: ${JSON.stringify(invoice)}`);
-
-    if (
-      invoice.billing_reason === 'subscription_create' ||
-      invoice.billing_reason === 'subscription_cycle'
-    ) {
-      console.log(`[WEBHOOK] Subscription invoice detected for reason: ${invoice.billing_reason}`);
-
-      const subscription = await stripeClient.subscription.retrieve(invoice.subscription);
-      console.log(`[WEBHOOK] Subscription details: ${JSON.stringify(subscription)}`);
-
-      const customer = await stripeClient.customers.retrieve(invoice.customer);
-      console.log(`[WEBHOOK] Customer details: ${JSON.stringify(customer)}`);
-
-      const userId = customer.metadata.userId;
-      console.log(`[WEBHOOK] User ID from metadata: ${userId}`);
-
-      if (userId) {
-        const userRecord = await users.get(userId);
-        console.log(`[WEBHOOK] User record before update: ${JSON.stringify(userRecord)}`);
-
-        if (userRecord) {
-          userRecord.isSubscribed = true;
-          userRecord.stripeSubscriptionId = invoice.subscription;
-          await users.set(userId, userRecord);
-          console.log(`[WEBHOOK] Updated subscription status for user ${userId}`);
-
-          // Verify the update
-          const updatedUser = await users.get(userId);
-          console.log(`[WEBHOOK] User record after update: ${JSON.stringify(updatedUser)}`);
-        } else {
-          console.log(`[WEBHOOK] User record not found for ${userId}`);
-        }
-      } else {
-        console.log(`[WEBHOOK] No user ID found in customer metadata`);
-      }
-    }
-  } catch (error) {
-    console.error(`[WEBHOOK] Error processing invoice payment: ${error.message}`);
-    console.error(error);
-  }
+  // Handle invoice.payment_succeeded event
 };
 
 // Handle customer.subscription.deleted event
-const handleSubscriptionDeleted = async (cancelledSubscription) => {
-  const { users } = global.stores;
-
-  try {
-    console.log(`[WEBHOOK] Subscription deleted: ${cancelledSubscription.id}`);
-    console.log(`[WEBHOOK] Subscription details: ${JSON.stringify(cancelledSubscription)}`);
-
-    const cancelledCustomer = await stripeClient.customers.retrieve(cancelledSubscription.customer);
-    console.log(`[WEBHOOK] Customer details: ${JSON.stringify(cancelledCustomer)}`);
-
-    const userId = cancelledCustomer.metadata.userId;
-    console.log(`[WEBHOOK] User ID from metadata: ${userId}`);
-
-    if (userId) {
-      const userRecord = await users.get(userId);
-      console.log(`[WEBHOOK] User record before update: ${JSON.stringify(userRecord)}`);
-
-      if (userRecord) {
-        userRecord.isSubscribed = false;
-        userRecord.stripeSubscriptionId = null;
-        await users.set(userId, userRecord);
-        console.log(`[WEBHOOK] Updated subscription status for user ${userId}`);
-
-        // Verify the update
-        const updatedUser = await users.get(userId);
-        console.log(`[WEBHOOK] User record after update: ${JSON.stringify(updatedUser)}`);
-      } else {
-        console.log(`[WEBHOOK] User record not found for ${userId}`);
-      }
-    } else {
-      console.log(`[WEBHOOK] No user ID found in customer metadata`);
-    }
-  } catch (error) {
-    console.error(`[WEBHOOK] Error processing subscription cancellation: ${error.message}`);
-    console.error(error);
-  }
+const handleSubscriptionDeleted = async (subscription) => {
+  // Handle customer.subscription.deleted event
 };

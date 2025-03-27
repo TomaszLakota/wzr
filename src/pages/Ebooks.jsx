@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, createCheckoutSession } from '../services/stripeService';
 import EbookCard from '../components/EbookCard';
 import './Ebooks.scss';
-
+import { getEbooks } from '../services/ebookService';
 function Ebooks() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +11,7 @@ function Ebooks() {
     // Fetch products on component mount
     const fetchProducts = async () => {
       try {
-        const productsList = await getProducts();
+        const productsList = await getEbooks();
         setProducts(productsList);
       } catch (error) {
         console.error('Error fetching products:', error);

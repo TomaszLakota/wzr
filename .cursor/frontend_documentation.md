@@ -54,13 +54,8 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 **src/services/stripeService.js**
 
 - Public functions:
-  - `getProducts()`: Fetches e-books from backend API
   - `createCheckoutSession()`: Creates checkout session for product purchase
   - `verifyPaymentStatus()`: Verifies payment status
-  - `getPurchasedEbooks()`: Gets user's purchased e-books
-  - `getSubscriptionStatus()`: Checks user subscription status
-  - `createSubscription()`: Creates new subscription
-  - `createPortalSession()`: Creates customer portal session for subscription management
 
 **src/services/apiClient.js**
 use it for all api calls

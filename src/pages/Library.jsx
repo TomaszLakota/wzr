@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getPurchasedEbooks } from '../services/stripeService';
+import { getPurchasedEbooks } from '../services/ebookService';
 import './Library.scss';
 
 function Library() {
@@ -43,18 +43,39 @@ function Library() {
         <div className="library-grid">
           {purchases.map((purchase) => (
             <div className="library-item" key={purchase.id}>
-              <h3 className="library-item__title">{purchase.productName}</h3>
-              <p className="library-item__date">
-                Zakupiono: {new Date(purchase.purchaseDate).toLocaleDateString('pl-PL')}
-              </p>
-              <a 
-                href={purchase.downloadUrl}
-                className="library-item__download"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pobierz ebooka
-              </a>
+              <div className="library-item__image">
+                {purchase.images && purchase.images[0] ? (
+                  <img src={purchase.images[0]} alt={purchase.name} />
+                ) : (
+                  <div className="library-item__no-image">Brak okładki</div>
+                )}
+              </div>
+              <div className="library-item__content">
+                <h3 className="library-item__title">{purchase.name}</h3>
+                {purchase.description && (
+                  <p className="library-item__description">{purchase.description}</p>
+                )}
+                <p className="library-item__date">
+                  Zakupiono: {new Date(purchase.purchaseInfo.purchaseDate).toLocaleDateString('pl-PL')}
+                </p>
+                <p className="library-item__price">
+                  Cena zakupu: {purchase.price.formatted}
+                </p>
+                {purchase.purchaseInfo.downloadUrl ? (
+                  <a
+                    href={purchase.purchaseInfo.downloadUrl}
+                    className="library-item__download"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Pobierz ebooka
+                  </a>
+                ) : (
+                  <span className="library-item__download-unavailable">
+                    Link do pobrania niedostępny
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>

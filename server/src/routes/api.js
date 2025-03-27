@@ -68,7 +68,7 @@ router.get('/ebooks', async (req, res) => {
 /**
  * Create a checkout session
  */
-router.post('/checkout', async (req, res) => {
+router.post('/checkout', authenticateToken, async (req, res) => {
   try {
     const { priceId, successUrl, cancelUrl } = req.body;
 
@@ -79,8 +79,35 @@ router.post('/checkout', async (req, res) => {
     // Get frontend URL from environment variable or use client-provided URL as fallback
     const frontendUrl = process.env.FRONTEND_URL || (successUrl ? new URL(successUrl).origin : '');
 
+    // Get user from auth token
+    const user = req.user; // authenticateToken middleware already verified and decoded the token
+    let customerId = user.stripeCustomerId;
+
+    // If user has no Stripe customer ID, create one
+    if (!customerId) {
+      try {
+        const customer = await stripeClient.customers.create({
+          email: user.email,
+          metadata: {
+            userId: user.email, // Using email as userId since that's our primary key
+          },
+        });
+
+        // Update user in database with new Stripe customer ID
+        await global.stores.users.set(user.email, {
+          ...user,
+          stripeCustomerId: customer.id,
+        });
+
+        customerId = customer.id;
+      } catch (error) {
+        console.error('Error creating Stripe customer:', error);
+        return res.status(500).json({ error: 'Nie udało się utworzyć konta klienta' });
+      }
+    }
+
     // Create checkout session
-    const session = await stripeClient.checkout.sessions.create({
+    const sessionConfig = {
       payment_method_types: ['card'],
       line_items: [
         {
@@ -89,12 +116,16 @@ router.post('/checkout', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: successUrl || `${frontendUrl}/platnosc/sukces?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: successUrl || `${frontendUrl}/platnosc/sukces?payment_intent={PAYMENT_INTENT}`,
       cancel_url: cancelUrl || `${frontendUrl}/ebooki`,
+      customer: customerId,
       metadata: {
         type: 'ebook',
       },
-    });
+      client_reference_id: user.email,
+    };
+
+    const session = await stripeClient.checkout.sessions.create(sessionConfig);
 
     res.json({ url: session.url });
   } catch (error) {
@@ -138,48 +169,91 @@ router.get('/payments/:paymentIntentId/verify', async (req, res) => {
  */
 router.get('/user/ebooks', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    if (!req.user?.stripeCustomerId) {
+      console.log('No Stripe customer ID found for user');
+      return res.json([]); // Return empty array if user has no Stripe customer ID
+    }
 
-    // Fetch customer's payment intents
-    const paymentIntents = await stripeClient.paymentIntents.list({
+    console.log('Fetching ebooks for customer:', req.user.stripeCustomerId);
+
+    // Get all successful checkout sessions for this customer with line items expanded
+    const sessions = await stripeClient.checkout.sessions.list({
       customer: req.user.stripeCustomerId,
       limit: 100,
+      expand: ['data.line_items'],
     });
 
-    // Filter successful payments only
-    const successfulPayments = paymentIntents.data.filter(
-      (pi) => pi.status === 'succeeded' && pi.metadata.type === 'ebook'
-    );
+    // Extract price IDs from line items
+    const priceIds = sessions.data
+      .filter((session) => session.payment_status === 'paid')
+      .flatMap((session) => session.line_items.data)
+      .map((item) => item.price?.id)
+      .filter(Boolean);
 
-    // Get purchased products
-    const purchases = await Promise.all(
-      successfulPayments.map(async (payment) => {
-        // Get the line items from this payment
-        const lineItems = await stripeClient.checkout.sessions.listLineItems(
-          payment.metadata.session_id
-        );
+    if (priceIds.length === 0) {
+      console.log('No paid items found for customer');
+      return res.json([]);
+    }
 
-        if (!lineItems.data || lineItems.data.length === 0) {
-          return null;
-        }
+    // Fetch all prices and their products
+    const allPrices = [];
+    for (const priceId of priceIds) {
+      try {
+        const price = await stripeClient.prices.retrieve(priceId, {
+          expand: ['product'],
+        });
+        allPrices.push(price);
+      } catch (error) {
+        console.error(`Error fetching price ${priceId}:`, error.message);
+        // Continue with other prices if one fails
+      }
+    }
 
-        // Get product details
-        const product = await stripeClient.products.retrieve(lineItems.data[0].price.product);
+    // Create a map of prices for easy lookup
+    const priceMap = new Map(allPrices.map((price) => [price.id, price]));
 
-        return {
-          id: payment.id,
-          productId: product.id,
-          productName: product.name,
-          purchaseDate: new Date(payment.created * 1000).toISOString(),
-          downloadUrl: product.metadata.download_url || '#',
-        };
+    // Process sessions and extract purchased ebooks
+    const purchases = sessions.data
+      .filter((session) => session.payment_status === 'paid')
+      .flatMap((session) => {
+        const lineItem = session.line_items.data[0];
+        if (!lineItem?.price?.id) return [];
+
+        const price = priceMap.get(lineItem.price.id);
+        if (!price?.product) return [];
+
+        const product = price.product;
+
+        // Skip if not an ebook
+        if (!product.metadata?.type || product.metadata.type !== 'ebook') return [];
+
+        return [
+          {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            images: product.images || [],
+            active: product.active,
+            price: {
+              id: price.id,
+              currency: price.currency,
+              unit_amount: price.unit_amount,
+              formatted: formatPrice(price.unit_amount, price.currency),
+            },
+            purchaseInfo: {
+              purchaseDate: new Date(session.created * 1000).toISOString(),
+              paymentId: session.payment_intent,
+              downloadUrl: product.metadata.download_url || null,
+            },
+          },
+        ];
       })
-    );
+      .sort(
+        (a, b) => new Date(b.purchaseInfo.purchaseDate) - new Date(a.purchaseInfo.purchaseDate)
+      );
 
-    // Filter out null purchases
-    const validPurchases = purchases.filter((purchase) => purchase !== null);
-
-    res.json(validPurchases);
+    console.log('Valid purchases found:', purchases.length);
+    res.json(purchases);
   } catch (error) {
     console.error('Error fetching user ebooks:', error.message);
     res.status(500).json({ error: 'Nie udało się pobrać zakupionych ebooków' });

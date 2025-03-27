@@ -27,23 +27,11 @@ function Profile() {
       
       try {
         // Fetch fresh user data from the server
-        const response = await fetch(`/api/users/${parsedUserData.email}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const freshUserData = await apiClient.get(`/api/users/${parsedUserData.email}`);
+        setUser(freshUserData);
         
-        if (response.ok) {
-          const freshUserData = await response.json();
-          setUser(freshUserData);
-          
-          // Update local storage with fresh data
-          localStorage.setItem('user', JSON.stringify(freshUserData));
-        } else {
-          console.error('Nie udało się pobrać danych użytkownika z serwera.');
-        }
+        // Update local storage with fresh data
+        localStorage.setItem('user', JSON.stringify(freshUserData));
       } catch (err) {
         console.error('Błąd podczas pobierania danych użytkownika:', err);
         setError('Wystąpił błąd podczas ładowania danych. Spróbuj ponownie później.');

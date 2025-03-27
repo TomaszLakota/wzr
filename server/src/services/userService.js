@@ -23,8 +23,8 @@ export const initializeTestUser = async () => {
       name: 'Tomasz Łakota',
       password: hashedPassword,
       createdAt: Date.now(),
-      stripeCustomerId: 'cus_Rz3rLxOUvWhrrF',
-      stripeSubscriptionId: 'sub_1R55jf2cdengCFrjOXcPgwz4',
+      stripeCustomerId: 'cus_S1GsYQYaNSTcDs',
+      stripeSubscriptionId: 'sub_1R7EWT2cdengCFrjSyJXasj5',
       isSubscribed: true,
       isAdmin: true,
     };

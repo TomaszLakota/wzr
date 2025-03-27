@@ -41,7 +41,26 @@ try {
   // Make stores globally accessible
   global.stores = stores;
 
-  app.use(cors());
+  // Configure CORS
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const corsOptions = isDevelopment
+    ? {
+        origin: true, // Allow all origins in development
+        credentials: true,
+      }
+    : {
+        origin: process.env.FRONTEND_URL,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
+      };
+
+  app.use(cors(corsOptions));
+
+  // Webhook routes must be registered before express.json middleware
+  // to access raw body data
+  app.use('/', webhookRoutes);
+
   app.use(express.json());
 
   // API Routes
@@ -50,9 +69,6 @@ try {
   app.use('/api/products', productRoutes);
   app.use('/api', authRoutes);
   app.use('/api', userRoutes);
-
-  // Webhook routes (not nested under /api)
-  app.use('/', webhookRoutes);
 
   // Initialize products and lessons when the server starts
   Promise.all([initializeProducts(), initializeLessons()])

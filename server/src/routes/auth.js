@@ -60,6 +60,7 @@ router.post('/register', async (req, res) => {
       {
         email: user.email,
         name: user.name,
+        stripeCustomerId: user.stripeCustomerId,
       },
       JWT_SECRET,
       {
@@ -153,6 +154,7 @@ router.post('/login', async (req, res) => {
       {
         email: user.email,
         name: user.name,
+        stripeCustomerId: user.stripeCustomerId,
       },
       JWT_SECRET,
       {

@@ -12,97 +12,84 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 - **API Communication**: Fetch API
 - **Payment Processing**: Stripe integration
 
-## Core Concepts
+## Project Structure
 
-### Authentication
+### Root Configuration Files
 
-- JWT-based authentication
-- Token stored in localStorage
-- Protected routes require authentication
+- `vite.config.js` - Vite configuration
+- `package.json` - Project dependencies and scripts
+- `index.html` - Main HTML entry point
+- `.env` - Environment variables (not committed to repository)
+- `.prettierrc` & `.prettierignore` - Code formatting configuration
+- `eslint.config.js` - ESLint configuration
 
-### E-book Shopping
+### Source Code Structure
 
-- Browse available e-books
-- View e-book details
-- Make purchases through Stripe checkout
-- Access purchased e-books
+**src/**
 
-### Subscription Management
+- `main.jsx` - React application entry point
+- `App.jsx` - Main application component with routing
+- `App.scss` - Main component styles
+- `index.scss` - Global styles and color definitions
 
-- Subscribe to premium content
-- Manage subscription (upgrade, cancel)
-- Access subscription-only content
-
-## File Structure and Purpose
-
-### Main Application Files
-
-**src/main.jsx**
-
-- Entry point for the React application
-- Initializes React and renders the App component
-
-**src/App.jsx**
-
-- Main React application component
-- Sets up routing and application layout
-- Manages authentication state
-- Provides context for user data
-
-### Services
-
-**src/services/stripeService.js**
-
-- Public functions:
-  - `createCheckoutSession()`: Creates checkout session for product purchase
-  - `verifyPaymentStatus()`: Verifies payment status
-
-**src/services/apiClient.js**
-use it for all api calls
-
-### Pages
-
-**src/pages/** (Directory)
-
-- Page components for different routes in the application
-- Includes:
-  - Home page
-  - E-book list page
-  - E-book details page
-  - Checkout page
-  - Payment success page
-  - User dashboard page
-  - Subscription management page
-
-### Components
-
-**src/components/** (Directory)
+**src/components/**
 
 - Reusable UI components
-- Includes:
-  - Navigation bar
-  - E-book card
-  - Payment button
-  - Subscription card
-  - User profile
-  - Loading indicator
-  - Authentication forms
+- Each component in its own directory with dedicated SCSS file
 
-### Styles
+**src/pages/**
 
-**src/index.scss**
+- Page components for different application routes
+- Each page in its own directory with dedicated SCSS file
 
-- Global stylesheet with color definitions and base styles
+**src/services/**
 
-**src/styles/** (Directory)
+- API communication logic
+- Stripe integration
+- Authentication handling
 
-- SCSS modules for component-specific styling
-- Includes variables, mixins, and reusable style classes
+**src/styles/**
 
-### Assets
+- SCSS modules
+- Variables
+- Mixins
+- Reusable classes
 
-8. **src/assets/** (Directory)
-   - Static assets such as images, icons, and fonts
+**src/assets/**
+
+- Static assets (images, icons, fonts)
+
+## Core Requirements
+
+1. **User Interface Language**
+
+   - All user-facing text MUST be in Polish
+   - Currency formatting follows Polish standards (PLN)
+
+2. **Styling**
+
+   - SCSS for all styling
+   - Colors defined in `src/index.scss`
+   - Component-specific styles in dedicated SCSS modules
+
+3. **API & Integrations**
+
+   - Stripe for payment processing
+   - Backend communication through dedicated services
+   - Error handling and form validation
+
+4. **Security**
+   - JWT authentication
+   - Protected routes
+   - Secure payment handling via Stripe
+   - Input validation and sanitization
+
+## Development Guidelines
+
+- Application runs through Vite
+- Hot Module Replacement enabled
+- Automatic code formatting with Prettier
+- Code linting with ESLint
 
 ## User Flows
 
@@ -124,20 +111,9 @@ use it for all api calls
 5. User gains access to subscription-only content
 6. User can manage subscription from their dashboard
 
-## API Integration
-
-The frontend communicates with the backend API for:
-
-- User authentication (login/register)
-- Fetching e-book catalog
-- Creating checkout sessions
-- Verifying payments
-- Managing subscriptions
-- Accessing user-specific data
-
 ## Error Handling
 
-- User-friendly error messages
+- User-friendly error messages (in Polish)
 - Form validation
 - Payment error handling
 - Network error handling
@@ -155,10 +131,3 @@ The frontend communicates with the backend API for:
 - Secure payment handling through Stripe
 - Input validation and sanitization
 - HTTPS required for production
-
-## Implementation Notes
-
-- All user-facing text is in Polish
-- Currency is formatted according to Polish locale (PLN)
-- Form validation follows Polish conventions
-- UI design adheres to modern web standards

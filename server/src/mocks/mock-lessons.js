@@ -32,6 +32,8 @@ export const lessons = [
         title: 'Podstawowe Zwroty',
         description: 'Opanuj codzienne wyrażenia i powitania',
         url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
+      },
+    ],
   },
   {
     id: 3,
@@ -49,6 +51,7 @@ export const lessons = [
         description: 'Opanuj codzienne wyrażenia i powitania',
         url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
       },
+    ],
   },
   {
     id: 4,
@@ -84,6 +87,7 @@ export const lessons = [
         description: 'Opanuj codzienne wyrażenia i powitania',
         url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
       },
+    ],
   },
   {
     id: 6,
@@ -100,5 +104,7 @@ export const lessons = [
         title: 'Podstawowe Zwroty',
         description: 'Opanuj codzienne wyrażenia i powitania',
         url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
+      },
+    ],
   },
 ];

@@ -1,6 +1,11 @@
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
 # Rules!
@@ -9,9 +14,10 @@ alwaysApply: true
 - avoid excesive changes
 - make minimal changes
 - you can use mcp for stripe interactions, but don't expect them to work in the project we're building
+- you can use sequencial thinking mcp for planning tasks that will take multiple steps to complete
 - Our server files are in the /server folder
-- When running terminal commands make sure you're in the right folder and use commands that work with windows 10 (&& wont work)
-- use scss
+- When running terminal commands make sure you're in the right folder and use commands that work with windows 10!!! (&& wont work)
+
 
 
 # Project structure
@@ -19,7 +25,9 @@ alwaysApply: true
 - root folder has our frontend files
 
 ## Frontend
+- use scss
 - use colors from index.scss
+- docs: [frontend_documentation.md](mdc:.cursor/frontend_documentation.md) keep the file updated!
 
 
 ## Backend

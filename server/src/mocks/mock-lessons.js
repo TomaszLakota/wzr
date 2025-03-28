@@ -8,6 +8,14 @@ export const lessons = [
     thumbnailUrl:
       'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/thumbnail_85d08a0a.jpg',
     videoId: 'cc8d5af1-e754-486f-a093-1860fa393f8a',
+    downloads: [
+      {
+        id: 1,
+        title: 'Podstawowe Zwroty',
+        description: 'Opanuj codzienne wyrażenia i powitania',
+        url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
+      },
+    ],
   },
   {
     id: 2,
@@ -18,6 +26,12 @@ export const lessons = [
     thumbnailUrl:
       'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/thumbnail_85d08a0a.jpg',
     videoId: 'cc8d5af1-e754-486f-a093-1860fa393f8a',
+    downloads: [
+      {
+        id: 1,
+        title: 'Podstawowe Zwroty',
+        description: 'Opanuj codzienne wyrażenia i powitania',
+        url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
   },
   {
     id: 3,
@@ -28,6 +42,13 @@ export const lessons = [
     thumbnailUrl:
       'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/thumbnail_85d08a0a.jpg',
     videoId: 'cc8d5af1-e754-486f-a093-1860fa393f8a',
+    downloads: [
+      {
+        id: 1,
+        title: 'Podstawowe Zwroty',
+        description: 'Opanuj codzienne wyrażenia i powitania',
+        url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
+      },
   },
   {
     id: 4,
@@ -38,6 +59,14 @@ export const lessons = [
     thumbnailUrl:
       'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/thumbnail_85d08a0a.jpg',
     videoId: 'cc8d5af1-e754-486f-a093-1860fa393f8a',
+    downloads: [
+      {
+        id: 1,
+        title: 'Podstawowe Zwroty',
+        description: 'Opanuj codzienne wyrażenia i powitania',
+        url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
+      },
+    ],
   },
   {
     id: 5,
@@ -48,6 +77,13 @@ export const lessons = [
     thumbnailUrl:
       'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/thumbnail_85d08a0a.jpg',
     videoId: 'cc8d5af1-e754-486f-a093-1860fa393f8a',
+    downloads: [
+      {
+        id: 1,
+        title: 'Podstawowe Zwroty',
+        description: 'Opanuj codzienne wyrażenia i powitania',
+        url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
+      },
   },
   {
     id: 6,
@@ -58,5 +94,11 @@ export const lessons = [
     thumbnailUrl:
       'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/thumbnail_85d08a0a.jpg',
     videoId: 'cc8d5af1-e754-486f-a093-1860fa393f8a',
+    downloads: [
+      {
+        id: 1,
+        title: 'Podstawowe Zwroty',
+        description: 'Opanuj codzienne wyrażenia i powitania',
+        url: 'https://vz-8deb48a5-fff.b-cdn.net/cc8d5af1-e754-486f-a093-1860fa393f8a/Podstawowe_Zwroty.pdf',
   },
 ];

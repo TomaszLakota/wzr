@@ -86,6 +86,15 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
 | ------ | ---------- | ---------------------- |
 | POST   | `/webhook` | Stripe webhook handler |
 
+### Lesson Management
+
+| Method | Endpoint           | Description                 | Auth Required |
+| ------ | ------------------ | --------------------------- | ------------- |
+| GET    | `/api/lessons`     | Get all lessons with videos | No            |
+| GET    | `/api/lessons/:id` | Get lesson by ID            | No            |
+| POST   | `/api/lessons`     | Create or update lesson     | Yes           |
+| DELETE | `/api/lessons/:id` | Delete lesson               | Yes           |
+
 ## Webhook Events Handled
 
 - `checkout.session.completed`: Process completed purchase
@@ -126,6 +135,17 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
     type: 'ebook',
     download_url: string  // Optional
   }
+}
+```
+
+### Lesson
+
+```js
+{
+  id: string,             // Unique identifier
+  videoId: string,        // Optional, Bunny.net video ID
+  videoUrl: string,       // Generated from videoId
+  // ... other lesson fields
 }
 ```
 
@@ -170,12 +190,27 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
 ### Services
 
 6. **src/services/productService.js**
+
    - Public functions:
      - `initializeProducts()`: Fetches and initializes products from Stripe
 
+7. **src/services/lessonService.js**
+
+   - Public functions:
+     - `initializeLessons()`: Initializes lessons store (mock data in dev only)
+     - `getAllLessons()`: Gets all lessons with video URLs
+     - `getLessonById()`: Gets a specific lesson by ID
+     - `upsertLesson()`: Creates or updates a lesson
+     - `deleteLesson()`: Deletes a lesson
+
+8. **src/services/videoService.js**
+   - Public functions:
+     - `listVideos()`: Lists all videos from Bunny.net
+     - `getVideoStreamUrl()`: Generates streaming URL for a video
+
 ### Route Files
 
-7. **src/routes/api.js**
+9. **src/routes/api.js**
 
    - Public functions:
      - `GET /api/ebooks`: Fetches all e-books with prices
@@ -185,39 +220,39 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
      - `GET /api/checkout/sessions/:sessionId/verify`: Verifies payment by session ID
      - `formatPrice()`: Helper function to format prices
 
-8. **src/routes/subscription.js**
+10. **src/routes/subscription.js**
 
-   - Public functions:
-     - `POST /api/subscription/create-subscription`: Creates subscription
-     - `GET /api/subscription/subscription-status`: Checks subscription status
-     - `POST /api/subscription/create-portal-session`: Creates customer portal session
-     - `POST /api/subscription/create-checkout-session`: Creates checkout session
-     - `POST /api/subscription/force-check-subscription`: Forces update of subscription status
+    - Public functions:
+      - `POST /api/subscription/create-subscription`: Creates subscription
+      - `GET /api/subscription/subscription-status`: Checks subscription status
+      - `POST /api/subscription/create-portal-session`: Creates customer portal session
+      - `POST /api/subscription/create-checkout-session`: Creates checkout session
+      - `POST /api/subscription/force-check-subscription`: Forces update of subscription status
 
-9. **src/routes/products.js**
+11. **src/routes/products.js**
 
-   - Handles product-related operations in Stripe
-   - Manages e-book products in the system
+    - Handles product-related operations in Stripe
+    - Manages e-book products in the system
 
-10. **src/routes/auth.js**
+12. **src/routes/auth.js**
 
     - Public functions:
       - `POST /api/register`: Registers new user
       - `POST /api/login`: Authenticates user and issues JWT token
 
-11. **src/routes/userRoutes.js**
+13. **src/routes/userRoutes.js**
 
     - Public functions:
       - `GET /api/users/:email`: Gets user details
       - `POST /api/users/update-subscription`: Updates user subscription status
 
-12. **src/routes/webhookRoutes.js**
+14. **src/routes/webhookRoutes.js**
     - Public functions:
       - `POST /webhook`: Processes Stripe webhook events
 
 ### Middleware
 
-13. **src/middleware/auth.js**
+15. **src/middleware/auth.js**
     - Public functions:
       - `authenticateToken()`: Middleware to validate JWT tokens and authenticate users
 

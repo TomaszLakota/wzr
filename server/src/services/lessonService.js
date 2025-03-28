@@ -1,19 +1,35 @@
 import { lessons as mockLessons } from '../mocks/mock-lessons.js';
+import { listVideos, getVideoStreamUrl } from './videoService.js';
+
+const addVideoUrl = (lesson) => ({
+  ...lesson,
+  videoUrl: lesson.videoId ? getVideoStreamUrl(lesson.videoId) : null,
+});
 
 // Initialize lessons in the store
 export const initializeLessons = async () => {
   try {
     const { lessons } = global.stores;
 
+    // Get videos from Bunny.net
+    let videos = [];
+    try {
+      videos = await listVideos();
+      console.log(`Found ${videos.length} videos in Bunny.net`);
+    } catch (error) {
+      console.error('Error fetching videos from Bunny.net:', error);
+    }
+
     // In development, use mock data
     if (process.env.NODE_ENV === 'development') {
       console.log('Initializing mock lessons in development mode');
+      const lessonsWithVideos = mockLessons.map(addVideoUrl);
 
-      for (const lesson of mockLessons) {
+      for (const lesson of lessonsWithVideos) {
         await lessons.set(lesson.id.toString(), lesson);
       }
 
-      console.log(`Initialized ${mockLessons.length} mock lessons`);
+      console.log(`Initialized ${lessonsWithVideos.length} mock lessons`);
       return { success: true, message: 'Mock lessons initialized' };
     }
 
@@ -24,15 +40,10 @@ export const initializeLessons = async () => {
       return { success: true, message: 'Lessons already exist' };
     }
 
-    // If no lessons exist in production, initialize with mock data
-    // This is temporary until we have a proper admin interface
-    console.log('No lessons found in production, initializing with mock data');
-    for (const lesson of mockLessons) {
-      await lessons.set(lesson.id.toString(), lesson);
-    }
-
-    console.log(`Initialized ${mockLessons.length} lessons in production`);
-    return { success: true, message: 'Lessons initialized in production' };
+    // In production with no lessons, return empty state
+    // This should be handled by admin interface for adding real lessons
+    console.log('No lessons found in production');
+    return { success: true, message: 'No lessons exist in production' };
   } catch (error) {
     console.error('Error initializing lessons:', error);
     return { success: false, error: error.message };
@@ -43,7 +54,8 @@ export const initializeLessons = async () => {
 export const getAllLessons = async () => {
   try {
     const { lessons } = global.stores;
-    return await lessons.getAll();
+    const allLessons = await lessons.getAll();
+    return allLessons.map(addVideoUrl);
   } catch (error) {
     console.error('Error fetching lessons:', error);
     throw error;
@@ -54,7 +66,8 @@ export const getAllLessons = async () => {
 export const getLessonById = async (id) => {
   try {
     const { lessons } = global.stores;
-    return await lessons.get(id.toString());
+    const lesson = await lessons.get(id.toString());
+    return lesson ? addVideoUrl(lesson) : null;
   } catch (error) {
     console.error(`Error fetching lesson ${id}:`, error);
     throw error;
@@ -66,7 +79,7 @@ export const upsertLesson = async (lesson) => {
   try {
     const { lessons } = global.stores;
     await lessons.set(lesson.id.toString(), lesson);
-    return lesson;
+    return addVideoUrl(lesson);
   } catch (error) {
     console.error('Error upserting lesson:', error);
     throw error;

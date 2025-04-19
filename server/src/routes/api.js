@@ -1,7 +1,7 @@
 import express from 'express';
 import stripe from 'stripe';
 import { authenticateToken } from '../middleware/auth.js';
-import { getAllLessons } from '../services/lessonService.js';
+import { getAllLessons, getLessonById } from '../services/lessonService.js';
 
 const router = express.Router();
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
@@ -313,14 +313,37 @@ const formatPrice = (amount, currency) => {
   }).format(amount / 100);
 };
 
-// Get all lessons
-router.get('/lessons', authenticateToken, async (req, res) => {
+/**
+ * Get all lessons
+ */
+router.get('/lekcje', async (req, res) => {
   try {
     const lessons = await getAllLessons();
     res.json(lessons);
   } catch (error) {
-    console.error('Error fetching lessons:', error);
-    res.status(500).json({ error: 'Błąd serwera podczas pobierania lekcji' });
+    console.error('Error fetching lessons:', error.message);
+    res.status(500).json({ error: 'Nie udało się pobrać listy lekcji' });
+  }
+});
+
+/**
+ * Get a single lesson by ID
+ */
+router.get('/lekcje/:id', async (req, res) => {
+  try {
+    const lessonId = parseInt(req.params.id, 10);
+    if (isNaN(lessonId)) {
+      return res.status(400).json({ error: 'Nieprawidłowe ID lekcji' });
+    }
+    const lesson = await getLessonById(lessonId);
+    if (lesson) {
+      res.json(lesson);
+    } else {
+      res.status(404).json({ error: 'Nie znaleziono lekcji' });
+    }
+  } catch (error) {
+    console.error('Error fetching lesson:', error.message);
+    res.status(500).json({ error: 'Nie udało się pobrać lekcji' });
   }
 });
 

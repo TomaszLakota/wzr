@@ -12,6 +12,9 @@ const Lesson = ({ lesson }) => {
     exercises = []
   } = lesson;
 
+  const separator = videoUrl.includes('?') ? '&' : '?';
+  const finalVideoUrl = `${videoUrl}${separator}preload=false`;
+
   return (
     <div className="lesson">
       <h1 className="lesson__title">{title}</h1>
@@ -20,7 +23,7 @@ const Lesson = ({ lesson }) => {
         {/* Bunny.net video player */}
         <iframe 
           className="lesson__video"
-          src={videoUrl}
+          src={finalVideoUrl}
           loading="lazy"
           allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
           allowFullScreen={true}

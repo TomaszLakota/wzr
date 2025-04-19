@@ -1,10 +1,12 @@
+@use '../index.scss' as *;
+
 .register-container {
   max-width: 400px;
   margin: 2rem auto;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: var(--color-background);
+  box-shadow: $shadow-sm;
+  background-color: $background-color;
 }
 
 h1 {
@@ -25,25 +27,25 @@ h1 {
 
 .form-group label {
   font-weight: 500;
-  color: var(--color-text);
+  color: $text-color;
 }
 
 .form-group input {
   padding: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid $border-color;
   border-radius: 4px;
   font-size: 1rem;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: $primary-color;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .submit-button {
-  background-color: var(--color-primary);
-  color: var(--color-background);
+  background-color: $primary-color;
+  color: $background-color;
   padding: 0.75rem;
   border: none;
   border-radius: 4px;
@@ -53,14 +55,14 @@ h1 {
 }
 
 .submit-button:hover {
-  background-color: var(--color-primary-dark);
+  background-color: $primary-color-dark;
 }
 
 .error-message {
-  background-color: var(--color-error-background);
-  color: var(--color-error);
+  background-color: $error-background;
+  color: $error-color;
   padding: 0.75rem;
   border-radius: 4px;
   margin-bottom: 1rem;
-  border: 1px solid var(--color-error);
+  border: 1px solid $error-color;
 }

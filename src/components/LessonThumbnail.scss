@@ -1,4 +1,4 @@
-@import '../../src/index.scss';
+@use '../../src/index.scss' as *;
 
 .lesson-thumbnail {
   background: white;

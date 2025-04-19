@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiClient from '../services/apiClient';
+import apiClient from '../../services/apiClient';
 import '../styles/adminPanel.scss';
 
 // Helper function to format subscription status in Polish
 const formatStatus = (status, cancelAt) => {
   const statusMap = {
-    'active': cancelAt ? 'Aktywna do' : 'Aktywna',
-    'canceled': 'Anulowana',
-    'incomplete': 'Niekompletna',
-    'incomplete_expired': 'Wygasła',
-    'past_due': 'Zaległa',
-    'trialing': 'Okres próbny',
-    'unpaid': 'Nieopłacona',
-    'error': 'Błąd',
-    'unknown': 'Nieznany'
+    active: cancelAt ? 'Aktywna do' : 'Aktywna',
+    canceled: 'Anulowana',
+    incomplete: 'Niekompletna',
+    incomplete_expired: 'Wygasła',
+    past_due: 'Zaległa',
+    trialing: 'Okres próbny',
+    unpaid: 'Nieopłacona',
+    error: 'Błąd',
+    unknown: 'Nieznany',
   };
   return statusMap[status] || status;
 };
@@ -28,21 +28,23 @@ function AdminPanel() {
     page: 1,
     limit: 10,
     total: 0,
-    totalPages: 0
+    totalPages: 0,
   });
   const navigate = useNavigate();
 
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
-      const data = await apiClient.get(`/api/admin/users/subscriptions?page=${page}&limit=${pagination.limit}`);
-      
+      const data = await apiClient.get(
+        `/api/admin/users/subscriptions?page=${page}&limit=${pagination.limit}`
+      );
+
       setUsers(data.users);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
         page: data.pagination.page,
         total: data.pagination.total,
-        totalPages: data.pagination.totalPages
+        totalPages: data.pagination.totalPages,
       }));
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -56,7 +58,7 @@ function AdminPanel() {
     try {
       setManagingUser(email);
       const data = await apiClient.post(`/api/admin/users/${email}/portal`);
-      
+
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -104,12 +106,14 @@ function AdminPanel() {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {users.map((user) => (
               <tr key={user.email}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>{user.subscriptionPlan}</td>
-                <td className={`status-${user.subscriptionStatus}${user.cancelAt ? ' status-canceling' : ''}`}>
+                <td
+                  className={`status-${user.subscriptionStatus}${user.cancelAt ? ' status-canceling' : ''}`}
+                >
                   {formatStatus(user.subscriptionStatus, user.cancelAt)}
                   {user.cancelAt && (
                     <span className="cancel-date">
@@ -118,7 +122,7 @@ function AdminPanel() {
                   )}
                 </td>
                 <td>
-                  {user.subscriptionStartDate 
+                  {user.subscriptionStartDate
                     ? new Date(user.subscriptionStartDate).toLocaleDateString('pl-PL')
                     : '-'}
                 </td>
@@ -138,7 +142,7 @@ function AdminPanel() {
 
         {pagination.totalPages >= 1 && (
           <div className="pagination">
-            <button 
+            <button
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page === 1 || loading}
             >
@@ -147,7 +151,7 @@ function AdminPanel() {
             <span className="page-info">
               Strona {pagination.page} z {pagination.totalPages}
             </span>
-            <button 
+            <button
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page === pagination.totalPages || loading}
             >
@@ -160,4 +164,4 @@ function AdminPanel() {
   );
 }
 
-export default AdminPanel; 
+export default AdminPanel;

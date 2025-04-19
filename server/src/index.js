@@ -8,6 +8,7 @@ import apiRoutes from './routes/api.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/userRoutes.js';
 import webhookRoutes from './routes/webhookRoutes.js';
+import articlesRouter from './routes/articles.routes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { initializeProducts } from './services/productService.js';
@@ -69,6 +70,7 @@ try {
   app.use('/api/products', productRoutes);
   app.use('/api', authRoutes);
   app.use('/api', userRoutes);
+  app.use('/api/articles', articlesRouter);
 
   // Initialize products and lessons when the server starts
   Promise.all([initializeProducts(), initializeLessons()])

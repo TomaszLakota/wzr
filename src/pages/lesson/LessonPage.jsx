@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Lesson from '../../components/Lesson/Lesson';
 import './LessonPage.scss';
+import Lesson from '../../components/Lesson/Lesson';
 
 const LessonPage = () => {
   const { id } = useParams();

@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
-import Culture from './pages/Culture';
 import LanguageGuide from './pages/LanguageGuide';
 import LessonsPage from './pages/LessonsPage';
 import LessonPage from './pages/LessonPage/LessonPage';
@@ -13,6 +12,8 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import Library from './pages/Library';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
+import ArticleDetail from './components/article-detail/ArticleDetail';
+import Blog from './pages/Blog';
 import React from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -29,8 +30,8 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: '/kultura',
-        element: <Culture />,
+        path: '/blog',
+        element: <Blog />,
       },
       {
         path: '/poradnik',
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
       {
         path: '/admin',
         element: <AdminPanel />,
+      },
+      {
+        path: '/blog/:slug',
+        element: <ArticleDetail />,
       },
     ],
   },

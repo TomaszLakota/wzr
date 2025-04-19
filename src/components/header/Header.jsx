@@ -52,7 +52,7 @@ function Header() {
             <Link to="/poradnik">Poradnik językowy</Link>
           </li>
           <li>
-            <Link to="/kultura">Kultura i ciekawostki</Link>
+            <Link to="/blog">Blog</Link>
           </li>
           <li>
             <Link to="/ebooki">E-booki</Link>

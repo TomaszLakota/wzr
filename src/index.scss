@@ -10,6 +10,11 @@ $error-color: #dc3545;
 $error-background: #fff3f3;
 $shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
 
+// Additional variables for pages
+$text-primary: $text-color;
+$text-secondary: $text-light;
+$accent-color: #ffc107;
+
 * {
   box-sizing: border-box;
 }

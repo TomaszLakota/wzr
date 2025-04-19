@@ -95,6 +95,48 @@ The backend is a Node.js Express server that provides API endpoints for e-book s
 | POST   | `/api/lessons`     | Create or update lesson     | Yes           |
 | DELETE | `/api/lessons/:id` | Delete lesson               | Yes           |
 
+## `/api/articles`
+
+### `GET /`
+
+- **Description:** Retrieves a list of article previews.
+- **Response Body:** An array of article objects, each containing:
+  - `slug` (string): The unique identifier for the article URL.
+  - `title` (string): The title of the article.
+- **Example Response:**
+  ```json
+  [
+    { "slug": "pierwszy-artykul", "title": "Pierwszy Artykuł" },
+    { "slug": "drugi-wpis", "title": "Drugi Wpis Blogowy" }
+  ]
+  ```
+
+### `GET /:slug`
+
+- **Description:** Retrieves the full details of a specific article by its slug.
+- **URL Parameters:**
+  - `slug` (string): The unique identifier of the article.
+- **Response Body:** A single article object containing:
+  - `slug` (string)
+  - `title` (string)
+  - `content` (string): The full content of the article.
+- **Error Responses:**
+  - `404 Not Found`: If no article with the specified slug exists.
+- **Example Response (Success):**
+  ```json
+  {
+    "slug": "pierwszy-artykul",
+    "title": "Pierwszy Artykuł",
+    "content": "To jest treść pierwszego artykułu..."
+  }
+  ```
+- **Example Response (Error):**
+  ```json
+  {
+    "message": "Artykuł nie znaleziony"
+  }
+  ```
+
 ## Webhook Events Handled
 
 - `checkout.session.completed`: Process completed purchase

@@ -1,0 +1,18 @@
+.article-preview {
+  border-bottom: 1px solid #eee; // Example styling
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.5rem 0;
+  }
+
+  a {
+    text-decoration: none;
+    color: #333; // Example color
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

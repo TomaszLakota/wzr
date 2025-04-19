@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import LessonThumbnail from '../components/LessonThumbnail';
+import LessonThumbnail from '../components/lesson-thumbnail/LessonThumbnail';
 import '../styles/subscription.scss';
 import './LessonsPage.scss';
 import apiClient from '../services/apiClient';
@@ -80,7 +80,7 @@ const LessonsPage = () => {
       setLessonsError(null);
       
       try {
-        const data = await apiClient.get('/api/lessons');
+        const data = await apiClient.get('/api/lekcje');
         setLessons(data);
       } catch (error) {
         console.error('Error fetching lessons:', error);

@@ -41,6 +41,7 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 
 - Page components for different application routes
 - Each page in its own directory with dedicated SCSS file
+- `Home.jsx` & `Home.scss` - Landing page with sections for features, e-books, and call-to-action
 
 **src/services/**
 
@@ -131,3 +132,59 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 - Secure payment handling through Stripe
 - Input validation and sanitization
 - HTTPS required for production
+
+## Landing Page
+
+The landing page (`Home.jsx`) is designed to showcase all major features of the platform:
+
+1. **Hero Section**
+
+   - Main headline and introduction to the platform
+   - Call-to-action buttons for lessons and e-books
+
+2. **Features Grid**
+
+   - Cards highlighting language lessons, cultural content, language guides, and yoga trips
+   - Each card links to the respective section of the website
+
+3. **E-books Section**
+
+   - Showcases digital publications for language learning
+   - Links to the e-book library
+
+4. **CTA Section**
+   - Final call to action encouraging registration or browsing lessons
+   - Strong visual design with primary brand colors
+
+All sections are responsive and use consistent styling throughout.
+
+## Components
+
+### `ArticlePreview` (`src/components/article-preview`)
+
+- **Purpose:** Displays a preview of a blog article, typically just the title, linking to the full article detail page.
+- **Props:**
+  - `article`: An object containing at least the `title` and `slug` of the article.
+- **Usage:** Used in `Blog.jsx` to list available articles.
+
+### `ArticleDetail` (`src/components/article-detail`)
+
+- **Purpose:** Displays the full content of a single blog article.
+- **Data Fetching:** Fetches the article data based on the `slug` parameter from the URL using `useParams()` and the `/api/articles/:slug` endpoint.
+- **Usage:** Rendered via a route like `/blog/:slug`.
+
+## Pages
+
+### `Blog` (`src/pages/Blog.jsx`)
+
+- **Purpose:** Displays a list of article previews.
+- **Data Fetching:** Fetches a list of article previews (title and slug) from the `/api/articles` endpoint.
+- **Components Used:** `ArticlePreview`.
+
+### `src/pages/ArticleDetail.jsx`
+
+Displays a single article fetched from the backend based on the URL slug.
+
+- **Route:** `/artykuly/:slug`
+- **Fetches Data:** Yes, from `/api/artykuly/:slug`.
+- **State:** Manages loading, error, and article data.

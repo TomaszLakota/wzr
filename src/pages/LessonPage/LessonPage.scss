@@ -1,0 +1,19 @@
+@use '../../index.scss' as *;
+
+.lesson-page {
+  min-height: 100vh;
+  background-color: $background-color;
+
+  &__loading,
+  &__error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    font-size: 1.2rem;
+  }
+
+  &__error {
+    color: $error-color;
+  }
+}

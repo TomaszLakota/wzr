@@ -1,0 +1,107 @@
+@use 'sass:color';
+@use '../../index.scss' as *;
+
+.lesson {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  &__title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: $primary-color;
+  }
+
+  &__video-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; // 16:9 aspect ratio
+    margin-bottom: 2rem;
+  }
+
+  &__video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+  }
+
+  &__meta {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: $background-light;
+    border-radius: 8px;
+  }
+
+  &__meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__meta-label {
+    font-weight: 600;
+    color: $text-light;
+  }
+
+  &__meta-value {
+    color: $text-color;
+  }
+
+  &__description {
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: $primary-color;
+    }
+
+    p {
+      line-height: 1.6;
+      color: $text-color;
+    }
+  }
+
+  &__exercises {
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: $primary-color;
+    }
+  }
+
+  &__exercises-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  &__exercise-item {
+    margin-bottom: 0.5rem;
+  }
+
+  &__exercise-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: $background-light;
+    border-radius: 6px;
+    color: $primary-color;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: color.adjust($background-light, $lightness: -5%);
+    }
+
+    &::before {
+      content: '⬇';
+      margin-right: 0.5rem;
+    }
+  }
+}

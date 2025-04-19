@@ -17,6 +17,7 @@ alwaysApply: true
 - you can use sequencial thinking mcp for planning tasks that will take multiple steps to complete
 - Our server files are in the /server folder
 - When running terminal commands make sure you're in the right folder and use commands that work with windows 10!!! (&& wont work)
+- When you're done with the task, update the docs to reflect changes you've made!
 
 
 

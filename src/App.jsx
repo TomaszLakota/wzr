@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Culture from './pages/Culture';
 import LanguageGuide from './pages/LanguageGuide';
 import LessonsPage from './pages/LessonsPage';
+import LessonPage from './pages/LessonPage/LessonPage';
 import YogaTrips from './pages/YogaTrips';
 import Ebooks from './pages/Ebooks';
 import Login from './pages/Login';
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: '/lekcje',
         element: <LessonsPage />,
+      },
+      {
+        path: '/lekcje/:id',
+        element: <LessonPage />,
       },
       {
         path: '/wyjazdy',

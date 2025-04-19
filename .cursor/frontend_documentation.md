@@ -16,7 +16,7 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 
 ### Root Configuration Files
 
-- `vite.config.js` - Vite configuration
+- `vite.config.ts` - Vite configuration
 - `package.json` - Project dependencies and scripts
 - `index.html` - Main HTML entry point
 - `.env` - Environment variables (not committed to repository)
@@ -27,8 +27,8 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 
 **src/**
 
-- `main.jsx` - React application entry point
-- `App.jsx` - Main application component with routing
+- `main.tsx` - React application entry point
+- `App.tsx` - Main application component with routing
 - `App.scss` - Main component styles
 - `index.scss` - Global styles and color definitions
 
@@ -41,7 +41,7 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 
 - Page components for different application routes
 - Each page in its own directory with dedicated SCSS file
-- `Home.jsx` & `Home.scss` - Landing page with sections for features, e-books, and call-to-action
+- `Home.tsx` & `Home.scss` - Landing page with sections for features, e-books, and call-to-action
 
 **src/services/**
 
@@ -135,7 +135,7 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 
 ## Landing Page
 
-The landing page (`Home.jsx`) is designed to showcase all major features of the platform:
+The landing page (`Home.tsx`) is designed to showcase all major features of the platform:
 
 1. **Hero Section**
 
@@ -165,7 +165,7 @@ All sections are responsive and use consistent styling throughout.
 - **Purpose:** Displays a preview of a blog article, typically just the title, linking to the full article detail page.
 - **Props:**
   - `article`: An object containing at least the `title` and `slug` of the article.
-- **Usage:** Used in `Blog.jsx` to list available articles.
+- **Usage:** Used in `Blog.tsx` to list available articles.
 
 ### `ArticleDetail` (`src/components/article-detail`)
 
@@ -175,13 +175,13 @@ All sections are responsive and use consistent styling throughout.
 
 ## Pages
 
-### `Blog` (`src/pages/Blog.jsx`)
+### `Blog` (`src/pages/Blog.tsx`)
 
 - **Purpose:** Displays a list of article previews.
 - **Data Fetching:** Fetches a list of article previews (title and slug) from the `/api/articles` endpoint.
 - **Components Used:** `ArticlePreview`.
 
-### `src/pages/ArticleDetail.jsx`
+### `src/pages/ArticleDetail.tsx`
 
 Displays a single article fetched from the backend based on the URL slug.
 

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../../styles/profile.scss';
 import apiClient from '../../services/apiClient';
-import { User, fetchUserProfile } from '../../services/userService';
+import { fetchUserProfile } from '../../services/userService';
+import { User } from '../../types/user.types';
 
 function Profile() {
   const [user, setUser] = useState<User | null>(null);

@@ -1,6 +1,6 @@
 import express from 'express';
 import stripe from 'stripe';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
@@ -298,14 +298,7 @@ router.get('/user/purchased', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * !!! ADMIN Endpoint: Sync Stripe Products & Prices to Supabase !!!
- * Fetches active 'ebook' products and their active prices from Stripe
- * and upserts them into the Supabase 'products' and 'prices' tables.
- * Requires 'image_url' column exists in the 'products' table.
- * WARNING: Add authentication/authorization to protect this endpoint.
- */
-router.post('/admin/sync-stripe', async (req, res) => {
+router.post('/admin/sync-stripe', authenticateToken, isAdmin, async (req, res) => {
   const supabase = req.app.locals.supabase;
   console.log('[POST /admin/sync-stripe] Starting sync process...');
 

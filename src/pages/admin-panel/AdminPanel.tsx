@@ -2,39 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/adminPanel.scss';
 import apiClient from '../../services/apiClient';
-
-// Define interfaces for state and data structures
-interface User {
-  email: string;
-  name: string | null; // Assuming name can be null based on potential database structure
-  subscriptionPlan: string | null;
-  subscriptionStatus: string;
-  subscriptionStartDate: string | null; // Assuming date comes as string
-  cancelAt: string | null; // Assuming date comes as string or null
-}
-
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
-// Helper function to format subscription status in Polish
-const formatStatus = (status: string, cancelAt: string | null): string => {
-  const statusMap = {
-    active: cancelAt ? 'Aktywna do' : 'Aktywna',
-    canceled: 'Anulowana',
-    incomplete: 'Niekompletna',
-    incomplete_expired: 'Wygasła',
-    past_due: 'Zaległa',
-    trialing: 'Okres próbny',
-    unpaid: 'Nieopłacona',
-    error: 'Błąd',
-    unknown: 'Nieznany',
-  };
-  return (statusMap as any)[status] || status; // Use 'as any' for dynamic access, or define statusMap type more strictly if needed
-};
+import { fetchAdminUsers, Pagination } from '../../services/userService';
+import { User } from '../../types/user.types';
 
 function AdminPanel() {
   const [users, setUsers] = useState<User[]>([]);
@@ -52,17 +21,12 @@ function AdminPanel() {
   const fetchUsers = async (page: number = 1) => {
     try {
       setLoading(true);
-      const data = await apiClient.get<{ users: User[]; pagination: Pagination }>(
-        `/api/admin/users/subscriptions?page=${page}&limit=${pagination.limit}`
-      );
+      // Use the userService function to fetch users
+      const data = await fetchAdminUsers(page, pagination.limit);
 
+      // Set state with data returned from the service
       setUsers(data.users);
-      setPagination((prev) => ({
-        ...prev,
-        page: data.pagination.page,
-        total: data.pagination.total,
-        totalPages: data.pagination.totalPages,
-      }));
+      setPagination(data.pagination);
     } catch (err: unknown) {
       console.error('Error fetching users:', err);
       setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');
@@ -123,6 +87,7 @@ function AdminPanel() {
             </tr>
           </thead>
           <tbody>
+            {/* Ensure the user type here matches FrontendUser */}
             {users.map((user: User) => (
               <tr key={user.email}>
                 <td>{user.name ?? '-'}</td>
@@ -131,7 +96,7 @@ function AdminPanel() {
                 <td
                   className={`status-${user.subscriptionStatus}${user.cancelAt ? ' status-canceling' : ''}`}
                 >
-                  {formatStatus(user.subscriptionStatus, user.cancelAt)}
+                  {user.status}
                   {user.cancelAt && (
                     <span className="cancel-date">
                       {new Date(user.cancelAt).toLocaleDateString('pl-PL')}

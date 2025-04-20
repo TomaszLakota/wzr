@@ -9,23 +9,18 @@ const JWT_SECRET = process.env.JWT_SECRET;
  * Middleware to authenticate JWT tokens
  */
 const authenticateToken = (req, res, next) => {
-  // Get the authorization header
   const authHeader = req.headers['authorization'];
-
-  // Check if header exists and has the Bearer format
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ error: 'Dostęp wymaga uwierzytelnienia' });
   }
 
-  // Verify the token
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({ error: 'Token jest nieprawidłowy lub wygasł' });
     }
 
-    // Add the user info to the request
     req.user = user;
     next();
   });
@@ -35,11 +30,27 @@ const authenticateToken = (req, res, next) => {
  * Middleware to check if user is admin
  */
 const isAdmin = async (req, res, next) => {
-  try {
-    const { users } = global.stores;
-    const user = await users.get(req.user.email);
+  // Ensure user is authenticated first
+  if (!req.user?.userId) {
+    return res.status(401).json({ error: 'Brak uwierzytelnienia lub ID użytkownika' });
+  }
 
-    if (!user || !user.isAdmin) {
+  try {
+    const supabase = req.app.locals.supabase;
+    const userId = req.user.userId;
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('is_admin')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user for admin check:', error);
+      return res.status(500).json({ error: 'Błąd podczas sprawdzania uprawnień' });
+    }
+
+    if (!user || !user.is_admin) {
       return res.status(403).json({ error: 'Brak uprawnień administratora' });
     }
 

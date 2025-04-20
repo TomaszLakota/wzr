@@ -3,20 +3,10 @@ import EbookCard from '../../components/ebook-card/EbookCard';
 import './Ebooks.scss';
 import { getEbooks } from '../../services/ebookService';
 import { createCheckoutSession } from '../../services/stripeService';
-
-interface Price {
-  id: string;
-  // Add other price properties if needed
-}
-
-interface Product {
-  id: string;
-  price?: Price;
-  // Add other product properties if needed
-}
+import { Ebook } from '../../types/ebook.types';
 
 function Ebooks() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
@@ -50,7 +40,7 @@ function Ebooks() {
       }
 
       // Create checkout session with the price ID
-      const response = await createCheckoutSession(product.price.id);
+      const response = await createCheckoutSession(product.priceId);
 
       if (response.success && response.sessionUrl) {
         setMessage(response.message);
@@ -84,7 +74,7 @@ function Ebooks() {
         <div className="ebooks-grid">
           {products.map((product) => (
             <div className="ebooks-grid__item" key={product.id}>
-              <EbookCard product={product} onPurchase={handlePurchase} />
+              <EbookCard ebook={product} onPurchase={handlePurchase} />
             </div>
           ))}
         </div>

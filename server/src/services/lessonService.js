@@ -1,98 +1,99 @@
-import { lessons as mockLessons } from '../mocks/mock-lessons.js';
-import { listVideos, getVideoStreamUrl } from './videoService.js';
+import { getVideoStreamUrl } from './videoService.js';
 
+// Helper to generate video stream URL based on lesson data from DB
+// Assumes DB schema has videoId column now
 const addVideoUrl = (lesson) => ({
   ...lesson,
+  // Use videoId now; assuming getVideoStreamUrl takes the video ID.
+  // If videoId itself is the stream URL or needs different handling, adjust getVideoStreamUrl or this logic.
   videoUrl: lesson.videoId ? getVideoStreamUrl(lesson.videoId) : null,
 });
 
-// Initialize lessons in the store
-export const initializeLessons = async () => {
+// Get all lessons from Supabase
+export const getAllLessons = async (supabase) => {
   try {
-    const { lessons } = global.stores;
+    const { data: allLessons, error } = await supabase.from('lessons').select('*');
 
-    // Get videos from Bunny.net
-    let videos = [];
-    try {
-      videos = await listVideos();
-      console.log(`Found ${videos.length} videos in Bunny.net`);
-    } catch (error) {
-      console.error('Error fetching videos from Bunny.net:', error);
+    if (error) {
+      console.error('Error fetching lessons:', error);
+      throw error;
     }
 
-    // In development, use mock data
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Initializing mock lessons in development mode');
-      const lessonsWithVideos = mockLessons.map(addVideoUrl);
-
-      for (const lesson of lessonsWithVideos) {
-        await lessons.set(lesson.id.toString(), lesson);
-      }
-
-      console.log(`Initialized ${lessonsWithVideos.length} mock lessons`);
-      return { success: true, message: 'Mock lessons initialized' };
-    }
-
-    // In production, check if lessons exist
-    const existingLessons = await lessons.getAll();
-    if (existingLessons.length > 0) {
-      console.log(`Found ${existingLessons.length} existing lessons`);
-      return { success: true, message: 'Lessons already exist' };
-    }
-
-    // In production with no lessons, return empty state
-    // This should be handled by admin interface for adding real lessons
-    console.log('No lessons found in production');
-    return { success: true, message: 'No lessons exist in production' };
-  } catch (error) {
-    console.error('Error initializing lessons:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Get all lessons
-export const getAllLessons = async () => {
-  try {
-    const { lessons } = global.stores;
-    const allLessons = await lessons.getAll();
     return allLessons.map(addVideoUrl);
   } catch (error) {
-    console.error('Error fetching lessons:', error);
-    throw error;
+    console.error('Error in getAllLessons service:', error);
+    throw new Error('Failed to fetch lessons');
   }
 };
 
-// Get lesson by ID
-export const getLessonById = async (id) => {
+// Get lesson by ID from Supabase, including downloads
+export const getLessonById = async (supabase, id) => {
+  console.log(`[GET_LESSON_BY_ID] Fetching lesson ${id}...`);
   try {
-    const { lessons } = global.stores;
-    const lesson = await lessons.get(id.toString());
+    const { data: lesson, error } = await supabase
+      .from('lessons')
+      .select('*, downloads(*)') // Fetch lesson and related downloads
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Not found
+        console.log(`[GET_LESSON_BY_ID] Lesson ${id} not found.`);
+        return null;
+      }
+      console.error(`Error fetching lesson ${id}:`, error);
+      throw error;
+    }
+
+    console.log(`[GET_LESSON_BY_ID] Found lesson ${id}.`);
     return lesson ? addVideoUrl(lesson) : null;
   } catch (error) {
-    console.error(`Error fetching lesson ${id}:`, error);
-    throw error;
+    console.error(`Error in getLessonById service for ID ${id}:`, error);
+    throw new Error('Failed to fetch lesson');
   }
 };
 
-// Create or update a lesson
-export const upsertLesson = async (lesson) => {
+// Create or update a lesson in Supabase
+export const upsertLesson = async (supabase, lessonData) => {
+  console.log(`[UPSERT_LESSON] Upserting lesson with ID: ${lessonData.id || '(new)'}...`);
+  // Ensure lessonData matches the DB schema, especially for nullable fields or defaults
+  // e.g., remove videoUrl if it's not a DB column
+  const { videoUrl, ...dbLessonData } = lessonData;
+
   try {
-    const { lessons } = global.stores;
-    await lessons.set(lesson.id.toString(), lesson);
-    return addVideoUrl(lesson);
+    const { data, error } = await supabase
+      .from('lessons')
+      .upsert(dbLessonData, { onConflict: 'id' })
+      .select()
+      .single(); // Select the upserted record
+
+    if (error) {
+      console.error('[UPSERT_LESSON] Error upserting lesson:', error);
+      throw error;
+    }
+    console.log(`[UPSERT_LESSON] Lesson ${data.id} upserted successfully.`);
+    return addVideoUrl(data); // Return the upserted lesson with video URL
   } catch (error) {
-    console.error('Error upserting lesson:', error);
-    throw error;
+    console.error('Error in upsertLesson service:', error);
+    throw new Error('Failed to save lesson');
   }
 };
 
-// Delete a lesson
-export const deleteLesson = async (id) => {
+// Delete a lesson from Supabase
+export const deleteLesson = async (supabase, id) => {
+  console.log(`[DELETE_LESSON] Deleting lesson ${id}...`);
   try {
-    const { lessons } = global.stores;
-    return await lessons.delete(id.toString());
+    const { error } = await supabase.from('lessons').delete().eq('id', id);
+
+    if (error) {
+      console.error(`Error deleting lesson ${id}:`, error);
+      throw error;
+    }
+    console.log(`[DELETE_LESSON] Lesson ${id} deleted successfully.`);
+    return { success: true }; // Indicate success
   } catch (error) {
-    console.error(`Error deleting lesson ${id}:`, error);
-    throw error;
+    console.error(`Error in deleteLesson service for ID ${id}:`, error);
+    throw new Error('Failed to delete lesson');
   }
 };

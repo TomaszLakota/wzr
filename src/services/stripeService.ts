@@ -2,32 +2,28 @@
 
 import apiClient from './apiClient';
 
-// Define expected return types for clarity
 interface CheckoutSessionResponse {
   success: boolean;
   message: string;
-  sessionUrl?: string; // Optional as it depends on successful response
-  error?: string; // Optional error message
+  sessionUrl?: string;
+  error?: string;
 }
 
 interface PaymentVerificationResponse {
   status: string;
-  amount?: number; // Assuming these might be optional depending on status
+  amount?: number;
   currency?: string;
   success: boolean;
   message: string;
 }
 
-// Define expected data structure from API for verification
 interface ApiVerificationData {
   status: string;
   amount?: number;
   currency?: string;
 }
 
-// API base URL - adjust according to your environment
-// Use `as string` to assert the type if env var might be undefined but you expect a default
-const API_BASE_URL = (import.meta.env.API_URL || 'http://localhost:3000/api') as string;
+const API_BASE_URL = import.meta.env.API_URL || 'http://localhost:3000/api';
 
 /**
  * Create checkout session for a product
@@ -55,7 +51,7 @@ export const createCheckoutSession = async (priceId: string): Promise<CheckoutSe
     Authorization: `Bearer ${token}`,
   };
 
-  const response = await fetch(`${API_BASE_URL}/checkout`, {
+  const response = await fetch(`${API_BASE_URL}/ebooks/checkout`, {
     method: 'POST',
     headers,
     body: JSON.stringify({
@@ -121,5 +117,62 @@ export const verifyPaymentStatus = async (id: string): Promise<PaymentVerificati
       data.status === 'succeeded'
         ? 'Płatność zakończona sukcesem!'
         : 'Płatność jest w trakcie przetwarzania.',
+  };
+};
+
+/**
+ * Create checkout session for a subscription
+ * @param {string} priceId - ID of the subscription price
+ * @param {string} successUrl - URL to redirect to on successful payment
+ * @param {string} cancelUrl - URL to redirect to on canceled payment
+ * @returns {Promise<CheckoutSessionResponse>} - Checkout session info
+ */
+export const createSubscriptionCheckoutSession = async (
+  priceId: string,
+  successUrl: string,
+  cancelUrl: string
+): Promise<CheckoutSessionResponse> => {
+  if (!priceId) {
+    throw new Error('ID ceny jest wymagane');
+  }
+  if (!successUrl || !cancelUrl) {
+    throw new Error('Adresy URL sukcesu i anulowania są wymagane');
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Musisz być zalogowany, aby subskrybować');
+  }
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+
+  const response = await fetch(`${API_BASE_URL}/subscription/create-checkout-session`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      priceId,
+      successUrl,
+      cancelUrl,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({})); // Try to parse error body
+    throw new Error(errorData.message || `Błąd tworzenia sesji subskrypcji: ${response.status}`);
+  }
+
+  const data: { url?: string } = await response.json();
+
+  if (!data.url) {
+    throw new Error('Nie otrzymano adresu URL sesji płatności');
+  }
+
+  return {
+    success: true,
+    message: 'Przekierowanie do płatności...',
+    sessionUrl: data.url,
   };
 };

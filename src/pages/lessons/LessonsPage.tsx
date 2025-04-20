@@ -1,21 +1,13 @@
 /// <reference types="vite/client" />
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import LessonThumbnail from '../../components/lesson-thumbnail/LessonThumbnail';
+import { Link, useNavigate } from 'react-router-dom';
+import LessonThumbnail, { Lesson } from '../../components/lesson-thumbnail/LessonThumbnail';
 import '../../styles/subscription.scss';
 import './LessonsPage.scss';
 import apiClient from '../../services/apiClient';
-
-interface UserData {
-  isSubscribed: boolean;
-  // Add other user properties if available
-}
-
-interface Lesson {
-  id: string;
-  // Add other lesson properties if needed
-}
+import { User } from '../../types/user.types';
+import { createSubscriptionCheckoutSession } from '../../services/stripeService';
 
 // Create a proper auth hook that uses the API
 const useAuth = () => {
@@ -36,7 +28,8 @@ const useAuth = () => {
       }
 
       try {
-        const user: UserData = JSON.parse(userDataString);
+        const user: User = JSON.parse(userDataString);
+        console.log('user', user);
         setIsLoggedIn(true);
         setIsSubscribed(user.isSubscribed);
       } catch (e) {
@@ -65,6 +58,7 @@ const useAuth = () => {
 
 const LessonsPage: React.FC = () => {
   const { isLoggedIn, isSubscribed, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [redirectLoading, setRedirectLoading] = useState(false);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
@@ -81,15 +75,14 @@ const LessonsPage: React.FC = () => {
       const userDataString = localStorage.getItem('user');
       if (userDataString) {
         try {
-          const user: UserData = JSON.parse(userDataString);
+          const user: User = JSON.parse(userDataString);
           user.isSubscribed = true;
           localStorage.setItem('user', JSON.stringify(user));
 
           window.dispatchEvent(new Event('authChange'));
 
           setTimeout(() => {
-            // Use React Router's navigation if available, or fallback to window.location
-            window.location.href = '/lekcje';
+            navigate('/lekcje');
           }, 3000);
         } catch (e) {
           console.error('Failed to update user data after success', e);
@@ -123,42 +116,35 @@ const LessonsPage: React.FC = () => {
 
   const handleSubscribe = async () => {
     if (!isLoggedIn) {
-      // Redirect to login page if user is not logged in
-      // Consider using React Router navigation if available
-      window.location.href = '/logowanie?redirect=lekcje';
+      navigate('/logowanie?redirect=lekcje');
       return;
     }
 
     setRedirectLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/subscription/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          priceId:
-            import.meta.env.VITE_STRIPE_SUBSCRIPTION_PRICE_ID || 'price_1R1C8u2cdengCFrj8fAJanCN',
-          successUrl: `${window.location.origin}/lekcje?success=true`,
-          cancelUrl: `${window.location.origin}/lekcje?canceled=true`,
-        }),
-      });
+      const priceId = import.meta.env.VITE_STRIPE_SUBSCRIPTION_PRICE_ID;
+      const successUrl = `${window.location.origin}/lekcje?success=true`;
+      const cancelUrl = `${window.location.origin}/lekcje?canceled=true`;
 
-      const data = await response.json();
+      const checkoutResponse = await createSubscriptionCheckoutSession(
+        priceId,
+        successUrl,
+        cancelUrl
+      );
 
-      if (response.ok && data.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
+      if (checkoutResponse.success && checkoutResponse.sessionUrl) {
+        window.location.href = checkoutResponse.sessionUrl;
       } else {
-        alert('Nie udało się utworzyć sesji płatności. Prosimy spróbować ponownie.');
+        alert(
+          checkoutResponse.message ||
+            'Nie udało się utworzyć sesji płatności. Prosimy spróbować ponownie.'
+        );
         setRedirectLoading(false);
       }
     } catch (error) {
       console.error('Błąd podczas tworzenia sesji płatności:', error);
-      alert('Wystąpił błąd. Prosimy spróbować ponownie.');
+      alert(error instanceof Error ? error.message : 'Wystąpił błąd. Prosimy spróbować ponownie.');
       setRedirectLoading(false);
     }
   };

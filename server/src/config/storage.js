@@ -1,37 +1,20 @@
-import Keyv from 'keyv';
-import KeyvRedis from '@keyv/redis';
+import { createClient } from '@supabase/supabase-js';
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+// Function to create and export the Supabase client instance for the backend
+export const createSupabaseClient = () => {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Helper function to add getAll functionality to Keyv instance
-const extendKeyvWithGetAll = (keyv) => {
-  keyv.getAll = async () => {
-    const iterator = keyv.iterator();
-    const items = [];
-    for await (const [, value] of iterator) {
-      items.push(value);
-    }
-    return items;
-  };
-  return keyv;
-};
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    console.error('Supabase URL or Service Role Key is missing. Please check your .env file.');
+    throw new Error('Supabase URL or Service Role Key not configured.');
+  }
 
-export const createStores = () => {
   try {
-    const store = isDevelopment ? undefined : new KeyvRedis(process.env.REDIS_URL);
-
-    const options = isDevelopment ? {} : { store };
-
-    const users = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'users' }));
-    const products = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'products' }));
-    const orders = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'orders' }));
-    const lessons = extendKeyvWithGetAll(new Keyv({ ...options, namespace: 'lessons' }));
-
-    users.on('error', (err) => console.error('Storage Error:', err));
-
-    return { users, products, orders, lessons };
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {});
+    return supabase;
   } catch (error) {
-    console.error('Store initialization error:', error);
+    console.error('Supabase client initialization error:', error);
     throw error;
   }
 };

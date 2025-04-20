@@ -10,14 +10,19 @@ alwaysApply: true
 ---
 # Rules!
 
-- All labels and texts in UI must be exclusively in polish!!!
+- All labels, urls and texts in UI must be exclusively in polish!!! 
+- DONT ASK ME TO DO SHIT YOU CAN DO YOURSELF!
 - avoid excesive changes
 - make minimal changes
+- DO NOT ADD COMMENTS UNLESS ITS NECESSARY. replace existing comments with comment saying 'remove me'
+- remove all dumbass comments in files you edit
 - you can use mcp for stripe interactions, but don't expect them to work in the project we're building
 - you can use sequencial thinking mcp for planning tasks that will take multiple steps to complete
 - Our server files are in the /server folder
 - When running terminal commands make sure you're in the right folder and use commands that work with windows 10!!! (&& wont work)
 - When you're done with the task, update the docs to reflect changes you've made!
+- make sure you update all the files you're told to edit, in any order
+- make sure to follow all necessary steps
 
 
 

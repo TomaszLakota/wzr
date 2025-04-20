@@ -1,14 +1,7 @@
 import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import './Header.scss';
-
-// Define a basic user structure based on usage
-interface User {
-  name?: string;
-  isAdmin?: boolean;
-  // Add other potential user properties if known
-  [key: string]: any; // Allow other properties since it comes from JSON
-}
+import { User } from '../../types/user.types';
 
 const Header: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -74,10 +67,10 @@ const Header: React.FC = () => {
             <Link to="/blog">Blog</Link>
           </li>
           <li>
-            <Link to="/ebooki">E-booki</Link>
+            <Link to="/wyjazdy">Wyjazdy z jogą</Link>
           </li>
           <li>
-            <Link to="/wyjazdy">Wyjazdy z jogą</Link>
+            <Link to="/ebooki">E-booki</Link>
           </li>
           {isLoggedIn && (
             <li>

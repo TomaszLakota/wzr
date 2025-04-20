@@ -1,337 +1,123 @@
 # Backend Documentation
 
-## Project Overview
+## Overview
 
-The backend is a Node.js Express server that provides API endpoints for e-book sales and subscription management using Stripe.
+Node.js Express server for e-book sales and Stripe subscription management.
 
-## Server Configuration
+- **Environment**: `dev` / `prod`
+- **Port**: `PORT` env var (default: 3000)
+- **Entry Point**: `src/index.js`
 
-- **Environment**: The server supports dev and prod environments.
-- **Port**: Runs on PORT from environment variables or defaults to 3000.
-- **Server File**: Main entry point is `src/index.js`.
+## Important notes
 
-## Dependencies
+Don't `cd server && some command`, it won't work, it's windows 10
 
-- express: Web framework
-- stripe: Payment processing
-- bcryptjs: Password hashing
-- jsonwebtoken: Authentication
-- @keyv/sqlite: Data storage (dev)
-- @keyv/redis: Data storage (prod)
-- cors: Cross-origin resource sharing
+## Core Technologies
 
-## Core Concepts
+- **Framework**: Express
+- **Payments**: Stripe
+- **Authentication**: JWT (jsonwebtoken)
+- **Password Hashing**: bcryptjs
+- **CORS**: cors
+- **DB**: supabase
 
-### Data Storage
+## Key Concepts
 
-- Uses Keyv for data persistence
-- Development: SQLite
-- Production: Redis
-- Store structure:
-  - `users`: User accounts and credentials
-  - `products`: Product data
-
-### Authentication
-
-- JWT-based authentication
-- Token expires in 24 hours
-- Protected routes use `authenticateToken` middleware
-- Token format: `Bearer <token>`
-
-### Payments & Subscriptions
-
-- Uses Stripe for payment processing
-- Supports one-time purchases (e-books)
-- Supports recurring subscription
+- **Data Storage**: Uses configurable storage (`src/config/storage.js`). `users` and `products` data.
+- **Authentication**: JWT-based (`Bearer <token>`). `authenticateToken` middleware (`src/middleware/auth.js`) protects routes. Token expiry: 24h.
+- **Payments**: Stripe integration (`src/config/stripeConfig.js`). Supports one-time purchases and recurring subscriptions.
 
 ## API Endpoints
 
-### User Management
+### Auth
 
-| Method | Endpoint                         | Description                | Auth Required |
-| ------ | -------------------------------- | -------------------------- | ------------- |
-| POST   | `/api/register`                  | Register new user          | No            |
-| POST   | `/api/login`                     | Login user                 | No            |
-| GET    | `/api/users/:email`              | Get user details           | Yes           |
-| POST   | `/api/users/update-subscription` | Update subscription status | Yes           |
+| Method | Endpoint        | Description       | Auth |
+| :----- | :-------------- | :---------------- | :--- |
+| POST   | `/api/register` | Register new user | No   |
+| POST   | `/api/login`    | Login user        | No   |
 
-### E-book Management
+### Users
 
-| Method | Endpoint           | Description                  | Auth Required |
-| ------ | ------------------ | ---------------------------- | ------------- |
-| GET    | `/api/ebooks`      | Get all e-books with prices  | No            |
-| GET    | `/api/user/ebooks` | Get user's purchased e-books | Yes           |
+| Method | Endpoint                         | Description                     | Auth |
+| :----- | :------------------------------- | :------------------------------ | :--- |
+| GET    | `/api/users/:email`              | Get user details by email       | Yes  |
+| POST   | `/api/users/update-subscription` | Sync subscription status (user) | Yes  |
 
-### Payment Processing
+### E-books & Payments (One-time)
 
-| Method | Endpoint                                   | Description             | Auth Required |
-| ------ | ------------------------------------------ | ----------------------- | ------------- |
-| POST   | `/api/checkout`                            | Create checkout session | No            |
-| GET    | `/api/payments/:paymentIntentId/verify`    | Verify payment          | No            |
-| GET    | `/api/checkout/sessions/:sessionId/verify` | Verify by session ID    | No            |
+| Method | Endpoint                                   | Description                    | Auth |
+| :----- | :----------------------------------------- | :----------------------------- | :--- |
+| GET    | `/api/ebooks`                              | Get all e-books with prices    | No   |
+| GET    | `/api/user/ebooks`                         | Get user's purchased e-books   | Yes  |
+| POST   | `/api/checkout`                            | Create Stripe checkout session | No   |
+| GET    | `/api/payments/:paymentIntentId/verify`    | Verify payment by Intent ID    | No   |
+| GET    | `/api/checkout/sessions/:sessionId/verify` | Verify payment by Session ID   | No   |
 
-### Subscription Management
+### Subscriptions
 
-| Method | Endpoint                                     | Description                      | Auth Required |
-| ------ | -------------------------------------------- | -------------------------------- | ------------- |
-| POST   | `/api/subscription/create-subscription`      | Create subscription              | Yes           |
-| GET    | `/api/subscription/subscription-status`      | Check subscription status        | Yes           |
-| POST   | `/api/subscription/create-portal-session`    | Create customer portal session   | Yes           |
-| POST   | `/api/subscription/create-checkout-session`  | Create checkout session          | Yes           |
-| POST   | `/api/subscription/force-check-subscription` | Force update subscription status | Yes           |
+| Method | Endpoint                                     | Description                      | Auth |
+| :----- | :------------------------------------------- | :------------------------------- | :--- |
+| POST   | `/api/subscription/create-subscription`      | Create subscription              | Yes  |
+| GET    | `/api/subscription/subscription-status`      | Check user's subscription status | Yes  |
+| POST   | `/api/subscription/create-portal-session`    | Create Stripe customer portal    | Yes  |
+| POST   | `/api/subscription/create-checkout-session`  | Create Stripe checkout (sub)     | Yes  |
+| POST   | `/api/subscription/force-check-subscription` | Force sync subscription status   | Yes  |
+
+### Lessons (requires subscription)
+
+| Method | Endpoint           | Description                 | Auth |
+| :----- | :----------------- | :-------------------------- | :--- |
+| GET    | `/api/lekcje`      | Get all lessons with videos | No   |
+| GET    | `/api/lekcje/:id`  | Get lesson by ID            | No   |
+| POST   | `/api/lessons`     | Create or update lesson     | Yes  |
+| DELETE | `/api/lessons/:id` | Delete lesson               | Yes  |
 
 ### Webhooks
 
-| Method | Endpoint   | Description            |
-| ------ | ---------- | ---------------------- |
-| POST   | `/webhook` | Stripe webhook handler |
+| Method | Endpoint   | Description                    |
+| :----- | :--------- | :----------------------------- |
+| POST   | `/webhook` | Handles Stripe webhook events. |
 
-### Lesson Management
+## Webhook Events Handled (`src/controllers/webhookController.js`)
 
-| Method | Endpoint           | Description                 | Auth Required |
-| ------ | ------------------ | --------------------------- | ------------- |
-| GET    | `/api/lessons`     | Get all lessons with videos | No            |
-| GET    | `/api/lessons/:id` | Get lesson by ID            | No            |
-| POST   | `/api/lessons`     | Create or update lesson     | Yes           |
-| DELETE | `/api/lessons/:id` | Delete lesson               | Yes           |
+- `checkout.session.completed`: Process purchase, grant access.
+- `invoice.payment_succeeded`: Update subscription status to active.
+- `customer.subscription.deleted`: Update subscription status to inactive.
 
-## `/api/articles`
+## Key Files & Structure
 
-### `GET /`
+- **`src/index.js`**: Server entry point, middleware, routing setup.
+- **`src/config/`**:
+  - `storage.js`: Data store initialization (SQLite/Redis).
+  - `stripeConfig.js`: Stripe client initialization.
+- **`src/controllers/`**: Request/response handling.
+  - `userController.js`: User fetching, subscription sync.
+  - `webhookController.js`: Stripe event processing.
+- **`src/services/`**: Business logic.
+  - `productService.js`: Stripe product initialization.
+  - `lessonService.js`: Lesson CRUD operations.
+  - `videoService.js`: Bunny.net video interactions.
+- **`src/routes/`**: Define API endpoints and link to controllers.
+  - `api.js`: E-book checkout, payment verification.
+  - `subscription.js`: Subscription management endpoints.
+  - `products.js`: (Likely internal Stripe product sync).
+  - `auth.js`: Registration, login.
+  - `userRoutes.js`: User detail fetching, manual sub sync trigger.
+  - `webhookRoutes.js`: Stripe webhook endpoint.
+- **`src/middleware/`**:
+  - `auth.js`: `authenticateToken` JWT validation.
 
-- **Description:** Retrieves a list of article previews.
-- **Response Body:** An array of article objects, each containing:
-  - `slug` (string): The unique identifier for the article URL.
-  - `title` (string): The title of the article.
-- **Example Response:**
-  ```json
-  [
-    { "slug": "pierwszy-artykul", "title": "Pierwszy Artykuł" },
-    { "slug": "drugi-wpis", "title": "Drugi Wpis Blogowy" }
-  ]
-  ```
+## Notes
 
-### `GET /:slug`
+- **Error Format**: `{ error: string }`
+- **Security**: Input validation, JWT, bcrypt, HTTPS recommended.
+- **Language**: User-facing errors/text should be in Polish.
 
-- **Description:** Retrieves the full details of a specific article by its slug.
-- **URL Parameters:**
-  - `slug` (string): The unique identifier of the article.
-- **Response Body:** A single article object containing:
-  - `slug` (string)
-  - `title` (string)
-  - `content` (string): The full content of the article.
-- **Error Responses:**
-  - `404 Not Found`: If no article with the specified slug exists.
-- **Example Response (Success):**
-  ```json
-  {
-    "slug": "pierwszy-artykul",
-    "title": "Pierwszy Artykuł",
-    "content": "To jest treść pierwszego artykułu..."
-  }
-  ```
-- **Example Response (Error):**
-  ```json
-  {
-    "message": "Artykuł nie znaleziony"
-  }
-  ```
+### Articles
 
-## Webhook Events Handled
+Articles are fetched from a Supabase database.
 
-- `checkout.session.completed`: Process completed purchase
-- `invoice.payment_succeeded`: Update subscription status
-- `customer.subscription.deleted`: Cancel subscription
-
-## Data Models
-
-### User
-
-```js
-{
-  email: string,          // Primary key
-  name: string,
-  password: string,       // Hashed
-  stripeCustomerId: string,
-  stripeSubscriptionId: string,
-  isSubscribed: boolean
-}
-```
-
-### Product (E-book)
-
-```js
-{
-  id: string,             // From Stripe
-  name: string,
-  description: string,
-  images: string[],
-  active: boolean,
-  price: {
-    id: string,           // From Stripe
-    currency: string,
-    unit_amount: number,
-    formatted: string     // Formatted price
-  },
-  metadata: {
-    type: 'ebook',
-    download_url: string  // Optional
-  }
-}
-```
-
-### Lesson
-
-```js
-{
-  id: string,             // Unique identifier
-  videoId: string,        // Optional, Bunny.net video ID
-  videoUrl: string,       // Generated from videoId
-  // ... other lesson fields
-}
-```
-
-## File Structure and Purpose
-
-### Main Server Files
-
-1. **src/index.js**
-   - Main entry point for the server
-   - Sets up Express application
-   - Initializes data stores and middleware
-   - Configures routes
-   - Serves static files in production
-
-### Configuration
-
-2. **src/config/storage.js**
-
-   - Public functions:
-     - `createStores()`: Creates and initializes data storage mechanisms
-     - Configures SQLite (dev) and Redis (prod) storage
-
-3. **src/config/stripeConfig.js**
-   - Centralizes Stripe client configuration
-   - Exports initialized Stripe client for use across the application
-
-### Controllers
-
-4. **src/controllers/userController.js**
-
-   - Public functions:
-     - `getUserByEmail()`: Gets user details by email
-     - `updateSubscriptionStatus()`: Updates user subscription status
-
-5. **src/controllers/webhookController.js**
-   - Public functions:
-     - `handleStripeWebhook()`: Processes Stripe webhook events
-     - `handleCheckoutSessionCompleted()`: Handles completed checkout sessions
-     - `handleInvoicePaymentSucceeded()`: Handles successful invoice payments
-     - `handleSubscriptionDeleted()`: Handles subscription deletion events
-
-### Services
-
-6. **src/services/productService.js**
-
-   - Public functions:
-     - `initializeProducts()`: Fetches and initializes products from Stripe
-
-7. **src/services/lessonService.js**
-
-   - Public functions:
-     - `initializeLessons()`: Initializes lessons store (mock data in dev only)
-     - `getAllLessons()`: Gets all lessons with video URLs
-     - `getLessonById()`: Gets a specific lesson by ID
-     - `upsertLesson()`: Creates or updates a lesson
-     - `deleteLesson()`: Deletes a lesson
-
-8. **src/services/videoService.js**
-   - Public functions:
-     - `listVideos()`: Lists all videos from Bunny.net
-     - `getVideoStreamUrl()`: Generates streaming URL for a video
-
-### Route Files
-
-9. **src/routes/api.js**
-
-   - Public functions:
-     - `GET /api/ebooks`: Fetches all e-books with prices
-     - `POST /api/checkout`: Creates checkout session
-     - `GET /api/payments/:paymentIntentId/verify`: Verifies payment status
-     - `GET /api/user/ebooks`: Gets user's purchased e-books
-     - `GET /api/checkout/sessions/:sessionId/verify`: Verifies payment by session ID
-     - `formatPrice()`: Helper function to format prices
-
-10. **src/routes/subscription.js**
-
-    - Public functions:
-      - `POST /api/subscription/create-subscription`: Creates subscription
-      - `GET /api/subscription/subscription-status`: Checks subscription status
-      - `POST /api/subscription/create-portal-session`: Creates customer portal session
-      - `POST /api/subscription/create-checkout-session`: Creates checkout session
-      - `POST /api/subscription/force-check-subscription`: Forces update of subscription status
-
-11. **src/routes/products.js**
-
-    - Handles product-related operations in Stripe
-    - Manages e-book products in the system
-
-12. **src/routes/auth.js**
-
-    - Public functions:
-      - `POST /api/register`: Registers new user
-      - `POST /api/login`: Authenticates user and issues JWT token
-
-13. **src/routes/userRoutes.js**
-
-    - Public functions:
-      - `GET /api/users/:email`: Gets user details
-      - `POST /api/users/update-subscription`: Updates user subscription status
-
-14. **src/routes/webhookRoutes.js**
-    - Public functions:
-      - `POST /webhook`: Processes Stripe webhook events
-
-### Middleware
-
-15. **src/middleware/auth.js**
-    - Public functions:
-      - `authenticateToken()`: Middleware to validate JWT tokens and authenticate users
-
-## Code Organization Principles
-
-- **Separation of Concerns**:
-
-  - Controllers handle request/response logic
-  - Services handle business logic
-  - Routes define API endpoints
-  - Config centralizes configuration
-
-- **Modularity**:
-
-  - Related functionality is grouped together
-  - Each file has a single responsibility
-  - Dependencies are explicitly imported
-
-- **Central Configuration**:
-  - Stripe client is configured once and imported where needed
-  - Environment variables are loaded in relevant config files
-
-## Error Handling
-
-- All endpoints return consistent error formats:
-  ```js
-  {
-    error: string;
-  }
-  ```
-- Polish language used for most user-facing error messages
-- HTTP status codes properly utilized (400, 401, 403, 404, 500)
-
-## Security Considerations
-
-- Always validate user input
-- JWT tokens with proper expiration
-- Password hashing with bcrypt
-- Route protection through middleware
-- Client errors don't expose sensitive information
+| Method | Endpoint              | Description              | Auth |
+| :----- | :-------------------- | :----------------------- | :--- |
+| GET    | `/api/articles`       | Get all article previews | No   |
+| GET    | `/api/articles/:slug` | Get full article by slug | No   |

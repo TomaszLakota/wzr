@@ -1,15 +1,14 @@
 import React from 'react';
 import './LessonThumbnail.scss';
 
-interface Lesson {
-  id: string | number; // Added id assuming it's needed for keys/linking
-  thumbnailUrl?: string; // Optional based on usage
+export interface Lesson {
+  id: string | number;
+  thumbnailUrl?: string;
   title: string;
   description: string;
   level: string;
   duration: string;
-  // Add slug if it's used for linking
-  // slug: string;
+  slug: string;
 }
 
 interface LessonThumbnailProps {

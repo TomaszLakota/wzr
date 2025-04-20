@@ -11,8 +11,7 @@
     "test-api": "node test-api.js"
   },
   "dependencies": {
-    "@keyv/redis": "^4.3.1",
-    "@keyv/sqlite": "^4.0.1",
+    "@supabase/supabase-js": "^2.49.4",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

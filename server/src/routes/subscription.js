@@ -1,72 +1,83 @@
 import express from 'express';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
+import { authenticateToken } from '../middleware/auth.js';
 
 dotenv.config();
 
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Middleware to authenticate requests using your existing middleware
-import { authenticateToken } from '../middleware/auth.js';
+// Helper to get/create Stripe customer and update Supabase user
+const getOrCreateStripeCustomer = async (supabase, userId, userEmail, userName) => {
+  // 1. Fetch user to get current Stripe Customer ID
+  const { data: user, error: fetchUserError } = await supabase
+    .from('users')
+    .select('id, stripe_customer_id')
+    .eq('id', userId)
+    .single();
 
-// Create a subscription
+  if (fetchUserError || !user) {
+    console.error(`[SUB_HELPER] Error fetching user ${userId}:`, fetchUserError);
+    throw new Error('User not found');
+  }
+
+  if (user.stripe_customer_id) {
+    console.log(
+      `[SUB_HELPER] Found existing Stripe customer ID ${user.stripe_customer_id} for user ${userId}`
+    );
+    return user.stripe_customer_id;
+  }
+
+  // 2. Create Stripe customer if not found
+  console.log(`[SUB_HELPER] Creating Stripe customer for user ${userId} (${userEmail})`);
+  try {
+    const customer = await stripe.customers.create({
+      email: userEmail,
+      name: userName,
+      metadata: {
+        userId: userId, // Store our DB user ID
+      },
+    });
+    const customerId = customer.id;
+
+    // 3. Update user record in Supabase
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ stripe_customer_id: customerId })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error(
+        `[SUB_HELPER] Failed to update user ${userId} with Stripe customer ID ${customerId}:`,
+        updateError
+      );
+      // Decide how to handle - throw error? Log and continue?
+      throw new Error('Failed to update user with Stripe customer ID');
+    }
+    console.log(`[SUB_HELPER] Associated Stripe customer ${customerId} with user ${userId}`);
+    return customerId;
+  } catch (stripeError) {
+    console.error('[SUB_HELPER] Error creating Stripe customer:', stripeError);
+    throw new Error('Could not create Stripe customer');
+  }
+};
+
+// Create a subscription (likely deprecated by create-checkout-session?)
+// Keeping refactored logic for reference, but checkout session is preferred by Stripe
 router.post('/create-subscription', authenticateToken, async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const userId = req.user.userId;
+  const userEmail = req.user.email;
+  const userName = req.user.name;
   try {
     const { priceId } = req.body;
-    console.log(`[SUB] Create subscription requested for price: ${priceId}`);
+    console.log(`[SUB_CREATE] Create subscription requested for user ${userId}, price: ${priceId}`);
+    if (!priceId) return res.status(400).json({ error: 'Price ID is required' });
 
-    if (!priceId) {
-      console.log('[SUB] Error: Price ID is missing');
-      return res.status(400).json({ error: 'Price ID is required' });
-    }
+    const customerId = await getOrCreateStripeCustomer(supabase, userId, userEmail, userName);
 
-    // Get the user from the request (populated by your authentication middleware)
-    const user = req.user;
-    console.log(`[SUB] User from token: ${JSON.stringify(user)}`);
-
-    // Get the full user record from the database
-    let userRecord = await global.stores.users.get(user.email);
-    console.log(`[SUB] User record from store: ${JSON.stringify(userRecord)}`);
-    if (!userRecord) {
-      console.log(`[SUB] Error: User not found in store for email: ${user.email}`);
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Get or create a Stripe customer for this user
-    let customerId = userRecord.stripeCustomerId;
-    console.log(`[SUB] Existing Stripe customer ID: ${customerId || 'none'}`);
-
-    if (!customerId) {
-      // Create a customer in Stripe
-      console.log(`[SUB] Creating new Stripe customer for user: ${userRecord.email}`);
-      const customer = await stripe.customers.create({
-        email: userRecord.email,
-        name: userRecord.name,
-        metadata: {
-          userId: userRecord.email, // Using email as the user ID based on your system
-        },
-      });
-
-      customerId = customer.id;
-      console.log(`[SUB] New Stripe customer created with ID: ${customerId}`);
-
-      // Update the user store with the Stripe customer ID
-      // You'll need to implement this using your storage system
-      try {
-        userRecord.stripeCustomerId = customerId;
-        await global.stores.users.set(user.email, userRecord);
-        console.log(`[SUB] User record updated with Stripe customer ID: ${customerId}`);
-        // Verify the update
-        const updatedUser = await global.stores.users.get(user.email);
-        console.log(`[SUB] Verified user record after update: ${JSON.stringify(updatedUser)}`);
-      } catch (error) {
-        console.error('[SUB] Error updating user with Stripe customer ID:', error);
-      }
-    }
-
-    // Create a subscription
-    console.log(`[SUB] Creating subscription for customer: ${customerId} with price: ${priceId}`);
+    console.log(`[SUB_CREATE] Creating subscription for customer: ${customerId}`);
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: priceId }],
@@ -75,292 +86,218 @@ router.post('/create-subscription', authenticateToken, async (req, res) => {
       expand: ['latest_invoice.payment_intent'],
     });
 
-    console.log(`[SUB] Subscription created with ID: ${subscription.id}`);
-    console.log(`[SUB] Subscription status: ${subscription.status}`);
-
-    // Return the client secret for the payment intent
+    console.log(`[SUB_CREATE] Subscription ${subscription.id} created (${subscription.status})`);
     res.json({
       subscriptionId: subscription.id,
-      clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+      clientSecret: subscription.latest_invoice.payment_intent?.client_secret,
+      status: subscription.status,
     });
   } catch (error) {
-    console.error('[SUB] Error creating subscription:', error);
-    res.status(400).json({ error: error.message });
+    console.error(`[SUB_CREATE] Error creating subscription for user ${userId}:`, error);
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Check subscription status
 router.get('/subscription-status', authenticateToken, async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const userId = req.user.userId;
+  console.log(`[SUB_STATUS] Checking subscription status for user: ${userId}`);
+
   try {
-    const user = req.user;
-    console.log(`[SUB-STATUS] Checking subscription status for user: ${user.email}`);
+    // 1. Fetch user for customer ID
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('id, stripe_customer_id, subscription_status') // Select current status too
+      .eq('id', userId)
+      .single();
 
-    // Get the Stripe customer ID
-    const userRecord = await global.stores.users.get(user.email);
-    console.log(`[SUB-STATUS] User record: ${JSON.stringify(userRecord)}`);
-
-    const customerId = userRecord?.stripeCustomerId;
-    console.log(`[SUB-STATUS] Stripe customer ID: ${customerId || 'none'}`);
-
-    if (!customerId) {
-      console.log(`[SUB-STATUS] No Stripe customer ID for user: ${user.email}`);
-      return res.json({ isSubscribed: false });
+    if (fetchError || !user) {
+      console.error(`[SUB_STATUS] Error fetching user ${userId}:`, fetchError);
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Get customer's subscription
-    console.log(`[SUB-STATUS] Fetching active subscription for customer: ${customerId}`);
-    const subscription = await stripe.subscriptions.list({
+    const customerId = user.stripe_customer_id;
+    if (!customerId) {
+      console.log(`[SUB_STATUS] No Stripe customer ID for user ${userId}`);
+      // Ensure status is inactive if no customer ID
+      if (user.subscription_status !== 'inactive') {
+        await supabase.from('users').update({ subscription_status: 'inactive' }).eq('id', userId);
+      }
+      return res.json({ isSubscribed: false, subscriptionDetails: null });
+    }
+
+    // 2. Check Stripe for active subscription
+    console.log(`[SUB_STATUS] Fetching active subscription for customer: ${customerId}`);
+    const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: 'active',
       limit: 1,
+      expand: ['data.default_payment_method'], // Optionally expand needed fields
     });
 
-    console.log(`[SUB-STATUS] Found ${subscription.data.length} active subscription`);
-    if (subscription.data.length > 0) {
-      console.log(`[SUB-STATUS] Subscription details: ${JSON.stringify(subscription.data[0])}`);
-    }
+    const activeSubscription = subscriptions.data.length > 0 ? subscriptions.data[0] : null;
+    const isStripeSubscribed = !!activeSubscription;
+    const currentDbStatus = user.subscription_status === 'active';
 
-    const isSubscribed = subscription.data.length > 0;
-    console.log(`[SUB-STATUS] Is user isSubscribed: ${isSubscribed}`);
+    console.log(`[SUB_STATUS] Stripe active: ${isStripeSubscribed}, DB status: ${currentDbStatus}`);
 
-    // Update user record with subscription status
-    if (userRecord) {
-      const previousStatus = userRecord.isSubscribed || false;
-      userRecord.isSubscribed = isSubscribed;
-      await global.stores.users.set(user.email, userRecord);
-      console.log(
-        `[SUB-STATUS] Updated user subscription status from ${previousStatus} to ${isSubscribed}`
-      );
-
-      // Verify the update
-      const updatedUser = await global.stores.users.get(user.email);
-      console.log(`[SUB-STATUS] Verified user record after update: ${JSON.stringify(updatedUser)}`);
+    // 3. Update DB if status mismatch
+    if (currentDbStatus !== isStripeSubscribed) {
+      const newDbStatus = isStripeSubscribed ? 'active' : 'inactive';
+      console.log(`[SUB_STATUS] Updating DB status for user ${userId} to ${newDbStatus}`);
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ subscription_status: newDbStatus })
+        .eq('id', userId);
+      if (updateError) {
+        console.error(`[SUB_STATUS] Failed to update DB status for user ${userId}:`, updateError);
+        // Decide whether to return old status or error
+      }
     }
 
     res.json({
-      isSubscribed,
-      subscriptionDetails: isSubscribed
+      isSubscribed: isStripeSubscribed,
+      subscriptionDetails: activeSubscription
         ? {
-            id: subscription.data[0].id,
-            status: subscription.data[0].status,
-            currentPeriodEnd: new Date(
-              subscription.data[0].current_period_end * 1000
-            ).toISOString(),
+            id: activeSubscription.id,
+            status: activeSubscription.status,
+            currentPeriodEnd: new Date(activeSubscription.current_period_end * 1000).toISOString(),
+            // Add other relevant details
+            // paymentMethod: activeSubscription.default_payment_method
           }
         : null,
     });
   } catch (error) {
-    console.error('[SUB-STATUS] Error checking subscription status:', error);
-    res.status(400).json({ error: error.message });
+    console.error(`[SUB_STATUS] Error checking subscription status for user ${userId}:`, error);
+    res.status(500).json({ error: 'Failed to check subscription status' });
   }
 });
 
 // Create a customer portal session
 router.post('/create-portal-session', authenticateToken, async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const userId = req.user.userId;
+  console.log(`[PORTAL] Creating portal session for user: ${userId}`);
   try {
-    const user = req.user;
-    console.log(`[PORTAL] Creating portal session for user: ${user.email}`);
+    // 1. Fetch user for customer ID
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('stripe_customer_id')
+      .eq('id', userId)
+      .single();
 
-    // Get the Stripe customer ID
-    const userRecord = await global.stores.users.get(user.email);
-    console.log(`[PORTAL] User record: ${JSON.stringify(userRecord)}`);
-
-    const customerId = userRecord?.stripeCustomerId;
-    console.log(`[PORTAL] Stripe customer ID: ${customerId || 'none'}`);
-
-    if (!customerId) {
-      console.log(`[PORTAL] No Stripe customer found for user: ${user.email}`);
-      return res.status(400).json({ error: 'No Stripe customer found for this user' });
+    if (fetchError || !user) {
+      console.error(`[PORTAL] Error fetching user ${userId}:`, fetchError);
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Create a portal session
-    console.log(`[PORTAL] Creating portal session for customer: ${customerId}`);
-    const session = await stripe.billingPortal.sessions.create({
+    const customerId = user.stripe_customer_id;
+    if (!customerId) {
+      console.log(`[PORTAL] No Stripe customer ID for user ${userId}`);
+      return res.status(400).json({ error: 'Stripe customer account not found for this user' });
+    }
+
+    // 2. Create portal session
+    const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${process.env.FRONTEND_URL}/profil`,
+      return_url: `${process.env.FRONTEND_URL}/profil`, // Ensure this matches your frontend route
     });
 
-    console.log(`[PORTAL] Portal session created with URL: ${session.url}`);
-    // Return the URL of the portal
-    res.json({ url: session.url });
+    console.log(`[PORTAL] Portal session created for customer ${customerId}`);
+    res.json({ url: portalSession.url });
   } catch (error) {
-    console.error('[PORTAL] Error creating portal session:', error);
-    res.status(400).json({ error: error.message });
+    console.error(`[PORTAL] Error creating portal session for user ${userId}:`, error);
+    res.status(500).json({ error: 'Failed to create customer portal session' });
   }
 });
 
 // Create a checkout session for subscription
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const userId = req.user.userId;
+  const userEmail = req.user.email;
+  const userName = req.user.name;
   try {
     const { priceId, successUrl, cancelUrl } = req.body;
-    const user = req.user;
-    console.log(`[CHECKOUT] Creating checkout session for user: ${user.email}, price: ${priceId}`);
+    console.log(`[SUB_CHECKOUT] Creating checkout session for user: ${userId}, price: ${priceId}`);
+    if (!priceId) return res.status(400).json({ error: 'Price ID is required' });
 
-    if (!priceId) {
-      console.log('[CHECKOUT] Error: Price ID is missing');
-      return res.status(400).json({ error: 'Price ID is required' });
-    }
+    const customerId = await getOrCreateStripeCustomer(supabase, userId, userEmail, userName);
 
-    // Get the full user record from the database
-    let userRecord = await global.stores.users.get(user.email);
-    console.log(`[CHECKOUT] User record: ${JSON.stringify(userRecord)}`);
+    const frontendUrl = process.env.FRONTEND_URL || (successUrl ? new URL(successUrl).origin : '');
 
-    if (!userRecord) {
-      console.log(`[CHECKOUT] Error: User not found in store for email: ${user.email}`);
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Get or create a Stripe customer for this user
-    let customerId = userRecord.stripeCustomerId;
-    console.log(`[CHECKOUT] Existing Stripe customer ID: ${customerId || 'none'}`);
-
-    if (!customerId) {
-      // Create a customer in Stripe
-      console.log(`[CHECKOUT] Creating new Stripe customer for user: ${userRecord.email}`);
-      const customer = await stripe.customers.create({
-        email: userRecord.email,
-        name: userRecord.name,
-        metadata: {
-          userId: userRecord.email, // Using email as the user ID based on your system
-        },
-      });
-
-      customerId = customer.id;
-      console.log(`[CHECKOUT] New Stripe customer created with ID: ${customerId}`);
-
-      // Update the user record with the Stripe customer ID
-      try {
-        userRecord.stripeCustomerId = customerId;
-        await global.stores.users.set(user.email, userRecord);
-        console.log(`[CHECKOUT] User record updated with Stripe customer ID: ${customerId}`);
-
-        // Verify the update
-        const updatedUser = await global.stores.users.get(user.email);
-        console.log(`[CHECKOUT] Verified user record after update: ${JSON.stringify(updatedUser)}`);
-      } catch (error) {
-        console.error('[CHECKOUT] Error updating user with Stripe customer ID:', error);
-      }
-    }
-
-    // Create the checkout session
-    console.log(`[CHECKOUT] Creating checkout session for customer: ${customerId}`);
+    console.log(`[SUB_CHECKOUT] Creating checkout session for customer: ${customerId}`);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      success_url: successUrl || `${process.env.FRONTEND_URL}/lekcje?success=true`,
-      cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/lekcje?canceled=true`,
       customer: customerId,
-      client_reference_id: user.email,
-      metadata: {
-        userId: user.email,
-      },
+      success_url: successUrl || `${frontendUrl}/profil?session_id={CHECKOUT_SESSION_ID}`, // Redirect to profile/dashboard on success
+      cancel_url: cancelUrl || `${frontendUrl}/`,
+      // Use client_reference_id to link session to your user ID for webhook handling
+      client_reference_id: userId,
+      // Or use metadata if preferred
+      // metadata: { userId: userId }
     });
 
-    console.log(`[CHECKOUT] Checkout session created with ID: ${session.id}`);
-    console.log(`[CHECKOUT] Checkout session URL: ${session.url}`);
-
+    console.log(`[SUB_CHECKOUT] Checkout session ${session.id} created`);
     res.json({ url: session.url });
   } catch (error) {
-    console.error('[CHECKOUT] Error creating checkout session:', error);
-    res.status(400).json({ error: error.message });
+    console.error(`[SUB_CHECKOUT] Error creating checkout session for user ${userId}:`, error);
+    res.status(500).json({ error: 'Failed to create checkout session' });
   }
 });
 
-// Force check and update subscription status from Stripe
+// Force check subscription (Alias for /subscription-status endpoint logic)
 router.post('/force-check-subscription', authenticateToken, async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const userId = req.user.userId;
+  console.log(`[FORCE_CHECK] Force checking subscription status for user: ${userId}`);
+
+  // Reuse the logic from GET /subscription-status
   try {
-    const user = req.user;
-    console.log(`[FORCE-CHECK] Force checking subscription for user: ${user.email}`);
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('id, stripe_customer_id, subscription_status')
+      .eq('id', userId)
+      .single();
+    if (fetchError || !user) throw new Error('User not found');
 
-    // Get the full user record
-    const userRecord = await global.stores.users.get(user.email);
-    console.log(`[FORCE-CHECK] User record: ${JSON.stringify(userRecord)}`);
-
-    if (!userRecord) {
-      console.log(`[FORCE-CHECK] User not found in database: ${user.email}`);
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    const customerId = userRecord.stripeCustomerId;
-    console.log(`[FORCE-CHECK] Customer ID: ${customerId || 'none'}`);
-
+    const customerId = user.stripe_customer_id;
     if (!customerId) {
-      console.log(`[FORCE-CHECK] No Stripe customer ID found for user: ${user.email}`);
-      return res.json({ isSubscribed: false, message: 'No Stripe customer ID found' });
+      if (user.subscription_status !== 'inactive') {
+        await supabase.from('users').update({ subscription_status: 'inactive' }).eq('id', userId);
+      }
+      return res.json({
+        success: true,
+        isSubscribed: false,
+        message: 'User has no Stripe customer ID.',
+      });
     }
 
-    // Retrieve customer from Stripe
-    const customer = await stripe.customers.retrieve(customerId);
-    console.log(`[FORCE-CHECK] Stripe customer data: ${JSON.stringify(customer)}`);
-
-    // Check for active subscription
-    console.log(`[FORCE-CHECK] Fetching all subscription for customer: ${customerId}`);
-    const subscription = await stripe.subscriptions.list({
+    const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      limit: 100,
+      status: 'active',
+      limit: 1,
     });
+    const isStripeSubscribed = subscriptions.data.length > 0;
+    const currentDbStatus = user.subscription_status === 'active';
 
-    console.log(`[FORCE-CHECK] Found ${subscription.data.length} subscription`);
-
-    // Log all subscription for debugging
-    subscription.data.forEach((sub, i) => {
-      console.log(
-        `[FORCE-CHECK] Subscription ${i + 1}/${subscription.data.length}: ID=${sub.id}, Status=${sub.status}`
-      );
-    });
-
-    // Find active subscription
-    const activeSubscriptions = subscription.data.filter(
-      (sub) => sub.status === 'active' || sub.status === 'trialing'
-    );
-
-    console.log(`[FORCE-CHECK] Found ${activeSubscriptions.length} active subscription`);
-
-    const isSubscribed = activeSubscriptions.length > 0;
-    console.log(`[FORCE-CHECK] Is user isSubscribed: ${isSubscribed}`);
-
-    // Update user record
-    const previousStatus = userRecord.isSubscribed || false;
-    userRecord.isSubscribed = isSubscribed;
-
-    if (isSubscribed && activeSubscriptions.length > 0) {
-      userRecord.stripeSubscriptionId = activeSubscriptions[0].id;
-      console.log(`[FORCE-CHECK] Updating subscription ID to: ${activeSubscriptions[0].id}`);
+    if (currentDbStatus !== isStripeSubscribed) {
+      const newDbStatus = isStripeSubscribed ? 'active' : 'inactive';
+      await supabase.from('users').update({ subscription_status: newDbStatus }).eq('id', userId);
+      console.log(`[FORCE_CHECK] Updated DB status for user ${userId} to ${newDbStatus}`);
     }
-
-    await global.stores.users.set(user.email, userRecord);
-    console.log(
-      `[FORCE-CHECK] Updated subscription status from ${previousStatus} to ${isSubscribed}`
-    );
-
-    // Verify the update
-    const updatedUser = await global.stores.users.get(user.email);
-    console.log(`[FORCE-CHECK] User record after update: ${JSON.stringify(updatedUser)}`);
 
     res.json({
-      isSubscribed,
-      previousStatus,
-      message: 'Subscription status updated',
-      subscriptionDetails:
-        isSubscribed && activeSubscriptions.length > 0
-          ? {
-              id: activeSubscriptions[0].id,
-              status: activeSubscriptions[0].status,
-              currentPeriodEnd: new Date(
-                activeSubscriptions[0].current_period_end * 1000
-              ).toISOString(),
-            }
-          : null,
+      success: true,
+      isSubscribed: isStripeSubscribed,
+      message: 'Subscription status synchronized.',
     });
   } catch (error) {
-    console.error('[FORCE-CHECK] Error checking subscription status:', error);
-    res.status(400).json({ error: error.message });
+    console.error(`[FORCE_CHECK] Error force checking subscription for user ${userId}:`, error);
+    res.status(500).json({ success: false, error: 'Failed to synchronize subscription status' });
   }
 });
 

@@ -2,14 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../../styles/profile.scss';
 import apiClient from '../../services/apiClient';
-
-interface User {
-  name?: string;
-  email?: string;
-  isSubscribed?: boolean;
-  isAdmin?: boolean;
-  // Add other user properties as needed
-}
+import { User, fetchUserProfile } from '../../services/userService';
 
 function Profile() {
   const [user, setUser] = useState<User | null>(null);
@@ -44,9 +37,11 @@ function Profile() {
       // Fetch fresh user data from the server
       if (parsedUserData?.email) {
         try {
-          const freshUserData = await apiClient.get(`/api/users/${parsedUserData.email}`);
-          setUser(freshUserData as User); // Cast the response if needed
-          localStorage.setItem('user', JSON.stringify(freshUserData));
+          // Fetch fresh user data using the userService
+          const frontendUserData = await fetchUserProfile(parsedUserData.email);
+          setUser(frontendUserData);
+          localStorage.setItem('user', JSON.stringify(frontendUserData));
+          console.log('freshUserData fetched via service', frontendUserData);
         } catch (err) {
           console.error('Błąd podczas pobierania danych użytkownika:', err);
           // Keep local storage data but show an error
@@ -80,7 +75,7 @@ function Profile() {
     try {
       setPortalLoading(true);
       setError(null); // Clear previous errors
-      const data = await apiClient.post('/api/subscription/create-portal-session');
+      const data = await apiClient.post('/api/subscription/create-portal-session', {});
       const responseData = data as { url?: string };
 
       if (responseData.url) {
@@ -121,7 +116,9 @@ function Profile() {
 
             <div className="profile-field">
               <label>Status subskrypcji:</label>
-              <p>{user.isSubscribed ? 'Aktywna' : 'Brak aktywnej subskrypcji'}</p>
+              <p>
+                {user.subscriptionStatus === 'active' ? 'Aktywna' : 'Brak aktywnej subskrypcji'}
+              </p>
             </div>
 
             {user.isAdmin && (
@@ -133,7 +130,7 @@ function Profile() {
           </div>
 
           <div className="profile-actions">
-            {user.isSubscribed && (
+            {user.subscriptionStatus === 'active' && (
               <button
                 className="manage-subscription-button"
                 onClick={handleManageSubscription}

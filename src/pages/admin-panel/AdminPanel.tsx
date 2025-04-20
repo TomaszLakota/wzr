@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/adminPanel.scss';
 import apiClient from '../../services/apiClient';
-import { fetchAdminUsers, Pagination } from '../../services/userService';
+import { fetchAdminUsers } from '../../services/userService';
 import { User } from '../../types/user.types';
+import { Pagination } from '../../types/shared.types';
 
 function AdminPanel() {
   const [users, setUsers] = useState<User[]>([]);
@@ -21,10 +22,9 @@ function AdminPanel() {
   const fetchUsers = async (page: number = 1) => {
     try {
       setLoading(true);
-      // Use the userService function to fetch users
       const data = await fetchAdminUsers(page, pagination.limit);
 
-      // Set state with data returned from the service
+      console.log('data', data.users);
       setUsers(data.users);
       setPagination(data.pagination);
     } catch (err: unknown) {
@@ -87,7 +87,6 @@ function AdminPanel() {
             </tr>
           </thead>
           <tbody>
-            {/* Ensure the user type here matches FrontendUser */}
             {users.map((user: User) => (
               <tr key={user.email}>
                 <td>{user.name ?? '-'}</td>

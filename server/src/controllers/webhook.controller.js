@@ -79,8 +79,8 @@ const handleCheckoutSessionCompleted = async (supabase, session) => {
           .from('users')
           .update({
             subscription_status: 'active',
-            stripe_subscription_id: subscriptionId, // Store subscription ID if needed
-            stripe_customer_id: customerId, // Ensure customer ID is stored/updated
+            stripe_subscription_id: subscriptionId,
+            stripe_customer_id: customerId,
           })
           .eq('id', userId);
 

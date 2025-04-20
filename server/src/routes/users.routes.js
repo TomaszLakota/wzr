@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUserByEmail, updateSubscriptionStatus } from '../controllers/userController.js';
+import { getUserByEmail, updateSubscriptionStatus } from '../controllers/user.controller.js';
 import { authenticateToken, isAdmin } from '../middleware/auth.js';
 import stripe from 'stripe';
 

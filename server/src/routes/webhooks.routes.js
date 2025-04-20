@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { handleStripeWebhook } from '../controllers/webhookController.js';
+import { handleStripeWebhook } from '../controllers/webhook.controller.js';
 
 const router = express.Router();
 

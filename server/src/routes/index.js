@@ -1,14 +1,13 @@
 import express from 'express';
 import stripe from 'stripe';
-import { authenticateToken } from '../middleware/auth.js';
-import ebooksRouter from './ebooks.js';
-import subscriptionRoutes from './subscription.js';
-import productRoutes from './products.js';
-import authRoutes from './auth.js';
-import userRoutes from './userRoutes.js';
+import ebooksRouter from './ebooks.routes.js';
+import subscriptionRoutes from './subscription.routes.js';
+import productRoutes from './products.routes.js';
+import authRoutes from './auth.routes.js';
+import userRoutes from './users.routes.js';
 import articlesRouter from './articles.routes.js';
-import lessonsRouter from './lessons.js';
-
+import lessonsRouter from './lessons.routes.js';
+import webhookRoutes from './webhooks.routes.js';
 const router = express.Router();
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -19,6 +18,7 @@ router.use('/articles', articlesRouter);
 router.use('/lekcje', lessonsRouter);
 router.use(authRoutes);
 router.use(userRoutes);
+router.use(webhookRoutes);
 
 /**
  * Verify payment status

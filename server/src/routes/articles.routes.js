@@ -1,6 +1,6 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
-import 'dotenv/config'; // Load environment variables
+import 'dotenv/config';
 
 const router = express.Router();
 

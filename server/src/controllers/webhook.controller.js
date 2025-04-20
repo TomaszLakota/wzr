@@ -1,4 +1,4 @@
-import stripeClient from '../config/stripeConfig.js';
+import stripeClient from '../config/stripe.js';
 
 // Process Stripe webhook events
 export const handleStripeWebhook = async (req, res) => {

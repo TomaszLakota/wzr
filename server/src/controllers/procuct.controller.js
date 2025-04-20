@@ -1,4 +1,4 @@
-import stripeClient from '../config/stripeConfig.js';
+import stripeClient from '../config/stripe.js';
 
 // Initialize products and prices in Supabase from Stripe
 export const initializeProducts = async (supabase) => {

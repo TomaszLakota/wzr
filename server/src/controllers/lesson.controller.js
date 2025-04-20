@@ -1,4 +1,4 @@
-import { getVideoStreamUrl } from './videoService.js';
+import { getVideoStreamUrl } from './video.controller.js';
 
 // Helper to generate video stream URL based on lesson data from DB
 // Assumes DB schema has videoId column now

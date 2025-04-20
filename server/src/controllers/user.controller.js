@@ -1,4 +1,4 @@
-import stripeClient from '../config/stripeConfig.js';
+import stripeClient from '../config/stripe.js';
 
 const syncSubscriptionStatus = async (supabase, userId) => {
   const { data: user, error: fetchError } = await supabase

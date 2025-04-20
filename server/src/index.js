@@ -2,8 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createSupabaseClient } from './config/storage.js';
-import apiRoutes from './routes/api.js';
-import webhookRoutes from './routes/webhookRoutes.js';
+import apiRoutes from './routes/index.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -48,10 +47,6 @@ try {
       };
 
   app.use(cors(corsOptions));
-
-  // Webhook routes must be registered before express.json middleware
-  // to access raw body data
-  app.use('/', webhookRoutes);
 
   app.use(express.json());
 

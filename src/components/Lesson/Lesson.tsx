@@ -1,19 +1,6 @@
 import React from 'react';
 import './Lesson.scss';
-
-interface Exercise {
-  name: string;
-  url: string;
-}
-
-interface LessonData {
-  title: string;
-  videoUrl: string;
-  level: string;
-  duration: string;
-  description: string;
-  exercises?: Exercise[]; //
-}
+import { LessonData } from '../../types/lesson.types';
 
 interface LessonProps {
   lesson: LessonData;
@@ -26,7 +13,7 @@ const Lesson: React.FC<LessonProps> = ({ lesson }) => {
     level,
     duration,
     description,
-    exercises = [], // Keep default value for runtime safety if API might omit it
+    exercises = [],
   } = lesson;
 
   const separator = videoUrl.includes('?') ? '&' : '?';
@@ -37,12 +24,11 @@ const Lesson: React.FC<LessonProps> = ({ lesson }) => {
       <h1 className="lesson__title">{title}</h1>
 
       <div className="lesson__video-container">
-        {/* Bunny.net video player iframe remains the same */}
         <iframe
           className="lesson__video"
           src={finalVideoUrl}
           loading="lazy"
-          title={title} // Add title attribute for accessibility
+          title={title}
           allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
           allowFullScreen={true}
         ></iframe>
@@ -61,11 +47,9 @@ const Lesson: React.FC<LessonProps> = ({ lesson }) => {
 
       <div className="lesson__description">
         <h2>Opis</h2>
-        {/* Render description safely, handle potential newlines if needed */}
         <p>{description}</p>
       </div>
 
-      {/* Check exercises array length before mapping */}
       {exercises.length > 0 && (
         <div className="lesson__exercises">
           <h2>Materiały do pobrania</h2>
@@ -76,7 +60,8 @@ const Lesson: React.FC<LessonProps> = ({ lesson }) => {
                   href={exercise.url}
                   download
                   className="lesson__exercise-link"
-                  // Consider adding target="_blank" rel="noopener noreferrer" for external links
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {exercise.name}
                 </a>

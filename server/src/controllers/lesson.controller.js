@@ -1,11 +1,7 @@
 import { getVideoStreamUrl } from './video.controller.js';
 
-// Helper to generate video stream URL based on lesson data from DB
-// Assumes DB schema has videoId column now
 const addVideoUrl = (lesson) => ({
   ...lesson,
-  // Use videoId now; assuming getVideoStreamUrl takes the video ID.
-  // If videoId itself is the stream URL or needs different handling, adjust getVideoStreamUrl or this logic.
   videoUrl: lesson.videoId ? getVideoStreamUrl(lesson.videoId) : null,
 });
 
@@ -28,25 +24,18 @@ export const getAllLessons = async (supabase) => {
 
 // Get lesson by ID from Supabase, including downloads
 export const getLessonById = async (supabase, id) => {
-  console.log(`[GET_LESSON_BY_ID] Fetching lesson ${id}...`);
   try {
     const { data: lesson, error } = await supabase
       .from('lessons')
-      .select('*, downloads(*)') // Fetch lesson and related downloads
+      .select('*, downloads(*)')
       .eq('id', id)
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        // Not found
-        console.log(`[GET_LESSON_BY_ID] Lesson ${id} not found.`);
-        return null;
-      }
       console.error(`Error fetching lesson ${id}:`, error);
       throw error;
     }
 
-    console.log(`[GET_LESSON_BY_ID] Found lesson ${id}.`);
     return lesson ? addVideoUrl(lesson) : null;
   } catch (error) {
     console.error(`Error in getLessonById service for ID ${id}:`, error);
@@ -57,8 +46,6 @@ export const getLessonById = async (supabase, id) => {
 // Create or update a lesson in Supabase
 export const upsertLesson = async (supabase, lessonData) => {
   console.log(`[UPSERT_LESSON] Upserting lesson with ID: ${lessonData.id || '(new)'}...`);
-  // Ensure lessonData matches the DB schema, especially for nullable fields or defaults
-  // e.g., remove videoUrl if it's not a DB column
   const { videoUrl, ...dbLessonData } = lessonData;
 
   try {
@@ -66,14 +53,14 @@ export const upsertLesson = async (supabase, lessonData) => {
       .from('lessons')
       .upsert(dbLessonData, { onConflict: 'id' })
       .select()
-      .single(); // Select the upserted record
+      .single();
 
     if (error) {
       console.error('[UPSERT_LESSON] Error upserting lesson:', error);
       throw error;
     }
     console.log(`[UPSERT_LESSON] Lesson ${data.id} upserted successfully.`);
-    return addVideoUrl(data); // Return the upserted lesson with video URL
+    return addVideoUrl(data);
   } catch (error) {
     console.error('Error in upsertLesson service:', error);
     throw new Error('Failed to save lesson');

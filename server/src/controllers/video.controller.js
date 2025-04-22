@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
-const BUNNY_API_KEY = '5a352c62-08d9-4657-bce2a245e235-1001-49af';
-const BUNNY_LIBRARY_ID = 402491;
+const BUNNY_API_KEY = process.env.BUNNY_API_KEY;
+const BUNNY_LIBRARY_ID = process.env.BUNNY_LIBRARY_ID;
 
 // List all videos in the library
 export const listVideos = async () => {

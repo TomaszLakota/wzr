@@ -37,6 +37,11 @@ export const fetchUserProfile = async (email: string): Promise<User> => {
   return mapBackendUserToFrontend(backendUserData);
 };
 
+export const activateUserAccount = async (token: string): Promise<{ message: string }> => {
+  const response = await apiClient.post<{ message: string }>('/api/activate', { token });
+  return response;
+};
+
 const formatStatus = (status: string, cancelAt: string | null): string => {
   const statusMap = {
     active: cancelAt ? 'Aktywna do' : 'Aktywna',

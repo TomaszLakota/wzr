@@ -28,8 +28,7 @@ function Register() {
 
     try {
       await apiClient.post('/api/register', userData);
-
-      navigate('/logowanie');
+      navigate('/rejestracja-sukces');
     } catch (err: any) {
       setError(err.message || 'Błąd podczas rejestracji. Spróbuj ponownie.');
     }

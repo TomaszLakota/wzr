@@ -3,18 +3,13 @@ description:
 globs: 
 alwaysApply: true
 ---
----
-description: 
-globs: 
-alwaysApply: true
----
 # Rules!
 
 - All labels, urls and texts in UI must be exclusively in polish!!! 
-- DONT ASK ME TO DO SHIT YOU CAN DO YOURSELF!
+- DONT ASK ME TO DO SHIT YOU CAN DO YOURSELF! (especially looking up files or code, you do it!)
 - avoid excesive changes
 - make minimal changes
-- DO NOT ADD COMMENTS UNLESS ITS NECESSARY. replace existing comments with comment saying 'remove me'
+- DO NOT ADD COMMENTS UNLESS ITS NECESSARY
 - remove all dumbass comments in files you edit
 - you can use mcp for stripe interactions, but don't expect them to work in the project we're building
 - you can use sequencial thinking mcp for planning tasks that will take multiple steps to complete

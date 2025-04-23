@@ -53,10 +53,6 @@ try {
   // API Routes
   app.use('/api', apiRoutes);
 
-  // Start the server
-  app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-  });
   // Serve static files in production
   if (process.env.NODE_ENV === 'production') {
     // Serve any static files
@@ -71,3 +67,6 @@ try {
   console.error('Server initialization error:', error);
   process.exit(1);
 }
+
+// Export the app instance for Vercel
+export default app;

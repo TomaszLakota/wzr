@@ -88,22 +88,25 @@ Don't `cd server && some command`, it won't work, it's windows 10
 
 - **`src/index.js`**: Server entry point, middleware, routing setup.
 - **`src/config/`**:
-  - `storage.js`: Data store initialization (SQLite/Redis).
-  - `stripeConfig.js`: Stripe client initialization.
-- **`src/controllers/`**: Request/response handling.
-  - `userController.js`: User fetching, subscription sync.
-  - `webhookController.js`: Stripe event processing.
-- **`src/services/`**: Business logic.
-  - `productService.js`: Stripe product initialization.
-  - `lessonService.js`: Lesson CRUD operations.
-  - `videoService.js`: Bunny.net video interactions.
+  - `storage.js`: Data store initialization.
+  - `stripe.js`: Stripe client initialization.
+- **`src/controllers/`**: Request/response handling logic.
+  - `user.controller.js`: User fetching, subscription sync, auth logic.
+  - `webhook.controller.js`: Stripe event processing.
+  - `video.controller.js`: Video related operations (likely Bunny.net).
+  - `lesson.controller.js`: Lesson CRUD operations.
+  - `product.controller.js`: Product/E-book related logic. (Note: actual filename might be `procuct.controller.js`)
 - **`src/routes/`**: Define API endpoints and link to controllers.
-  - `api.js`: E-book checkout, payment verification.
-  - `subscription.js`: Subscription management endpoints.
-  - `products.js`: (Likely internal Stripe product sync).
-  - `auth.js`: Registration, login.
-  - `userRoutes.js`: User detail fetching, manual sub sync trigger.
-  - `webhookRoutes.js`: Stripe webhook endpoint.
+  - `index.js`: Aggregates all route modules.
+  - `auth.routes.js`: Registration, login endpoints.
+  - `users.routes.js`: User detail fetching, manual sub sync trigger.
+  - `ebooks.routes.js`: E-book listing, checkout, payment verification.
+  - `subscription.routes.js`: Subscription management endpoints.
+  - `lessons.routes.js`: Lesson fetching and management endpoints.
+  - `articles.routes.js`: Article fetching endpoints.
+  - `products.routes.js`: Internal product management or listing.
+  - `webhooks.routes.js`: Stripe webhook endpoint.
+  - `lessons.js`: (Potential duplicate or unused file - investigate/remove?)
 - **`src/middleware/`**:
   - `auth.js`: `authenticateToken` JWT validation.
 

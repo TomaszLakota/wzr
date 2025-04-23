@@ -1,6 +1,7 @@
 // Real service that fetches from the backend API
 
 import apiClient from './apiClient';
+import { loadStripe } from '@stripe/stripe-js';
 
 interface CheckoutSessionResponse {
   success: boolean;
@@ -23,7 +24,7 @@ interface ApiVerificationData {
   currency?: string;
 }
 
-const API_BASE_URL = import.meta.env.API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Create checkout session for a product

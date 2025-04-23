@@ -1,7 +1,7 @@
 import { BackendEbook, Ebook } from '../types/ebook.types';
 import apiClient from './apiClient';
 
-const API_BASE_URL = import.meta.env.API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const getEbooks = async (): Promise<Ebook[]> => {
   try {

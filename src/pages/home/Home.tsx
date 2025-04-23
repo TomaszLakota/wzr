@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.scss';
 
@@ -24,8 +23,9 @@ function Home() {
         </div>
       </section>
 
-      <section className="features">
-        <h2>Dlaczego warto z nami?</h2>
+      {false && (
+        <section className="features">
+          <h2>Dlaczego warto z nami?</h2>
 
         <div className="features-grid">
           <div className="feature-card">
@@ -72,7 +72,8 @@ function Home() {
             </Link>
           </div>
         </div>
-      </section>
+        </section>
+      )}
 
       <section className="ebooks-section">
         <div className="ebooks-content">

@@ -19,7 +19,6 @@ const Header: React.FC = () => {
           setUser(parsedUser);
         } catch (error) {
           console.error('Error parsing user data from localStorage:', error);
-          // Clear invalid data
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           setIsLoggedIn(false);
@@ -32,18 +31,14 @@ const Header: React.FC = () => {
     };
 
     checkAuthStatus();
-    // Listen for storage changes (in case user logs in/out in another tab)
     window.addEventListener('storage', checkAuthStatus);
 
-    // Create a custom event to handle logout/login in current tab
     const handleAuthChange = () => {
       checkAuthStatus();
     };
 
-    // Listen for custom auth change events
     window.addEventListener('authChange', handleAuthChange);
 
-    // Cleanup function to remove listeners when component unmounts
     return () => {
       window.removeEventListener('storage', checkAuthStatus);
       window.removeEventListener('authChange', handleAuthChange);
@@ -60,15 +55,15 @@ const Header: React.FC = () => {
           <li>
             <Link to="/lekcje">Lekcje</Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/poradnik">Poradnik językowy</Link>
-          </li>
+          </li> */}
           <li>
             <Link to="/blog">Blog</Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/wyjazdy">Wyjazdy z jogą</Link>
-          </li>
+          </li> */}
           <li>
             <Link to="/ebooki">E-booki</Link>
           </li>

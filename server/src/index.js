@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-// Get directory name in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -16,10 +15,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-console.log('Starting server with configuration:');
-console.log('- NODE_ENV:', process.env.NODE_ENV);
-console.log('- PORT:', port);
-console.log('- JWT Secret configured:', !!process.env.JWT_SECRET);
 
 if (!JWT_SECRET) {
   console.error('JWT_SECRET is not defined in environment variables');
@@ -27,24 +22,34 @@ if (!JWT_SECRET) {
 }
 
 try {
-  // Initialize Supabase client
   const supabase = createSupabaseClient();
-  // Make Supabase client accessible to routes/middleware
   app.locals.supabase = supabase;
 
-  // Configure CORS
-  const isDevelopment = process.env.NODE_ENV !== 'production';
-  const corsOptions = isDevelopment
-    ? {
-        origin: true, // Allow all origins in development
-        credentials: true,
-      }
-    : {
-        origin: process.env.FRONTEND_URL,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true,
-      };
+  // Configure CORS based on environment
+  const nodeEnv = process.env.NODE_ENV;
+  const frontendUrl = process.env.FRONTEND_URL;
+  let allowedOrigin;
+
+  if (nodeEnv === 'production') {
+    allowedOrigin = frontendUrl;
+    if (!allowedOrigin) {
+      console.error('FATAL: FRONTEND_URL environment variable is required but not set in production!');
+      process.exit(1);
+    }
+  } else {
+    allowedOrigin = frontendUrl;
+    if (!allowedOrigin) {
+      console.warn('WARN: FRONTEND_URL environment variable not set for development. Allowing all origins for CORS. Please set FRONTEND_URL in server/.env (e.g., FRONTEND_URL=http://localhost:5173)');
+      allowedOrigin = true;
+    }
+  }
+
+  const corsOptions = {
+    origin: allowedOrigin,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  };
 
   app.use(cors(corsOptions));
 
@@ -53,16 +58,11 @@ try {
   // API Routes
   app.use('/api', apiRoutes);
 
-  // Serve static files in production
-  if (process.env.NODE_ENV === 'production') {
-    // Serve any static files
-    app.use(express.static(path.join(__dirname, '../../build')));
-
-    // Handle React routing, return all requests to React app
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, '../../build', 'index.html'));
+  if (nodeEnv === 'development') {
+    app.listen(port, () => {
+      console.log(`Server listening locally at http://localhost:${port}`);
     });
-  }
+  } 
 } catch (error) {
   console.error('Server initialization error:', error);
   process.exit(1);

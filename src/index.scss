@@ -1,6 +1,6 @@
 // SCSS Variables
-$primary-color: #007bff;
-$primary-color-dark: #0056b3;
+$primary-color: #0f3930;
+$primary-color-dark: #0a2c25;
 $text-color: #333;
 $text-light: #666;
 $background-color: #fff;
@@ -9,11 +9,11 @@ $background-light: #f8f9fa;
 $error-color: #dc3545;
 $error-background: #fff3f3;
 $shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$accent-color: #c56a45;
 
 // Additional variables for pages
 $text-primary: $text-color;
 $text-secondary: $text-light;
-$accent-color: #ffc107;
 
 * {
   box-sizing: border-box;

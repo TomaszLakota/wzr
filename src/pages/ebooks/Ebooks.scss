@@ -1,3 +1,5 @@
+@use '../../index.scss' as *;
+
 .ebooks-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -43,6 +45,19 @@
     margin: 0;
     color: #4a90e2;
     font-weight: 500;
+  }
+
+  .auth-links {
+    a {
+      color: $accent-color;
+      font-weight: 600;
+      text-decoration: underline;
+      transition: color 0.2s;
+
+      &:hover {
+        color: darken($accent-color, 10%);
+      }
+    }
   }
 }
 

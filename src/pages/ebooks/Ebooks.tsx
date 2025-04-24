@@ -4,11 +4,35 @@ import './Ebooks.scss';
 import { getEbooks } from '../../services/ebookService';
 import { createCheckoutSession } from '../../services/stripeService';
 import { Ebook } from '../../types/ebook.types';
+import { Link } from 'react-router-dom';
 
 function Ebooks() {
   const [products, setProducts] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const userDataString = localStorage.getItem('user');
+    setIsLoggedIn(!!(token && userDataString));
+
+    // Listen for auth changes
+    const handleAuthChange = () => {
+      const token = localStorage.getItem('token');
+      const userDataString = localStorage.getItem('user');
+      setIsLoggedIn(!!(token && userDataString));
+    };
+
+    window.addEventListener('authChange', handleAuthChange);
+    window.addEventListener('storage', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('authChange', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
+    };
+  }, []);
 
   useEffect(() => {
     // Fetch products on component mount
@@ -28,6 +52,14 @@ function Ebooks() {
   }, []);
 
   const handlePurchase = async (productId: string) => {
+    // Check if user is logged in first
+    if (!isLoggedIn) {
+      setMessage(
+        'Musisz być zalogowany, aby dokonać zakupu. ' 
+      );
+      return;
+    }
+
     try {
       setMessage('Przygotowywanie płatności...');
 
@@ -64,7 +96,16 @@ function Ebooks() {
 
       {message && (
         <div className="ebooks-message">
-          <p>{message}</p>
+          <p>
+            {message}
+            {!isLoggedIn && message.includes('Musisz być zalogowany') && (
+              <span className="auth-links">
+                {' '}
+                <Link to="/logowanie">Zaloguj się</Link> lub{' '}
+                <Link to="/rejestracja">Zarejestruj się</Link>
+              </span>
+            )}
+          </p>
         </div>
       )}
 

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import './Home.scss';
-import bookIcon from '../../../public/book-icon.svg';
+import bookIcon from '../../assets/book-icon.svg';
 
 const roberto1 = 'https://wzrr.b-cdn.net/roberto-1.webp';
 const roberto2 = 'https://wzrr.b-cdn.net/roberto-2.webp';

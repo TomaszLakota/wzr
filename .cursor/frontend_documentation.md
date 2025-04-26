@@ -65,12 +65,36 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 - `ebooks/`
 - `blog/`
 - `admin-panel/`
+- `forgotPassword/`
+- `resetPassword/`
 
 **src/services/**
 
 - API communication logic
 - Stripe integration
 - Authentication handling
+
+### `apiClient.ts`
+
+- **Purpose:** A centralized service for making HTTP requests to the backend API.
+- **Features:**
+  - Automatic token handling for authenticated requests
+  - Consistent error handling
+  - Response parsing
+  - Cache control
+  - Methods for common HTTP verbs (GET, POST, PUT, DELETE)
+
+### `authService.ts`
+
+- **Purpose:** Handles authentication-related API calls.
+- **Features:**
+  - Login method for user authentication
+  - Forgot password functionality for requesting password reset
+  - Reset password functionality for setting a new password with a reset token
+- **Methods:**
+  - `login(email, password)`: Authenticates a user and returns a token and user data
+  - `forgotPassword(email)`: Sends a password reset email to the user
+  - `resetPassword(token, password)`: Resets the user's password using a valid token
 
 **src/styles/**
 
@@ -94,7 +118,8 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 
    - SCSS for all styling
    - Colors defined in `src/index.scss`
-   - import using @use
+   - Import using @use
+   - **Important**: Always check index.scss for existing variable names before creating new ones. Variable names should be consistent throughout the application. Recently added variables include: $success-color, $success-background, $text-color-secondary, $disabled-background.
 
 3. **API & Integrations**
 
@@ -247,6 +272,30 @@ All sections are responsive and use consistent styling throughout.
 - **Purpose:** Displays a list of article previews.
 - **Data Fetching:** Fetches a list of article previews (title and slug) from the `/api/articles` endpoint.
 - **Components Used:** `ArticlePreview`.
+
+### `ForgotPassword` (`src/pages/forgotPassword/ForgotPassword.tsx`)
+
+- **Purpose:** Allows users to request a password reset email by providing their email address.
+- **Data Handling:** Sends a request to the `/api/forgot-password` endpoint with the user's email.
+- **Components Used:** React Router's `Form` and `Link`.
+- **Features:**
+  - Form validation
+  - Success/error message display
+  - Loading state indication
+
+### `ResetPassword` (`src/pages/resetPassword/ResetPassword.tsx`)
+
+- **Purpose:** Allows users to set a new password after clicking the reset link in their email.
+- **Data Handling:**
+  - Extracts token from URL query parameters
+  - Validates new password (matching confirmation, minimum length)
+  - Sends request to `/api/reset-password` endpoint with token and new password
+- **Components Used:** React Router's `Form`, `Link`, and `useSearchParams` for token extraction.
+- **Features:**
+  - Password validation
+  - Success/error message display
+  - Automatic redirect to login page after successful reset
+  - Loading state indication
 
 ### `ArticleDetail` (`src/pages/ArticleDetail.tsx`)
 

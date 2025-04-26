@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Form, useNavigate } from 'react-router-dom';
-import apiClient from '../../services/apiClient';
+import { Form, useNavigate, Link } from 'react-router-dom';
+import authService from '../../services/authService';
 import './Login.scss';
 
 function Login() {
@@ -16,7 +16,7 @@ function Login() {
     };
 
     try {
-      const data = await apiClient.post('/api/login', userData);
+      const data = await authService.login(userData.email, userData.password);
 
       // Store the token and user data
       localStorage.setItem('token', data.token);
@@ -45,6 +45,9 @@ function Login() {
         <div className="form-group">
           <label htmlFor="password">Hasło:</label>
           <input type="password" id="password" name="password" required />
+        </div>
+        <div className="forgot-password">
+          <Link to="/zresetuj-haslo">Zapomniałeś hasła?</Link>
         </div>
         <button type="submit" className="submit-button">
           Logowanie

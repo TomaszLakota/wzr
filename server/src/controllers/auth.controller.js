@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import stripe from 'stripe';
-import { sendActivationEmail } from './email.controller.js';
+import { sendActivationEmail, sendPasswordResetEmail } from './email.controller.js';
 
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -234,5 +234,130 @@ export const login = async (req, res) => {
       stack: error.stack,
     });
     res.status(500).json({ error: 'Wystąpił nieoczekiwany błąd podczas logowania.' });
+  }
+};
+
+// Handle forgot password request
+export const forgotPassword = async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Proszę podać adres email.' });
+  }
+
+  try {
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    // Token expires in 1 hour
+    const resetTokenExpiry = new Date(Date.now() + 3600000).toISOString();
+
+    // Find user by email
+    const { data: user, error: findError } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('email', email)
+      .single();
+
+    // Always return success even if user not found (security best practice)
+    if (findError || !user) {
+      if (findError && findError.code !== 'PGRST116') {
+        console.error('Error finding user by email:', findError);
+      }
+
+      // Return success anyway to prevent email enumeration
+      return res.status(200).json({
+        message:
+          'Jeśli konto z podanym adresem email istnieje, wysłaliśmy na niego instrukcje resetowania hasła.',
+      });
+    }
+
+    // Update user with reset token
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        reset_token: resetToken,
+        reset_token_expiry: resetTokenExpiry,
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error updating user with reset token:', updateError);
+      return res.status(500).json({ error: 'Wystąpił błąd podczas przetwarzania żądania.' });
+    }
+
+    // Construct reset link
+    const resetLink = `${process.env.FRONTEND_URL}/reset-hasla?token=${resetToken}`;
+
+    // Send password reset email
+    try {
+      await sendPasswordResetEmail(user.email, resetLink);
+    } catch (emailError) {
+      console.error('Error sending password reset email:', emailError);
+      // Continue without returning an error to client
+    }
+
+    // Return success response
+    res.status(200).json({
+      message:
+        'Jeśli konto z podanym adresem email istnieje, wysłaliśmy na niego instrukcje resetowania hasła.',
+    });
+  } catch (error) {
+    console.error('Error during password reset request:', error);
+    res.status(500).json({ error: 'Wystąpił nieoczekiwany błąd.' });
+  }
+};
+
+// Handle password reset with token
+export const resetPassword = async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ error: 'Brak tokena lub nowego hasła.' });
+  }
+
+  try {
+    // Find user by reset token
+    const { data: user, error: findError } = await supabase
+      .from('users')
+      .select('id, reset_token_expiry')
+      .eq('reset_token', token)
+      .single();
+
+    if (findError || !user) {
+      return res.status(400).json({ error: 'Nieprawidłowy lub wygasły token resetujący.' });
+    }
+
+    // Check if token has expired
+    if (new Date(user.reset_token_expiry) < new Date()) {
+      return res.status(400).json({ error: 'Token resetujący wygasł. Poproś o nowy link.' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update user's password and clear reset token
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        password: hashedPassword,
+        reset_token: null,
+        reset_token_expiry: null,
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error updating password:', updateError);
+      return res.status(500).json({ error: 'Nie udało się zaktualizować hasła.' });
+    }
+
+    res
+      .status(200)
+      .json({ message: 'Hasło zostało pomyślnie zmienione. Możesz się teraz zalogować.' });
+  } catch (error) {
+    console.error('Error during password reset:', error);
+    res.status(500).json({ error: 'Wystąpił nieoczekiwany błąd podczas resetowania hasła.' });
   }
 };

@@ -18,6 +18,8 @@ import LessonPage from './pages/lesson/LessonPage';
 import AdminPanel from './pages/admin-panel/AdminPanel';
 import EmailActivated from './pages/email-activated/EmailActivated';
 import RegistrationSuccess from './pages/registration-success/RegistrationSuccess';
+import ForgotPassword from './pages/forgotPassword/ForgotPassword';
+import ResetPassword from './pages/resetPassword/ResetPassword';
 
 // Load Stripe outside of component render to avoid recreating the Stripe object on re-renders
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -89,6 +91,14 @@ const router = createBrowserRouter([
       {
         path: '/rejestracja-sukces',
         element: <RegistrationSuccess />,
+      },
+      {
+        path: '/zresetuj-haslo',
+        element: <ForgotPassword />,
+      },
+      {
+        path: '/reset-hasla',
+        element: <ResetPassword />,
       },
     ],
   },

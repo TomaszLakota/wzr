@@ -53,3 +53,22 @@ export async function sendActivationEmail(to, activationLink) {
     throw error;
   }
 }
+
+// Send password reset email
+export async function sendPasswordResetEmail(to, resetLink) {
+  const mailOptions = {
+    from: `"Włoski z Roberto" <${process.env.EMAIL}>`,
+    to: to,
+    subject: 'Resetowanie hasła - Włoski z Roberto',
+    text: `Witaj! Otrzymaliśmy prośbę o zresetowanie Twojego hasła. Kliknij poniższy link, aby zresetować hasło: ${resetLink}. Link wygaśnie po 1 godzinie. Jeśli nie prosiłeś o zresetowanie hasła, zignoruj tę wiadomość.`,
+    html: `<b>Witaj!</b><br><br>Otrzymaliśmy prośbę o zresetowanie Twojego hasła.<br><br>Kliknij poniższy link, aby zresetować hasło:<br><a href="${resetLink}">${resetLink}</a><br><br>Link wygaśnie po 1 godzinie.<br><br>Jeśli nie prosiłeś o zresetowanie hasła, zignoruj tę wiadomość.`,
+  };
+
+  try {
+    let info = await transporter.sendMail(mailOptions);
+    return info;
+  } catch (error) {
+    console.error('Błąd podczas wysyłania emaila resetującego hasło:', error);
+    throw error;
+  }
+}

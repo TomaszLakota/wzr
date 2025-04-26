@@ -12,6 +12,9 @@ Node.js Express server for e-book sales and Stripe subscription management.
 
 Don't `cd server && some command`, it won't work, it's windows 10
 
+- db schema in .cursor/rules/db_schema.json
+- any SQL queries you to run, add them in a new file and i will run it. assume db shape is exactly as in the schema
+
 ## Core Technologies
 
 - **Framework**: Express
@@ -31,10 +34,13 @@ Don't `cd server && some command`, it won't work, it's windows 10
 
 ### Auth
 
-| Method | Endpoint        | Description       | Auth |
-| :----- | :-------------- | :---------------- | :--- |
-| POST   | `/api/register` | Register new user | No   |
-| POST   | `/api/login`    | Login user        | No   |
+| Method | Endpoint               | Description               | Auth |
+| :----- | :--------------------- | :------------------------ | :--- |
+| POST   | `/api/register`        | Register new user         | No   |
+| POST   | `/api/login`           | Login user                | No   |
+| POST   | `/api/activate`        | Activate user account     | No   |
+| POST   | `/api/forgot-password` | Request password reset    | No   |
+| POST   | `/api/reset-password`  | Reset password with token | No   |
 
 ### Users
 

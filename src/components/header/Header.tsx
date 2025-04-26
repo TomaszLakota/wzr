@@ -61,9 +61,9 @@ const Header: React.FC = () => {
           <li>
             <Link to="/blog">Blog</Link>
           </li>
-          {/* <li>
+          <li>
             <Link to="/wyjazdy">Wyjazdy z jogą</Link>
-          </li> */}
+          </li>
           <li>
             <Link to="/ebooki">E-booki</Link>
           </li>

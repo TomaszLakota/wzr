@@ -387,5 +387,10 @@ Displays a single article fetched from the backend based on the URL slug.
 
 ### `YogaTrips` (`src/pages/yoga-trips`)
 
-- **Purpose:** Page dedicated to information about yoga trips offered.
+- **Purpose:** Displays information about yoga trips offered and includes a contact form for inquiries.
 - **Route:** `/wyjazdy-joga` or similar.
+- **Features:**
+  - Information about yoga trips to Italy
+  - Contact form that submits to `/api/contact` endpoint
+  - Form validation and error/success message handling
+- **Components Used:** Custom contact form with styling similar to login form

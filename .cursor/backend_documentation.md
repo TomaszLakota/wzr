@@ -135,3 +135,9 @@ Articles are fetched from a Supabase database.
 | :----- | :-------------------- | :----------------------- | :--- |
 | GET    | `/api/articles`       | Get all article previews | No   |
 | GET    | `/api/articles/:slug` | Get full article by slug | No   |
+
+### Contact
+
+| Method | Endpoint       | Description                                | Auth |
+| :----- | :------------- | :----------------------------------------- | :--- |
+| POST   | `/api/contact` | Submit contact form (rate limited: 3/hour) | No   |

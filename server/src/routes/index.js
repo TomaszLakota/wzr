@@ -8,6 +8,7 @@ import userRoutes from './users.routes.js';
 import articlesRouter from './articles.routes.js';
 import lessonsRouter from './lessons.routes.js';
 import webhookRoutes from './webhooks.routes.js';
+import contactRoutes from './contact.routes.js';
 const router = express.Router();
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -19,6 +20,7 @@ router.use('/lekcje', lessonsRouter);
 router.use(authRoutes);
 router.use(userRoutes);
 router.use(webhookRoutes);
+router.use(contactRoutes);
 
 /**
  * Verify payment status

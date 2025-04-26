@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import stripe from 'stripe';
-import { sendActivationEmail, sendPasswordResetEmail } from './email.controller.js';
+import { sendActivationEmail, sendPasswordResetEmail } from '../services/auth-email.service.js';
 
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 

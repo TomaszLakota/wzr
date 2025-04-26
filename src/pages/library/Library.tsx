@@ -1,28 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPurchasedEbooks } from '../../services/ebookService';
 import './Library.scss';
+import { Purchase } from '../../types/stripe.types';
 
-interface Price {
-  formatted: string;
-  // Add other price properties if needed
-}
-
-interface PurchaseInfo {
-  purchaseDate: string | number | Date;
-  downloadUrl?: string;
-  // Add other purchase info properties if needed
-}
-
-interface Purchase {
-  id: string;
-  name: string;
-  description?: string;
-  images?: string[];
-  price: Price;
-  purchaseInfo: PurchaseInfo;
-  // Add other purchase properties if needed
-}
+  
 
 function Library() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -32,9 +14,9 @@ function Library() {
   useEffect(() => {
     const fetchPurchases = async () => {
       try {
-        // Assuming getPurchasedEbooks returns Purchase[]
         const purchasedEbooks = await getPurchasedEbooks();
-        setPurchases(purchasedEbooks);
+        console.log('purchasedEbooks', purchasedEbooks);
+        setPurchases(purchasedEbooks as any);
       } catch (error) {
         console.error('Błąd podczas pobierania zakupionych ebooków:', error);
         setMessage('Nie udało się załadować zakupionych ebooków. Spróbuj ponownie później.');

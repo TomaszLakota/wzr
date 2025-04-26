@@ -1,18 +1,32 @@
+@use '../../index.scss' as *;
+
 .article-preview {
-  border-bottom: 1px solid #eee; // Example styling
-  padding: 1rem 0;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid $border-color;
 
   h2 {
-    margin: 0 0 0.5rem 0;
+    margin-bottom: 0.5rem;
+    
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
-  a {
-    text-decoration: none;
-    color: #333; // Example color
+  .article-date {
+    font-size: 0.9rem;
+    color: $text-color-secondary;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+  }
 
-    &:hover {
-      text-decoration: underline;
-    }
+  p {
+    margin-top: 0.5rem;
+    line-height: 1.6;
   }
 }

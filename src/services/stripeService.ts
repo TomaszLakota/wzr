@@ -1,28 +1,11 @@
 // Real service that fetches from the backend API
 
+import {
+  CheckoutSessionResponse,
+  PaymentVerificationResponse,
+  ApiVerificationData,
+} from '../types/stripe.types';
 import apiClient from './apiClient';
-import { loadStripe } from '@stripe/stripe-js';
-
-interface CheckoutSessionResponse {
-  success: boolean;
-  message: string;
-  sessionUrl?: string;
-  error?: string;
-}
-
-interface PaymentVerificationResponse {
-  status: string;
-  amount?: number;
-  currency?: string;
-  success: boolean;
-  message: string;
-}
-
-interface ApiVerificationData {
-  status: string;
-  amount?: number;
-  currency?: string;
-}
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -97,7 +80,8 @@ export const verifyPaymentStatus = async (id: string): Promise<PaymentVerificati
   const data = await apiClient.get<ApiVerificationData>(endpoint);
 
   // If payment is successful, update localStorage
-  if (data.status === 'succeeded') {
+  console.log('data.status', data.status);
+  if (data.status === 'success') {
     // Update local storage to reflect subscription
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -113,9 +97,9 @@ export const verifyPaymentStatus = async (id: string): Promise<PaymentVerificati
     status: data.status,
     amount: data.amount,
     currency: data.currency,
-    success: data.status === 'succeeded',
+    success: data.status === 'success',
     message:
-      data.status === 'succeeded'
+      data.status === 'success'
         ? 'Płatność zakończona sukcesem!'
         : 'Płatność jest w trakcie przetwarzania.',
   };

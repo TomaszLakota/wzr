@@ -4,3 +4,9 @@ export interface Pagination {
   total: number;
   totalPages: number;
 }
+
+declare global {
+  interface Window {
+    clientSecret?: string;
+  }
+}

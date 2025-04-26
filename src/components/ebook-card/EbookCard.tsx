@@ -2,7 +2,7 @@ import React from 'react';
 import './EbookCard.scss';
 import { Ebook } from '../../types/ebook.types';
 
-interface EbookCardProps {
+export interface EbookCardProps {
   ebook: Ebook;
   onPurchase: (productId: Ebook['id']) => void;
 }
@@ -14,7 +14,7 @@ const EbookCard: React.FC<EbookCardProps> = ({ ebook, onPurchase }) => {
         {ebook.imageUrl ? (
           <img src={ebook.imageUrl} alt={ebook.name} />
         ) : (
-          <div className="ebook-card__placeholder">E-book</div> // Polish text already
+          <div className="ebook-card__placeholder">E-book</div>
         )}
       </div>
       <div className="ebook-card__content">
@@ -23,9 +23,9 @@ const EbookCard: React.FC<EbookCardProps> = ({ ebook, onPurchase }) => {
         {ebook.price && <div className="ebook-card__price">{ebook.formattedPrice}</div>}
         <button
           className="ebook-card__button"
-          onClick={() => onPurchase(ebook.id)} // Call the passed function
+          onClick={() => onPurchase(ebook.id)}
         >
-          Kup teraz {/* Polish text already */}
+          Kup teraz
         </button>
       </div>
     </div>

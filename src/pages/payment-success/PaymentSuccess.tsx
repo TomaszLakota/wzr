@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { verifyPaymentStatus } from '../../services/stripeService';
 import './PaymentSuccess.scss';
-
-interface PaymentStatus {
-  status: 'processing' | 'success' | 'error';
-  success: boolean;
-  message: string;
-}
+import { PaymentVerificationResponse } from '../../types/stripe.types';
 
 function PaymentSuccess() {
   const [searchParams] = useSearchParams();
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({
+  const [paymentStatus, setPaymentStatus] = useState<PaymentVerificationResponse>({
     status: 'processing',
     success: false,
     message: 'Weryfikacja płatności...',
@@ -69,10 +64,8 @@ function PaymentSuccess() {
   }, [searchParams, verificationAttempted]); // Added dependencies
 
   useEffect(() => {
-    // Potentially update user state/local storage if payment was successful
     if (paymentStatus.success) {
       console.log('Payment successful, potentially update user state here.');
-      // Example: Trigger an event or fetch updated user data
       window.dispatchEvent(new Event('paymentSuccess'));
     }
   }, [paymentStatus.success]);

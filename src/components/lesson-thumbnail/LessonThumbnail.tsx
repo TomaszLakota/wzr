@@ -1,17 +1,8 @@
 import React from 'react';
 import './LessonThumbnail.scss';
+import { Lesson } from '../../types/lesson.types';
 
-export interface Lesson {
-  id: string | number;
-  thumbnailUrl?: string;
-  title: string;
-  description: string;
-  level: string;
-  duration: string;
-  slug: string;
-}
-
-interface LessonThumbnailProps {
+export interface LessonThumbnailProps {
   lesson: Lesson;
 }
 

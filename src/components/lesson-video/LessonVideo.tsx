@@ -1,22 +1,16 @@
 import React from 'react';
 import './LessonVideo.scss';
+import { Lesson } from '../../types/lesson.types';
 
-interface Lesson {
-  videoUrl: string;
-  title: string;
-}
-
-interface LessonVideoProps {
+export interface LessonVideoProps {
   lesson: Lesson;
 }
 
+
 const LessonVideo: React.FC<LessonVideoProps> = ({ lesson }) => {
-  // No need for the null check for videoUrl here as the type ensures it exists.
-  // If it *can* be null/undefined, the Lesson interface should reflect that.
-  // Assuming videoUrl is required based on the original logic showing nothing if it's missing.
   if (!lesson.videoUrl) {
     console.warn('LessonVideo component received lesson without videoUrl:', lesson);
-    return <div className="lesson-video--no-video">Brak dostępnego wideo dla tej lekcji.</div>;
+    return <div className="lesson-video--no-video">Błąd podczas ładowania wideo.</div>;
   }
 
   return (

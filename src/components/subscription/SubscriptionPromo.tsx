@@ -4,15 +4,8 @@ import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import '../styles/subscription.scss';
 import { StripeCardElement } from '@stripe/stripe-js';
 
-interface SubscriptionPromoProps {
+export interface SubscriptionPromoProps {
   isLoggedIn: boolean;
-}
-
-// Extend Window interface to include clientSecret
-declare global {
-  interface Window {
-    clientSecret?: string;
-  }
 }
 
 const SubscriptionPromo: React.FC<SubscriptionPromoProps> = ({ isLoggedIn }) => {

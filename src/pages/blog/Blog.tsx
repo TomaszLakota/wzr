@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ArticlePreview from '../../components/article-preview/ArticlePreview';
+import './Blog.scss';
+import { Article } from '../../types/article.types';
 
-interface Article {
-  slug: string;
-  // Add other article properties here as needed
-}
+
 
 function Blog() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -31,16 +30,18 @@ function Blog() {
   }, []);
 
   return (
-    <div>
+    <div className="blog-container">
       <h1>Blog</h1>
-      {loading && <p>Ładowanie...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {!loading && !error && (
-        <div>
-          {articles.map((article) => {
-            // console.log(article.slug);
-            return <ArticlePreview key={article.slug} article={article} />;
-          })}
+      {loading && <p className="loading-message">Ładowanie...</p>}
+      {error && <p className="error-message">{error}</p>}
+      {!loading && !error && articles.length === 0 && (
+        <p className="no-articles">Brak dostępnych artykułów.</p>
+      )}
+      {!loading && !error && articles.length > 0 && (
+        <div className="articles-list">
+          {articles.map((article) => (
+            <ArticlePreview key={article.slug} article={article} />
+          ))}
         </div>
       )}
     </div>

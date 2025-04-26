@@ -2,7 +2,7 @@ import React from 'react';
 import './Lesson.scss';
 import { LessonData } from '../../types/lesson.types';
 
-interface LessonProps {
+export interface LessonProps {
   lesson: LessonData;
 }
 

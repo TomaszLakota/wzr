@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
   try {
     const { data: articles, error } = await supabase
       .from('articles')
-      .select('slug, title, preview');
+      .select('slug, title, preview, created_at');
 
     if (error) throw error;
 

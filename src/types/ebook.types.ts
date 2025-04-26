@@ -1,3 +1,5 @@
+import { Price } from './stripe.types';
+
 export interface Ebook {
   id: string;
   name: string;
@@ -17,11 +19,4 @@ export interface BackendEbook {
   price?: Price;
   download_url?: string;
   image_url?: string;
-}
-
-export interface Price {
-  id: string;
-  currency: string;
-  unit_amount: number;
-  formatted: string;
 }

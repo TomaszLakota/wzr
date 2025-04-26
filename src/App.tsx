@@ -5,6 +5,7 @@ import LanguageGuide from './pages/language-guide/LanguageGuide';
 import LessonsPage from './pages/lessons/LessonsPage';
 import YogaTrips from './pages/yoga-trips/YogaTrips';
 import Ebooks from './pages/ebooks/Ebooks';
+import EbookDetails from './pages/ebook-details/EbookDetails';
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
 import PaymentSuccess from './pages/payment-success/PaymentSuccess';
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: '/ebooki',
         element: <Ebooks />,
+      },
+      {
+        path: '/ebooki/:id',
+        element: <EbookDetails />,
       },
       {
         path: '/platnosc/sukces',

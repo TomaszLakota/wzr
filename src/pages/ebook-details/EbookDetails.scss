@@ -1,0 +1,182 @@
+@use '../../index.scss' as *;
+@use 'sass:color';
+
+.ebook-details {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  position: relative;
+
+  &__back-link {
+    display: inline-block;
+    color: #555;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    
+    &:hover {
+      color: $accent-color;
+    }
+    
+    &:before {
+      content: "←";
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: visible;
+    padding: 2rem;
+    min-height: 600px;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: stretch;
+    }
+  }
+
+  &__left-column {
+    flex: 1;
+    width: 100%;
+
+    @media (min-width: 768px) {
+      width: 60%;
+      padding-right: 2rem;
+    }
+  }
+
+  &__right-column {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    @media (min-width: 768px) {
+      width: 40%;
+      position: relative;
+    }
+  }
+
+  &__sticky-content {
+    @media (min-width: 768px) {
+      position: sticky;
+      top: 2rem;
+      height: auto;
+    }
+  }
+
+  &__image-container {
+    width: 100%;
+    margin-bottom: 1rem;
+    min-height: 270px;
+  }
+
+  &__image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  &__placeholder {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #888;
+    border-radius: 8px;
+  }
+
+  &__title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  &__description {
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #444;
+    }
+
+    p {
+      line-height: 1.6;
+      color: #555;
+    }
+  }
+
+  &__price-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  &__price {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: $accent-color;
+    margin: 0;
+  }
+
+  &__buy-button {
+    background-color: $accent-color;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-grow: 1;
+    text-align: center;
+
+    &:hover {
+      background-color: color.adjust($accent-color, $lightness: -10%);
+    }
+  }
+
+  &__message {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+
+    p {
+      margin: 0;
+      color: $accent-color;
+      font-weight: 500;
+    }
+  }
+}
+
+.ebook-details-loading,
+.ebook-details-error {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+
+  p {
+    margin-bottom: 1.5rem;
+    color: #666;
+    font-size: 1.1rem;
+  }
+} 

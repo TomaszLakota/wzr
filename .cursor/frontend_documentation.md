@@ -63,6 +63,7 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 - `lessons/`
 - `language-guide/`
 - `ebooks/`
+- `ebook-details/` - Detailed view for a single e-book
 - `blog/`
 - `admin-panel/`
 - `forgotPassword/`
@@ -145,8 +146,8 @@ The frontend is a React application built with Vite, designed to provide an e-bo
 ### E-book Purchase Flow
 
 1. User browses e-books on the e-book list page
-2. User selects an e-book to view details
-3. User clicks "Buy Now" to initiate checkout
+2. User clicks on an e-book card to view its details on the dedicated EbookDetails page
+3. User can either click "Buy Now" on the list page or on the details page to initiate checkout
 4. User is redirected to Stripe checkout
 5. Upon successful payment, user is redirected to success page
 6. User can access purchased e-book from their dashboard
@@ -317,6 +318,19 @@ Displays a single article fetched from the backend based on the URL slug.
 - **Route:** `/ebooki`
 - **Fetches Data:** Yes, from `/api/ebooks`.
 - **Components Used:** `EbookCard`.
+
+### `EbookDetails` (`src/pages/ebook-details`)
+
+- **Purpose:** Displays detailed information about a single e-book including full description and purchase options.
+- **Route:** `/ebooki/:id`
+- **Fetches Data:** Yes, reuses the data from `/api/ebooks` and filters by ID.
+- **Navigation:** Accessible by clicking on any part of an e-book card in the Ebooks list, except the buy button.
+- **Features:**
+  - Larger image display
+  - Complete description
+  - Purchase button
+  - Return to list option
+- **Components Used:** None specific, self-contained.
 
 ### `EmailActivated` (`src/pages/email-activated`)
 

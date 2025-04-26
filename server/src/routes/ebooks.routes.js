@@ -74,6 +74,75 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * Get a single ebook by ID with full description
+ */
+router.get('/:id', async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const { id } = req.params;
+
+  try {
+    const { data: product, error } = await supabase
+      .from('products')
+      .select(
+        `
+            id,
+            name,
+            description,
+            full_description,
+            active,
+            image_url,
+            prices (
+                id,
+                currency,
+                unit_amount,
+                active
+            )
+        `
+      )
+      .eq('id', id)
+      .eq('active', true)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching ebook ${id} from Supabase:`, error);
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'E-book nie został znaleziony' });
+      }
+      throw error;
+    }
+
+    if (!product) {
+      return res.status(404).json({ error: 'E-book nie został znaleziony' });
+    }
+
+    const activePrice = product.prices?.find((p) => p.active);
+    if (!activePrice) {
+      return res.status(404).json({ error: 'E-book nie ma aktywnej ceny' });
+    }
+
+    const formattedEbook = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      full_description: product.full_description,
+      active: product.active,
+      image_url: product.image_url,
+      price: {
+        id: activePrice.id,
+        currency: activePrice.currency,
+        unit_amount: activePrice.unit_amount,
+        formatted: formatPrice(activePrice.unit_amount, activePrice.currency),
+      },
+    };
+
+    res.json(formattedEbook);
+  } catch (error) {
+    console.error(`Error fetching ebook ${id}:`, error.message);
+    res.status(500).json({ error: 'Nie udało się pobrać szczegółów e-booka' });
+  }
+});
+
+/**
  * Create a checkout session for ebook purchase
  */
 router.post('/checkout', authenticateToken, async (req, res) => {
@@ -328,6 +397,7 @@ router.post('/admin/sync-stripe', authenticateToken, isAdmin, async (req, res) =
         id: product.id, // Use Stripe product ID as primary key
         name: product.name,
         description: product.description,
+        full_description: product.metadata?.full_description || product.description, // Use metadata if available, fall back to description
         active: product.active,
         image_url: product.images?.[0] || null, // Use first image URL
       });

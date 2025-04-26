@@ -59,6 +59,7 @@ Don't `cd server && some command`, it won't work, it's windows 10. RUN 2 COMMAND
 | Method | Endpoint                                   | Description                    | Auth |
 | :----- | :----------------------------------------- | :----------------------------- | :--- |
 | GET    | `/api/ebooks`                              | Get all e-books with prices    | No   |
+| GET    | `/api/ebooks/:id`                          | Get e-book details by ID       | No   |
 | GET    | `/api/user/ebooks`                         | Get user's purchased e-books   | Yes  |
 | POST   | `/api/checkout`                            | Create Stripe checkout session | No   |
 | GET    | `/api/payments/:paymentIntentId/verify`    | Verify payment by Intent ID    | No   |

@@ -1,6 +1,7 @@
 import React from 'react';
 import './EbookCard.scss';
 import { Ebook } from '../../types/ebook.types';
+import { useNavigate } from 'react-router-dom';
 
 export interface EbookCardProps {
   ebook: Ebook;
@@ -8,8 +9,19 @@ export interface EbookCardProps {
 }
 
 const EbookCard: React.FC<EbookCardProps> = ({ ebook, onPurchase }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/ebooki/${ebook.id}`);
+  };
+
+  const handlePurchaseClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click from triggering
+    onPurchase(ebook.id);
+  };
+
   return (
-    <div className="ebook-card">
+    <div className="ebook-card" onClick={handleCardClick}>
       <div className="ebook-card__image">
         {ebook.imageUrl ? (
           <img src={ebook.imageUrl} alt={ebook.name} />
@@ -23,7 +35,7 @@ const EbookCard: React.FC<EbookCardProps> = ({ ebook, onPurchase }) => {
         {ebook.price && <div className="ebook-card__price">{ebook.formattedPrice}</div>}
         <button
           className="ebook-card__button"
-          onClick={() => onPurchase(ebook.id)}
+          onClick={handlePurchaseClick}
         >
           Kup teraz
         </button>

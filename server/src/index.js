@@ -3,18 +3,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createSupabaseClient } from './config/storage.js';
 import apiRoutes from './routes/index.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { standardLimiter } from './middleware/rateLimiter.js';
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
-
 
 if (!JWT_SECRET) {
   console.error('JWT_SECRET is not defined in environment variables');
@@ -33,15 +28,13 @@ try {
   if (nodeEnv === 'production') {
     allowedOrigin = frontendUrl;
     if (!allowedOrigin) {
-      console.error('FATAL: FRONTEND_URL environment variable is required but not set in production!');
+      console.error(
+        'FATAL: FRONTEND_URL environment variable is required but not set in production!'
+      );
       process.exit(1);
     }
   } else {
-    allowedOrigin = frontendUrl;
-    if (!allowedOrigin) {
-      console.warn('WARN: FRONTEND_URL environment variable not set for development. Allowing all origins for CORS. Please set FRONTEND_URL in server/.env (e.g., FRONTEND_URL=http://localhost:5173)');
-      allowedOrigin = true;
-    }
+    allowedOrigin = frontendUrl || true;
   }
 
   const corsOptions = {
@@ -55,6 +48,9 @@ try {
 
   app.use(express.json());
 
+  // Apply rate limiting to all routes
+  app.use(standardLimiter);
+
   // API Routes
   app.use('/api', apiRoutes);
 
@@ -62,7 +58,7 @@ try {
     app.listen(port, () => {
       console.log(`Server listening locally at http://localhost:${port}`);
     });
-  } 
+  }
 } catch (error) {
   console.error('Server initialization error:', error);
   process.exit(1);

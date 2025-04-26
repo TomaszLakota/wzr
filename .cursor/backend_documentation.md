@@ -10,7 +10,7 @@ Node.js Express server for e-book sales and Stripe subscription management.
 
 ## Important notes
 
-Don't `cd server && some command`, it won't work, it's windows 10
+Don't `cd server && some command`, it won't work, it's windows 10. RUN 2 COMMANDS INSTEAD
 
 - db schema in .cursor/rules/db_schema.json
 - any SQL queries you to run, add them in a new file and i will run it. assume db shape is exactly as in the schema
@@ -23,12 +23,17 @@ Don't `cd server && some command`, it won't work, it's windows 10
 - **Password Hashing**: bcryptjs
 - **CORS**: cors
 - **DB**: supabase
+- **Rate Limiting**: express-rate-limit
 
 ## Key Concepts
 
 - **Data Storage**: Uses configurable storage (`src/config/storage.js`). `users` and `products` data.
 - **Authentication**: JWT-based (`Bearer <token>`). `authenticateToken` middleware (`src/middleware/auth.js`) protects routes. Token expiry: 24h.
 - **Payments**: Stripe integration (`src/config/stripeConfig.js`). Supports one-time purchases and recurring subscriptions.
+- **Rate Limiting**: All API routes are rate limited to prevent abuse:
+  - Standard routes: 100 requests per 15-minute window per IP
+  - Authentication routes: 10 requests per hour per IP
+  - Webhook endpoints: No rate limiting (needed for Stripe integration)
 
 ## API Endpoints
 

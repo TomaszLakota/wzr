@@ -1,8 +1,10 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import { handleStripeWebhook } from '../controllers/webhook.controller.js';
+import { zeroLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
+
+router.use('/webhook', zeroLimiter);
 
 // Debug middleware
 router.use('/webhook', (req, res, next) => {

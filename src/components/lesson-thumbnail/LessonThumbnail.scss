@@ -1,4 +1,4 @@
-@use '../../index.scss' as *;
+@use '../../styles/variables.scss' as *;
 
 .lesson-thumbnail {
   background: white;
@@ -11,7 +11,7 @@
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: $box-shadow-lg;
   }
 
   &__image {

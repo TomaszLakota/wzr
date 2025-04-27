@@ -1,9 +1,9 @@
-@use '../../index.scss' as *;
+@use '../../styles/variables.scss' as *;
 
 .header {
   background-color: $background-color;
   padding: 1.5rem;
-  box-shadow: $shadow-sm;
+  box-shadow: $box-shadow-sm;
   margin-bottom: 5px;
 
   nav {

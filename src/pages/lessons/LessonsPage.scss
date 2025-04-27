@@ -38,7 +38,7 @@
   border-radius: 12px;
   max-width: 500px;
   margin: 2rem auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: $box-shadow-md;
 
   h2 {
     color: #4caf50;

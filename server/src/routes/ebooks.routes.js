@@ -297,6 +297,33 @@ router.get('/user/purchased', authenticateToken, async (req, res) => {
     const pricesResults = await Promise.all(pricesPromises);
     const allPrices = pricesResults.filter(Boolean);
 
+    // Extract unique product IDs from the prices
+    const productIds = [
+      ...new Set(
+        allPrices
+          .map((price) => (typeof price.product === 'object' ? price.product.id : null))
+          .filter(Boolean)
+      ),
+    ];
+
+    // Fetch product details (including image_url) from Supabase for these IDs
+    let productDetailsMap = new Map();
+    if (productIds.length > 0) {
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select('id, image_url, download_url')
+        .in('id', productIds);
+
+      if (productsError) {
+        console.error(
+          `[GET /user/ebooks] Error fetching product details from Supabase:`,
+          productsError
+        );
+      } else {
+        productDetailsMap = new Map(productsData.map((p) => [p.id, p]));
+      }
+    }
+
     const priceMap = new Map(allPrices.map((price) => [price.id, price]));
 
     const purchases = sessions.data
@@ -315,12 +342,18 @@ router.get('/user/purchased', authenticateToken, async (req, res) => {
 
             if (product.metadata?.type !== 'ebook') return null;
 
+            // Get image_url from Supabase data
+            const productDetails = productDetailsMap.get(product.id);
+            console.log('productDetails', productDetails);
+            const imageUrl = productDetails.image_url || null;
+            const downloadUrl = productDetails.download_url || null;
+
             return {
               id: product.id,
               name: product.name,
               description: product.description,
               active: product.active,
-              image_url: product.image_url,
+              images: imageUrl ? [imageUrl] : [],
               price: {
                 id: price.id,
                 currency: price.currency,
@@ -330,31 +363,15 @@ router.get('/user/purchased', authenticateToken, async (req, res) => {
               purchaseInfo: {
                 purchaseDate: new Date(session.created * 1000).toISOString(),
                 paymentId: session.payment_intent,
-                downloadUrl: product.metadata.download_url || null,
+                downloadUrl,
               },
             };
           })
           .filter(Boolean);
       })
-      // Deduplicate based on product ID, keeping the latest purchase
-      .reduce((acc, current) => {
-        const existingIndex = acc.findIndex((item) => item.id === current.id);
-        if (existingIndex > -1) {
-          // If current is newer, replace; otherwise, keep existing
-          if (
-            new Date(current.purchaseInfo.purchaseDate) >
-            new Date(acc[existingIndex].purchaseInfo.purchaseDate)
-          ) {
-            acc[existingIndex] = current;
-          }
-        } else {
-          acc.push(current);
-        }
-        return acc;
-      }, [])
       .sort(
         (a, b) => new Date(b.purchaseInfo.purchaseDate) - new Date(a.purchaseInfo.purchaseDate)
-      ); // Sort by purchase date descending
+      );
 
     res.json(purchases);
   } catch (error) {

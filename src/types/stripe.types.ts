@@ -6,14 +6,16 @@ export interface Price {
 }
 
 export interface PurchaseInfo {
-  purchaseDate: string | number | Date;
+  purchaseDate: string;
   downloadUrl?: string;
+  paymentId: string;
 }
 
 export interface Purchase {
   id: string;
   name: string;
   description?: string;
+  active: boolean;
   images?: string[];
   price: Price;
   purchaseInfo: PurchaseInfo;

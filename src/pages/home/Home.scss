@@ -1,5 +1,5 @@
 @use 'sass:color';
-@use '../../index.scss' as index;
+@use '../../styles/variables.scss' as *;
 
 .home-page {
   width: 100%;
@@ -16,7 +16,7 @@
   h2,
   h3 {
     margin-bottom: 1rem;
-    color: #0f3930;
+    color: $primary-color;
     font-weight: 600;
   }
 
@@ -39,7 +39,7 @@
     h1 {
       font-size: 3rem;
       margin-bottom: 1.2rem;
-      color: #0f3930;
+      color: $primary-color;
       font-weight: 700;
       line-height: 1.2;
     }
@@ -59,7 +59,7 @@
         width: 100%;
         max-width: 400px;
         border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: $box-shadow-md;
       }
     }
 
@@ -99,7 +99,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      background-color: #f9f9f9;
+      background-color: $background-light;
       border-radius: 8px;
       padding: 1.5rem;
       text-align: center;
@@ -108,7 +108,7 @@
     .offering-icon {
       font-size: 2.5rem;
       margin-bottom: 1.2rem;
-      color: #0f3930;
+      color: $primary-color;
 
       .video-icon:before {
         content: '\25B6';
@@ -148,7 +148,7 @@
     gap: 2.5rem;
     align-items: center;
     justify-content: space-evenly;
-    background-color: #f9f9f9;
+    background-color: $background-light;
     border-radius: 8px;
     padding: 2rem;
     margin: 3rem 0;
@@ -158,7 +158,7 @@
       max-width: 400px;
 
       h2 {
-        color: #0f3930;
+        color: $primary-color;
         margin-bottom: 1rem;
         font-size: 2rem;
       }
@@ -176,7 +176,7 @@
         max-width: 400px;
         object-fit: cover;
         border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: $box-shadow-md;
       }
     }
   }
@@ -184,7 +184,7 @@
   // Call to action
   .cta {
     text-align: center;
-    background-color: #0f3930;
+    background-color: $primary-color;
     color: white;
     border-radius: 12px;
     padding: 2.5rem 2rem;
@@ -217,30 +217,30 @@
   letter-spacing: 0.5px;
 
   &.primary {
-    background-color: #0f3930;
+    background-color: $primary-color;
     color: white;
 
     &:hover {
-      background-color: #0a2c25;
+      background-color: $primary-color-dark;
     }
   }
 
   &.secondary {
     background-color: white;
-    color: #0f3930;
-    border: 2px solid #0f3930;
+    color: $primary-color;
+    border: 2px solid $primary-color;
 
     &:hover {
-      background-color: #f5f5f5;
+      background-color: $background-light;
     }
   }
 
   &.accent {
-    background-color: #c56a45;
+    background-color: $accent-color;
     color: white;
 
     &:hover {
-      background-color: #b55a3a;
+      background-color: $accent-color-dark;
     }
   }
 }

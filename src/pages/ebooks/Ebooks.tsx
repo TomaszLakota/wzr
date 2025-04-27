@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import EbookCard from '../../components/ebook-card/EbookCard';
 import './Ebooks.scss';
 import { getEbooks } from '../../services/ebookService';

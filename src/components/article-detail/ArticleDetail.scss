@@ -1,4 +1,4 @@
-@use '../../index.scss' as *;
+@use '../../styles/variables.scss' as *;
 
 .article-detail-container {
   max-width: 800px;
@@ -6,7 +6,7 @@
   padding: 2rem;
   background-color: $background-light;
   border-radius: 8px;
-  box-shadow: $shadow-sm;
+  box-shadow: $box-shadow-sm;
   color: $text-color;
 
   h1 {

@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPurchasedEbooks } from '../../services/ebookService';
 import './Library.scss';
-import { Purchase } from '../../types/stripe.types';
-
-  
+import { Purchase, Price } from '../../types/stripe.types';
+import EbookCard from '../../components/ebook-card/EbookCard';
+import { Ebook } from '../../types/ebook.types';
 
 function Library() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -14,9 +14,25 @@ function Library() {
   useEffect(() => {
     const fetchPurchases = async () => {
       try {
-        const purchasedEbooks = await getPurchasedEbooks();
-        console.log('purchasedEbooks', purchasedEbooks);
-        setPurchases(purchasedEbooks as any);
+        const fetchedData: any[] = await getPurchasedEbooks();
+        console.log('Fetched data (as any[]):', fetchedData);
+
+        const mappedPurchases: Purchase[] = (fetchedData || []).map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          active: item.active,
+          images: item.images,
+          price: item.price,
+          purchaseInfo: {
+            purchaseDate: item.purchaseInfo?.purchaseDate,
+            downloadUrl: item.purchaseInfo?.downloadUrl,
+            paymentId: item.purchaseInfo?.paymentId,
+          },
+        }));
+
+        console.log('Mapped data (as Purchase[]):', mappedPurchases);
+        setPurchases(mappedPurchases);
       } catch (error) {
         console.error('Błąd podczas pobierania zakupionych ebooków:', error);
         setMessage('Nie udało się załadować zakupionych ebooków. Spróbuj ponownie później.');
@@ -27,6 +43,17 @@ function Library() {
 
     fetchPurchases();
   }, []);
+
+  const getFormattedPrice = (priceData: Price | undefined): string | undefined => {
+    if (typeof priceData === 'object' && priceData !== null && typeof priceData.formatted === 'string') {
+      return priceData.formatted;
+    }
+    if (typeof priceData === 'object' && priceData !== null && typeof (priceData as any).unit_amount === 'number') {
+      const amount = (priceData as any).unit_amount;
+      return (amount / 100).toFixed(2) + ' zł';
+    }
+    return undefined;
+  };
 
   return (
     <div className="library-page">
@@ -45,42 +72,33 @@ function Library() {
         <div className="library-loading">Ładowanie biblioteki...</div>
       ) : purchases.length > 0 ? (
         <div className="library-grid">
-          {purchases.map((purchase) => (
-            <div className="library-item" key={purchase.id}>
-              <div className="library-item__image">
-                {purchase.images && purchase.images[0] ? (
-                  <img src={purchase.images[0]} alt={purchase.name} />
-                ) : (
-                  <div className="library-item__no-image">Brak okładki</div>
-                )}
-              </div>
-              <div className="library-item__content">
-                <h3 className="library-item__title">{purchase.name}</h3>
-                {purchase.description && (
-                  <p className="library-item__description">{purchase.description}</p>
-                )}
-                <p className="library-item__date">
-                  Zakupiono:{' '}
-                  {new Date(purchase.purchaseInfo.purchaseDate).toLocaleDateString('pl-PL')}
-                </p>
-                <p className="library-item__price">Cena zakupu: {purchase.price.formatted}</p>
-                {purchase.purchaseInfo.downloadUrl ? (
-                  <a
-                    href={purchase.purchaseInfo.downloadUrl}
-                    className="library-item__download"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Pobierz ebooka
-                  </a>
-                ) : (
-                  <span className="library-item__download-unavailable">
-                    Link do pobrania niedostępny
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+          {purchases.map((purchase) => {
+            const ebookForCard: Ebook = {
+              id: purchase.id,
+              name: purchase.name || 'Nieznany tytuł',
+              description: purchase.description || 'Brak opisu',
+              priceId: purchase.price?.id || 'N/A',
+              price: purchase.price?.unit_amount ?? 0,
+              formattedPrice: purchase.price?.formatted || 'N/A',
+              currency: purchase.price?.currency || 'pln',
+              imageUrl: purchase.images?.[0],
+              downloadUrl: purchase.purchaseInfo?.downloadUrl,
+              fullDescription: purchase.description,
+            };
+
+            const purchaseDateForCard = purchase.purchaseInfo.purchaseDate;
+
+            return (
+              <EbookCard
+                key={purchase.id}
+                ebook={ebookForCard}
+                isLibraryItem={true}
+                purchaseDate={purchaseDateForCard}
+                downloadUrl={purchase.purchaseInfo?.downloadUrl}
+                purchasePriceFormatted={purchase.price?.formatted}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="library-empty">

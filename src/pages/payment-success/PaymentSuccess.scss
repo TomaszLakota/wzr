@@ -1,3 +1,5 @@
+@use '../../styles/variables.scss' as *;
+
 .payment-success {
   display: flex;
   justify-content: center;
@@ -9,7 +11,7 @@
     max-width: 600px;
     width: 100%;
     background-color: #fff;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: $box-shadow-lg;
     border-radius: 8px;
     padding: 2rem;
     text-align: center;

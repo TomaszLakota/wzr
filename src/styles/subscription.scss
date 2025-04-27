@@ -262,7 +262,7 @@
 
 .lesson-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: $box-shadow-lg;
 }
 
 .lesson-item h3 {

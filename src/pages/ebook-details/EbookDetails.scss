@@ -1,4 +1,4 @@
-@use '../../index.scss' as *;
+@use '../../styles/variables.scss' as *;
 @use 'sass:color';
 
 .ebook-details {
@@ -31,7 +31,7 @@
     gap: 2rem;
     background-color: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: $box-shadow-lg;
     overflow: visible;
     padding: 2rem;
     min-height: 600px;
@@ -82,7 +82,7 @@
     height: auto;
     object-fit: cover;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: $box-shadow-md;
   }
 
   &__placeholder {

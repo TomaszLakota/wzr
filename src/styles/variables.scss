@@ -1,101 +1,132 @@
 @use 'sass:color';
 
-// SCSS Variables
+// ---
+// Base Palette
+// ---
+
 $primary-color: #1c5246;
+$accent-color: #c56a45;
+$background-color: #fff;
+$text-color: #333;
+$border-color: #ddd;
+
+// ---
+// Color Variants & Shades
+// ---
+
+// Primary Color Variants
 $primary-color-dark: color.adjust($primary-color, $lightness: -5%);
 $primary-color-very-dark: color.adjust($primary-color, $lightness: -10%);
-$text-color: #333;
+
+// Accent Color Variants
+$accent-color-dark: color.adjust($accent-color, $lightness: -10%);
+
+// Text Shades
 $text-light: #666;
 $text-muted: #999;
-$background-color: #fff;
-$border-color: #ddd;
+$text-dark-gray: #444;
+$text-medium-gray: #555;
+$text-stripe-dark: #32325d;
+$text-stripe-muted: #525f7f;
+$text-table-header: #495057;
+
+// Background Shades
 $background-light: #f8f9fa;
-$error-color: #dc3545;
-$error-background: #fff3f3;
-$accent-color: #c56a45;
-$accent-color-dark: color.adjust($accent-color, $lightness: -10%);
+$background-offwhite: #fcfcfc;
+$background-very-light: #eee;
+
+// Border Shades
+$border-light-gray: #e6e6e6;
+$border-extra-light: #f0f0f0;
+
+// ---
+// State & Contextual Colors
+// ---
+
+// Success
 $success-color: #28a745;
+$success-color-dark: #2e7d32;
+$success-color-darker: #218838;
 $success-background: #f0fff4;
+$success-background-light: #e6f7e6;
+$success-background-alt: #f1f8e9;
+$success-border-light: #c5e1a5;
+$success-text-alt: #4caf50;
+
+// Error / Danger
+$error-color: #dc3545;
+$error-color-dark: #c62828;
+$error-background: #fff3f3;
+$error-background-light-alt: #fee;
+$error-text-alt: #e74c3c;
+$error-text-dark-alt: #c00;
+$button-danger-background: #f44336;
+$button-danger-background-hover: #d32f2f;
+
+// Warning
+$warning-color: #fd7e14;
+$warning-light-color: #ffc107;
+
+// Info
+$info-color: #17a2b8;
+$link-info-color: #4a90e2; // Often used for informational links
+
+// Processing
+$processing-background: #fff8e1;
+$processing-color: #f57c00;
+
+// Disabled
 $disabled-background: #f5f5f5;
+$disabled-background-alt: #ccc; // Often used for text on disabled backgrounds
+
+// Hover
 $hover-color: #f9f9f9;
 
-// Shadow Color Components
+// ---
+// Shadow Colors & Definitions
+// ---
+
 $color-shadow-faint: rgba(0, 0, 0, 0.03);
 $color-shadow-subtle: rgba(0, 0, 0, 0.08);
 $color-shadow-light: rgba(0, 0, 0, 0.1);
 $primary-color-shadow: rgba($primary-color, 0.2);
 
-// Box Shadows
 $box-shadow-sm: 0 2px 4px $color-shadow-light;
 $box-shadow-md: 0 4px 8px $color-shadow-light;
 $box-shadow-lg: 0 8px 16px $color-shadow-light;
 $box-shadow-xl: 0 10px 20px $color-shadow-light;
-$box-shadow-input: 0 0 0 2px rgba($primary-color, 0.25);
+$box-shadow-input: 0 0 0 2px rgba($primary-color, 0.25); // Specific for input focus glow
 
-// State colors
-$success-background-light: #e6f7e6;
-$success-color-dark: #2e7d32;
-$processing-background: #fff8e1;
-$processing-color: #f57c00;
-$error-color-dark: #c62828;
+// ---
+// Component-Specific Colors
+// ---
 
-// Button colors
+// Buttons
 $button-primary-background: #3f51b5;
 $button-primary-background-hover: #303f9f;
 $button-secondary-background: #6c757d;
 $button-secondary-background-hover: #5a6268;
-
-// Heading colors
-$heading-dark-blue: #0c2340;
-
-// Danger button colors
-$button-danger-background: #f44336;
-$button-danger-background-hover: #d32f2f;
-
-// Info button colors
 $button-info-background: #4285f4;
 $button-info-background-hover: #2b68cb;
+$button-info-background-hover-alt: #3367d6;
 $button-info-background-disabled: #b0c2e1;
 
-// Link colors
-$link-primary-background: #007bff;
+// Links
+$link-primary-background: #007bff; // Often used for link-like buttons
 $link-primary-background-hover: #0056b3;
-$link-info-color: #4a90e2;
+// Info link color is grouped with Info states
 
-// Stripe-specific colors (often used in payment/subscription contexts)
+// Headings
+$heading-dark-blue: #0c2340;
+
+// Media
+$video-player-background: #000;
+
+// ---
+// Third-Party / Brand Colors (Example: Stripe)
+// ---
+
 $stripe-button-blue: #5469d4;
 $stripe-button-blue-hover: #4a5fc1;
 $stripe-button-blue-disabled: #b8c2e6;
 $stripe-link-blue: #6772e5;
-$text-stripe-dark: #32325d;
-$text-stripe-muted: #525f7f;
-
-// Other specific colors
-$error-text-alt: #e74c3c;
-$success-text-alt: #4caf50;
-$text-dark-gray: #444;
-$text-medium-gray: #555;
-$border-light-gray: #e6e6e6;
-$success-background-alt: #f1f8e9;
-$success-border-light: #c5e1a5;
-$button-info-background-hover-alt: #3367d6;
-
-// Status/Contextual Colors
-$warning-color: #fd7e14;
-$warning-light-color: #ffc107;
-$info-color: #17a2b8;
-$success-color-darker: #218838;
-$error-background-light-alt: #fee;
-$error-text-dark-alt: #c00;
-
-// Table/UI Specific
-$text-table-header: #495057;
-$disabled-background-alt: #ccc;
-
-// Extra light variants
-$background-offwhite: #fcfcfc;
-$border-extra-light: #f0f0f0;
-$background-very-light: #eee;
-
-// Media Specific
-$video-player-background: #000;

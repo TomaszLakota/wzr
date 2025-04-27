@@ -4,6 +4,7 @@ import {
   CheckoutSessionResponse,
   PaymentVerificationResponse,
   ApiVerificationData,
+  SubscriptionCreationResponse,
 } from '../types/stripe.types';
 import apiClient from './apiClient';
 
@@ -159,5 +160,51 @@ export const createSubscriptionCheckoutSession = async (
     success: true,
     message: 'Przekierowanie do płatności...',
     sessionUrl: data.url,
+  };
+};
+
+/**
+ * Create a new subscription
+ * @param {string} priceId - ID of the subscription price
+ * @returns {Promise<SubscriptionCreationResponse>} - Subscription creation details including client secret
+ */
+export const createSubscription = async (
+  priceId: string
+): Promise<SubscriptionCreationResponse> => {
+  if (!priceId) {
+    throw new Error('ID ceny jest wymagane do utworzenia subskrypcji');
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Musisz być zalogowany, aby subskrybować');
+  }
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`, // Include auth token
+  };
+
+  const response = await fetch(`${API_BASE_URL}/create-subscription`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ priceId }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const errorMsg = data?.error?.message || 'Nie udało się utworzyć subskrypcji.';
+    throw new Error(errorMsg);
+  }
+
+  if (!data.clientSecret) {
+    throw new Error('Nie otrzymano klucza klienta z backendu.');
+  }
+
+  return {
+    clientSecret: data.clientSecret,
+    success: true,
+    message: 'Subskrypcja zainicjowana.',
   };
 };

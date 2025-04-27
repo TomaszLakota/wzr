@@ -1,5 +1,6 @@
 import React, { useState, FormEvent } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { createSubscription } from '../../services/stripeService'; // Import the service function
 
 export interface SubscriptionButtonProps {
   priceId: string;
@@ -26,37 +27,17 @@ const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({ priceId, produc
     setErrorMessage(null);
 
     try {
-      // Call your backend to create the subscription
-      const response = await fetch('/api/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add Authorization header if needed
-          // 'Authorization': `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({
-          priceId: priceId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMsg = data?.error?.message || 'Failed to create subscription on backend.';
-        setErrorMessage(errorMsg);
-        setLoading(false);
-        return;
-      }
+      // Call the service function to create the subscription
+      const { clientSecret } = await createSubscription(priceId);
 
       // We need the client secret from the backend response to confirm the payment
-      const clientSecret = data.clientSecret;
       if (!clientSecret) {
         setErrorMessage('Client secret not received from backend.');
         setLoading(false);
         return;
       }
 
-      // Confirm the subscription setup
+      // Confirm the subscription setup using the client secret
       const { error } = await stripe.confirmPayment({
         elements,
         clientSecret, // Use the client secret from the backend
@@ -76,8 +57,9 @@ const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({ priceId, produc
       }
       // If confirmPayment is successful, Stripe automatically redirects
       // to the return_url. If there is an error, it stays on the page.
-    } catch (err) {
-      setErrorMessage('An unexpected error occurred during subscription setup.');
+    } catch (err: any) {
+      // Catch specific error types if needed
+      setErrorMessage(err.message || 'An unexpected error occurred during subscription setup.');
       console.error('Subscription setup error:', err);
     }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/profile.scss';
+import './Profile.scss';
 import apiClient from '../../services/apiClient';
 import { fetchUserProfile } from '../../services/userService';
 import { User } from '../../types/user.types';

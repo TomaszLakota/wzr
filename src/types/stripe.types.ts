@@ -43,3 +43,9 @@ export interface ApiVerificationData {
 }
 
 export type PaymentStatus = 'processing' | 'success' | 'error';
+
+export interface SubscriptionCreationResponse {
+  clientSecret: string;
+  success: boolean;
+  message?: string; // Optional message
+}

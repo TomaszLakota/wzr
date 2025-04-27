@@ -17,7 +17,6 @@ $border-color: #ddd;
 // Primary Color Variants
 $primary-color-light: color.adjust($primary-color, $lightness: 15%);
 $primary-color-dark: color.adjust($primary-color, $lightness: -5%);
-$primary-color-very-dark: color.adjust($primary-color, $lightness: -10%);
 
 // Accent Color Variants
 $accent-color-dark: color.adjust($accent-color, $lightness: -10%);
@@ -28,6 +27,9 @@ $text-muted: #999;
 $text-dark-gray: #444;
 $text-medium-gray: #555;
 $text-table-header: #495057;
+$text-button-primary: #fff;
+$text-green: color.adjust($primary-color, $lightness: 10%);
+$text-dark-green: color.adjust($primary-color, $lightness: -10%);
 
 // Background Shades
 $background-light: #f8f9fa;
@@ -66,9 +68,9 @@ $button-danger-background-hover: #d32f2f;
 $warning-color: #fd7e14;
 $warning-light-color: #ffc107;
 
-// Info (Replaced blues with primary greens)
+// Info
 $info-color: $primary-color-light;
-$link-info-color: $primary-color; // Often used for informational links
+$link-info-color: $primary-color;
 
 // Processing
 $processing-background: #fff8e1;
@@ -76,7 +78,7 @@ $processing-color: #f57c00;
 
 // Disabled
 $disabled-background: #f5f5f5;
-$disabled-background-alt: #ccc; // Often used for text on disabled backgrounds
+$disabled-background-alt: #ccc;
 $disabled-primary-background: color.adjust($primary-color, $lightness: 30%, $saturation: -50%);
 
 // Hover
@@ -109,9 +111,8 @@ $button-secondary-background-hover: #5a6268;
 $button-info-background-disabled: $disabled-primary-background; // Keep specific disabled state
 
 // Links (Updated primary links to use primary green)
-$link-primary-background: $primary-color; // Often used for link-like buttons
+$link-primary-background: $primary-color;
 $link-primary-background-hover: $primary-color-dark;
-// Info link color is grouped with Info states
 
 // Headings (Updated dark blue heading to dark green)
 $heading-dark-green: color.adjust($primary-color, $lightness: -20%);

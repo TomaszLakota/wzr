@@ -189,6 +189,7 @@
     border-radius: 12px;
     padding: 2.5rem 2rem;
     margin: 4rem 0 3rem;
+    transition: all 0.3s ease;
 
     h2 {
       color: $background-color;
@@ -199,6 +200,10 @@
 
     &-link {
       text-decoration: none;
+
+      &:hover .cta {
+        background-color: $button-primary-background-hover;
+      }
     }
   }
 }
@@ -231,7 +236,7 @@
     border: 2px solid $primary-color;
 
     &:hover {
-      background-color: $background-light;
+      background-color: #eee;
     }
   }
 

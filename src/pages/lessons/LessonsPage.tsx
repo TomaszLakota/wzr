@@ -6,8 +6,8 @@ import LessonThumbnail from '../../components/lesson-thumbnail/LessonThumbnail';
 import './LessonsPage.scss';
 import apiClient from '../../services/apiClient';
 import { User } from '../../types/user.types';
-import { createSubscriptionCheckoutSession } from '../../services/stripeService';
 import { Lesson } from '../../types/lesson.types';
+import SubscriptionPromo from '../../components/subscription/SubscriptionPromo';
 
 // Create a proper auth hook that uses the API
 const useAuth = () => {
@@ -59,7 +59,6 @@ const useAuth = () => {
 const LessonsPage: React.FC = () => {
   const { isLoggedIn, isSubscribed, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [redirectLoading, setRedirectLoading] = useState(false);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lessonsError, setLessonsError] = useState<string | null>(null);
@@ -114,41 +113,6 @@ const LessonsPage: React.FC = () => {
     }
   }, [isLoggedIn, isSubscribed, isLoading]);
 
-  const handleSubscribe = async () => {
-    if (!isLoggedIn) {
-      navigate('/logowanie?redirect=lekcje');
-      return;
-    }
-
-    setRedirectLoading(true);
-
-    try {
-      const priceId = import.meta.env.VITE_STRIPE_SUBSCRIPTION_PRICE_ID;
-      const successUrl = `${window.location.origin}/lekcje?success=true`;
-      const cancelUrl = `${window.location.origin}/lekcje?canceled=true`;
-
-      const checkoutResponse = await createSubscriptionCheckoutSession(
-        priceId,
-        successUrl,
-        cancelUrl
-      );
-
-      if (checkoutResponse.success && checkoutResponse.sessionUrl) {
-        window.location.href = checkoutResponse.sessionUrl;
-      } else {
-        alert(
-          checkoutResponse.message ||
-            'Nie udało się utworzyć sesji płatności. Prosimy spróbować ponownie.'
-        );
-        setRedirectLoading(false);
-      }
-    } catch (error) {
-      console.error('Błąd podczas tworzenia sesji płatności:', error);
-      alert(error instanceof Error ? error.message : 'Wystąpił błąd. Prosimy spróbować ponownie.');
-      setRedirectLoading(false);
-    }
-  };
-
   if (isLoading) {
     return <div className="loading">Ładowanie...</div>;
   }
@@ -186,38 +150,8 @@ const LessonsPage: React.FC = () => {
     );
   }
 
-  // Show subscription promo for non-isSubscribed users
-  return (
-    <div className="subscription-promo">
-      <div className="promo-content">
-        <h2>Odblokuj Lekcje</h2>
-        <p className="promo-description">
-          Podnieś swój poziom nauki dzięki naszej subskrypcji lekcji.
-        </p>
-
-        <div className="subscription-card">
-          <h3>Dostęp do Lekcji</h3>
-          <p className="price">90zł miesięcznie</p>
-          <p>Podnieś swój poziom nauki dzięki naszej subskrypcji lekcji</p>
-
-          <ul className="feature-list">
-            <li>Dostęp do wszystkich lekcji</li>
-            <li>Cotygodniowe aktualizacje treści</li>
-            <li>Materiały dodatkowe do pobrania</li>
-            <li>Anuluj w dowolnym momencie</li>
-          </ul>
-
-          <button className="subscribe-button" onClick={handleSubscribe} disabled={redirectLoading}>
-            {redirectLoading
-              ? 'Przekierowywanie...'
-              : isLoggedIn
-                ? 'Subskrybuj Teraz'
-                : 'Zaloguj się, aby Subskrybować'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  // Show subscription promo for non-subscribed users using the SubscriptionPromo component
+  return <SubscriptionPromo isLoggedIn={isLoggedIn} />;
 };
 
 export default LessonsPage;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './adminPanel.scss';
+import './AdminPanel.scss';
 import apiClient from '../../services/apiClient';
 import { fetchAdminUsers } from '../../services/userService';
 import { User } from '../../types/user.types';

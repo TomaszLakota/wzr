@@ -47,7 +47,7 @@ function Login() {
           <input type="password" id="password" name="password" required />
         </div>
         <div className="forgot-password">
-          <Link to="/zresetuj-haslo">Zapomniałeś hasła?</Link>
+          <Link to="/zresetuj-haslo">Nie pamiętasz hasła?</Link>
         </div>
         <button type="submit" className="submit-button">
           Logowanie

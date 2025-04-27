@@ -1,13 +1,6 @@
 @use '../../styles/variables.scss' as *;
 
 .blog-container {
-  h1 {
-    color: $text-color;
-    margin-bottom: 2rem;
-    text-align: center;
-    font-size: 2.5rem;
-  }
-
   .loading-message {
     text-align: center;
     font-size: 1.2rem;

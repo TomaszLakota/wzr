@@ -2,7 +2,7 @@ import { rateLimit } from 'express-rate-limit';
 
 export const standardLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Zbyt wiele żądań, spróbuj ponownie później' },

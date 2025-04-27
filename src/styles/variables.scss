@@ -28,8 +28,9 @@ $text-dark-gray: #444;
 $text-medium-gray: #555;
 $text-table-header: #495057;
 $text-button-primary: #fff;
-$text-green: color.adjust($primary-color, $lightness: 10%);
-$text-dark-green: color.adjust($primary-color, $lightness: -10%);
+$text-green: $primary-color;
+$text-light-green: color.adjust($text-green, $lightness: 10%);
+$text-dark-green: color.adjust($text-green, $lightness: -10%);
 
 // Background Shades
 $background-light: #f8f9fa;

@@ -3,15 +3,23 @@
 .page-container-full {
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
-}
-
-.page-container-narrow {
-  max-width: 400px;
-  margin: 2rem auto;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem;
 }
 
 .page-container-medium {
-  max-width: 800px;
-  margin: 3rem auto;
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem;
+}
+
+.page-container-narrow {
+  width: 100%;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem;
 }

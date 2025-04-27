@@ -101,14 +101,14 @@
   margin-bottom: 10px;
   padding-left: 30px;
   position: relative;
-  color: $text-green;
+  color: $text-light-green;
 }
 
 .feature-list li:before {
   content: '✓';
   position: absolute;
   left: 0;
-  color: $text-green;
+  color: $text-light-green;
   font-weight: bold;
 }
 

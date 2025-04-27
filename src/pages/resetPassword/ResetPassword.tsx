@@ -47,7 +47,7 @@ function ResetPassword() {
     try {
       const response = await authService.resetPassword(token, password);
       setSuccess(response.message);
-      
+
       // Redirect to login page after successful password reset
       setTimeout(() => {
         navigate('/logowanie');
@@ -60,44 +60,40 @@ function ResetPassword() {
   };
 
   return (
-    <div className="reset-password-container">
+    <div className="reset-password-container page-container-narrow">
       <Form onSubmit={handleSubmit} className="reset-password-form">
         <h1>Ustaw nowe hasło</h1>
         <p>Wprowadź nowe hasło dla swojego konta.</p>
-        
+
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
-        
+
         <div className="form-group">
           <label htmlFor="password">Nowe hasło:</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            required 
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
             disabled={!token || isSubmitting}
           />
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="confirmPassword">Potwierdź hasło:</label>
-          <input 
-            type="password" 
-            id="confirmPassword" 
-            name="confirmPassword" 
-            required 
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            required
             disabled={!token || isSubmitting}
           />
         </div>
-        
-        <button 
-          type="submit" 
-          className="submit-button" 
-          disabled={!token || isSubmitting}
-        >
+
+        <button type="submit" className="submit-button" disabled={!token || isSubmitting}>
           {isSubmitting ? 'Przetwarzanie...' : 'Resetuj hasło'}
         </button>
-        
+
         <div className="back-to-login">
           <Link to="/logowanie">Powrót do logowania</Link>
         </div>
@@ -106,4 +102,4 @@ function ResetPassword() {
   );
 }
 
-export default ResetPassword; 
+export default ResetPassword;

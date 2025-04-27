@@ -61,8 +61,8 @@ $error-background: #fff3f3;
 $error-background-light-alt: #fee;
 $error-text-alt: #e74c3c;
 $error-text-dark-alt: #c00;
-$button-danger-background: #f44336;
-$button-danger-background-hover: #d32f2f;
+$button-danger-background: #be2116;
+$button-danger-background-hover: color.adjust($button-danger-background, $lightness: -10%);
 
 // Warning
 $warning-color: #fd7e14;

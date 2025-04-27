@@ -97,7 +97,7 @@ function Profile() {
   }
 
   return (
-    <div className="profile-container">
+    <div className="profile-container page-container-medium">
       <h1>Twój profil</h1>
 
       {error && <div className="error-message">{error}</div>}

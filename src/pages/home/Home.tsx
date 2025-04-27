@@ -7,7 +7,7 @@ const roberto2 = 'https://wzrr.b-cdn.net/roberto-2.webp';
 
 function Home() {
   return (
-    <div className="home-page">
+    <div className="home-page page-container-full">
       <section className="hero">
         <div className="hero-content">
           <h1>ODKRYJ JĘZYK WŁOSKI W ZUPEŁNIE NOWY SPOSÓB!</h1>

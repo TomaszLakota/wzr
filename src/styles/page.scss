@@ -1,0 +1,17 @@
+@use './variables.scss' as *;
+
+.page-container-full {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-container-narrow {
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+.page-container-medium {
+  max-width: 800px;
+  margin: 3rem auto;
+}

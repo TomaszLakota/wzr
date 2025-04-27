@@ -2,11 +2,6 @@
 @use '../../styles/variables.scss' as *;
 
 .home-page {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-
   section {
     margin: 3rem 0;
     padding: 1rem 0;
@@ -236,7 +231,7 @@
     border: 2px solid $primary-color;
 
     &:hover {
-      background-color: #eee;
+      background-color: color.adjust($primary-color, $alpha: -0.9);
     }
   }
 

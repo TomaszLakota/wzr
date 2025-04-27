@@ -2,9 +2,6 @@
 @use 'sass:color';
 
 .ebook-details {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
   position: relative;
 
   &__back-link {
@@ -167,8 +164,6 @@
 
 .ebook-details-loading,
 .ebook-details-error {
-  max-width: 1200px;
-  margin: 2rem auto;
   padding: 2rem;
   text-align: center;
   background-color: $background-light;

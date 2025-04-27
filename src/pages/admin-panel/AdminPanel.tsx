@@ -68,7 +68,7 @@ function AdminPanel() {
   }
 
   return (
-    <div className="admin-panel">
+    <div className="admin-panel page-container-full">
       <h1>Panel Administratora</h1>
       <h2>Użytkownicy z Subskrypcjami</h2>
 

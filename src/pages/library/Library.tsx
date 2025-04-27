@@ -56,7 +56,7 @@ function Library() {
   };
 
   return (
-    <div className="library-page">
+    <div className="library-page page-container-full">
       <div className="library-header">
         <h1>Moja biblioteka</h1>
         <p>Wszystkie Twoje zakupione ebooki w jednym miejscu</p>

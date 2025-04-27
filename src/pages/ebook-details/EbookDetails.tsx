@@ -39,7 +39,7 @@ function EbookDetails() {
     // Fetch the specific ebook
     const fetchEbook = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
         const fetchedEbook = await getEbookById(id);
@@ -63,9 +63,7 @@ function EbookDetails() {
 
     // Check if user is logged in first
     if (!isLoggedIn) {
-      setMessage(
-        'Musisz być zalogowany, aby dokonać zakupu.'
-      );
+      setMessage('Musisz być zalogowany, aby dokonać zakupu.');
       return;
     }
 
@@ -96,10 +94,10 @@ function EbookDetails() {
   if (loading) {
     return (
       <>
-        <Link to="/ebooki" className="ebook-details__back-link">
+        <Link to="/ebooki" className="ebook-details__back-link page-container-full">
           Powrót do listy e-booków
         </Link>
-        <div className="ebook-details-loading">Ładowanie e-booka...</div>
+        <div className="ebook-details-loading page-container-full">Ładowanie e-booka...</div>
       </>
     );
   }
@@ -107,10 +105,10 @@ function EbookDetails() {
   if (!ebook) {
     return (
       <>
-        <Link to="/ebooki" className="ebook-details__back-link">
+        <Link to="/ebooki" className="ebook-details__back-link page-container-full">
           Powrót do listy e-booków
         </Link>
-        <div className="ebook-details-error">
+        <div className="ebook-details-error page-container-full">
           <p>{message || 'Nie znaleziono e-booka.'}</p>
         </div>
       </>
@@ -118,15 +116,15 @@ function EbookDetails() {
   }
 
   return (
-    <div className="ebook-details">
+    <div className="ebook-details page-container-full">
       <Link to="/ebooki" className="ebook-details__back-link">
         Powrót do listy e-booków
       </Link>
-      
+
       <div className="ebook-details__container">
         <div className="ebook-details__left-column">
           <h1 className="ebook-details__title">{ebook.name}</h1>
-          
+
           {ebook.fullDescription ? (
             <div className="ebook-details__description">
               <h2>Opis</h2>
@@ -148,11 +146,7 @@ function EbookDetails() {
           <div className="ebook-details__sticky-content">
             <div className="ebook-details__image-container">
               {ebook.imageUrl ? (
-                <img 
-                  src={ebook.imageUrl} 
-                  alt={ebook.name} 
-                  className="ebook-details__image" 
-                />
+                <img src={ebook.imageUrl} alt={ebook.name} className="ebook-details__image" />
               ) : (
                 <div className="ebook-details__placeholder">E-book</div>
               )}
@@ -160,10 +154,7 @@ function EbookDetails() {
 
             <div className="ebook-details__price-section">
               <p className="ebook-details__price">{ebook.formattedPrice}</p>
-              <button 
-                className="ebook-details__buy-button" 
-                onClick={handlePurchase}
-              >
+              <button className="ebook-details__buy-button" onClick={handlePurchase}>
                 Kup teraz
               </button>
             </div>
@@ -180,4 +171,4 @@ function EbookDetails() {
   );
 }
 
-export default EbookDetails; 
+export default EbookDetails;

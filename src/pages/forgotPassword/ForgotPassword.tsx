@@ -30,23 +30,23 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="forgot-password-container">
+    <div className="forgot-password-container page-container-narrow">
       <Form onSubmit={handleSubmit} className="forgot-password-form">
         <h1>Resetowanie hasła</h1>
         <p>Podaj swój adres email, aby otrzymać instrukcje dotyczące resetowania hasła.</p>
-        
+
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
-        
+
         <div className="form-group">
           <label htmlFor="email">Adres email:</label>
           <input type="email" id="email" name="email" required />
         </div>
-        
+
         <button type="submit" className="submit-button" disabled={isSubmitting}>
           {isSubmitting ? 'Przetwarzanie...' : 'Wyślij link resetujący'}
         </button>
-        
+
         <div className="back-to-login">
           <Link to="/logowanie">Powrót do logowania</Link>
         </div>
@@ -55,4 +55,4 @@ function ForgotPassword() {
   );
 }
 
-export default ForgotPassword; 
+export default ForgotPassword;

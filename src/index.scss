@@ -1,5 +1,6 @@
 @use 'styles/variables' as *;
-@use 'styles/form' as *;
+@use 'styles/form';
+@use 'styles/page';
 
 body {
   margin: 0;

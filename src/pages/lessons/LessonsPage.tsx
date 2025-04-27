@@ -114,12 +114,12 @@ const LessonsPage: React.FC = () => {
   }, [isLoggedIn, isSubscribed, isLoading]);
 
   if (isLoading) {
-    return <div className="loading">Ładowanie...</div>;
+    return <div className="loading page-container-full">Ładowanie...</div>;
   }
 
   if (showSuccess) {
     return (
-      <div className="lessons-page">
+      <div className="lessons-page page-container-full">
         <div className="success-message">
           <h2>Dziękujemy za subskrypcję!</h2>
           <p>Twoja subskrypcja została pomyślnie aktywowana.</p>
@@ -131,7 +131,7 @@ const LessonsPage: React.FC = () => {
   // Show lessons content if user is logged in and isSubscribed
   if (isLoggedIn && isSubscribed) {
     return (
-      <div className="lessons-page">
+      <div className="lessons-page page-container-full">
         <h1>Lekcje</h1>
         {lessonsLoading ? (
           <div className="loading">Ładowanie lekcji...</div>

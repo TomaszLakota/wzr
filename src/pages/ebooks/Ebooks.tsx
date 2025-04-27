@@ -54,9 +54,7 @@ function Ebooks() {
   const handlePurchase = async (productId: string) => {
     // Check if user is logged in first
     if (!isLoggedIn) {
-      setMessage(
-        'Musisz być zalogowany, aby dokonać zakupu. ' 
-      );
+      setMessage('Musisz być zalogowany, aby dokonać zakupu. ');
       return;
     }
 
@@ -88,7 +86,7 @@ function Ebooks() {
   };
 
   return (
-    <div className="ebooks-page">
+    <div className="ebooks-page page-container-full">
       <div className="ebooks-header">
         <h1>E-Booki</h1>
         <p>Odkryj nasze cyfrowe publikacje, które pomogą Ci w nauce języka włoskiego</p>

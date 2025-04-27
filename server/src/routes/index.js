@@ -17,8 +17,8 @@ router.use('/subscription', subscriptionRoutes);
 router.use('/products', productRoutes);
 router.use('/articles', articlesRouter);
 router.use('/lekcje', lessonsRouter);
-router.use(authRoutes);
 router.use(userRoutes);
+router.use(authRoutes);
 router.use(webhookRoutes);
 router.use(contactRoutes);
 
@@ -74,9 +74,7 @@ router.get('/checkout/sessions/:sessionId/verify', async (req, res) => {
         // Assuming productIds metadata stores a single ID for now
         const productId = session.metadata.productIds;
 
-        console.log(
-          `Checkout session ${sessionId} paid. Granting access for user ${userId} to product ${productId}`
-        );
+        console.log(`Checkout session ${sessionId} paid. Granting access for user ${userId} to product ${productId}`);
 
         try {
           // Use upsert to avoid errors if the webhook runs later and inserts the same record
@@ -91,10 +89,7 @@ router.get('/checkout/sessions/:sessionId/verify', async (req, res) => {
           );
 
           if (upsertError) {
-            console.error(
-              `Error upserting ebook access for user ${userId}, product ${productId}:`,
-              upsertError
-            );
+            console.error(`Error upserting ebook access for user ${userId}, product ${productId}:`, upsertError);
             // Decide how to handle: maybe still return success but log error?
           } else {
             console.log(`Access granted successfully for user ${userId} to product ${productId}`);
@@ -109,9 +104,7 @@ router.get('/checkout/sessions/:sessionId/verify', async (req, res) => {
         // Metadata missing - maybe purchased via different flow?
       }
     } else {
-      console.log(
-        `Session ${sessionId} status: ${session.status}, payment_status: ${session.payment_status}. Access not granted yet.`
-      );
+      console.log(`Session ${sessionId} status: ${session.status}, payment_status: ${session.payment_status}. Access not granted yet.`);
     }
 
     // Return original verification details plus access status

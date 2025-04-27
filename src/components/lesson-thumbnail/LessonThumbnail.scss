@@ -1,7 +1,7 @@
 @use '../../styles/variables.scss' as *;
 
 .lesson-thumbnail {
-  background: white;
+  background: $background-color;
   border-radius: 12px;
   overflow: hidden;
   transition:
@@ -18,7 +18,7 @@
     position: relative;
     width: 100%;
     padding-top: 56.25%; // 16:9 aspect ratio
-    background: #f0f0f0;
+    background: $border-extra-light;
     overflow: hidden;
 
     img,
@@ -42,8 +42,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #6772e5, #5469d4);
-    color: white;
+    background: linear-gradient(135deg, $stripe-link-blue, $stripe-button-blue);
+    color: $background-color;
     font-size: 2rem;
     font-weight: bold;
   }
@@ -55,21 +55,23 @@
   &__title {
     font-size: 1rem;
     font-weight: 600;
-    color: #333;
+    color: $text-color;
     margin: 0 0 0.5rem;
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
   &__description {
     font-size: 0.875rem;
-    color: #666;
+    color: $text-light;
     margin: 0 0 0.75rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -79,11 +81,11 @@
     align-items: center;
     gap: 1rem;
     font-size: 0.75rem;
-    color: #666;
+    color: $text-light;
   }
 
   &__level {
-    background: #f0f0f0;
+    background: $border-extra-light;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-weight: 500;

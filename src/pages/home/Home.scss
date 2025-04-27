@@ -67,7 +67,7 @@
       flex: 1.5;
 
       h2 {
-        color: #0f3930;
+        color: $primary-color-very-dark;
         margin-bottom: 1.5rem;
         font-size: 2.2rem;
         line-height: 1.3;
@@ -77,11 +77,11 @@
         font-size: 1.1rem;
         line-height: 1.5;
         margin-bottom: 1.2rem;
-        color: #333;
+        color: $text-color;
       }
 
       h3 {
-        color: #0f3930;
+        color: $primary-color-very-dark;
         font-size: 1.6rem;
         margin-top: 1.5rem;
         font-weight: 600;
@@ -129,7 +129,7 @@
 
     .offering-content {
       h3 {
-        color: #0f3930;
+        color: $primary-color-very-dark;
         margin-bottom: 1rem;
         font-size: 1.5rem;
       }
@@ -185,13 +185,13 @@
   .cta {
     text-align: center;
     background-color: $primary-color;
-    color: white;
+    color: $background-color;
     border-radius: 12px;
     padding: 2.5rem 2rem;
     margin: 4rem 0 3rem;
 
     h2 {
-      color: white;
+      color: $background-color;
       margin: 0;
       font-size: 2.3rem;
       font-weight: 600;

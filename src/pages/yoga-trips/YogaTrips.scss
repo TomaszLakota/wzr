@@ -4,9 +4,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #fcfcfc;
+  background-color: $background-offwhite;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 5px 15px $color-shadow-faint;
 
   &__header {
     margin-bottom: 3rem;
@@ -122,9 +122,9 @@
   width: 100%;
   padding: 2.5rem;
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 30px $color-shadow-subtle;
   background-color: $background-color;
-  border: 1px solid #f0f0f0;
+  border: 1px solid $border-extra-light;
 }
 
 .contact-form {
@@ -168,7 +168,7 @@
   .submit-button:hover {
     background-color: $primary-color-dark;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba($primary-color, 0.2);
+    box-shadow: 0 5px 15px $primary-color-shadow;
   }
 
   .submit-button:active {

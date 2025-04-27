@@ -27,10 +27,10 @@
   }
 
   .admin-only-link {
-    color: #dc3545;
+    color: $error-color;
 
     &:hover {
-      color: #c82333;
+      color: $error-color-dark;
     }
   }
 }

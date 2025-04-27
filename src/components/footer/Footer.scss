@@ -1,7 +1,10 @@
-footer{
-    min-height: 100px;
-    background-color: #f8f9fa;
-    padding: 20px 0;
-    text-align: center;
-    color: #6c757d;
+@use '../../styles/variables.scss' as *;
+
+footer {
+  min-height: 100px;
+  background-color: $background-light;
+  padding: 20px 0;
+  color: $button-secondary-background;
+  border-top: 1px solid $border-color;
+  text-align: center;
 }

@@ -10,7 +10,7 @@
   &__container {
     max-width: 600px;
     width: 100%;
-    background-color: #fff;
+    background-color: $background-color;
     box-shadow: $box-shadow-lg;
     border-radius: 8px;
     padding: 2rem;
@@ -19,7 +19,7 @@
 
   &__title {
     font-size: 1.8rem;
-    color: #333;
+    color: $text-color;
     margin-bottom: 1.5rem;
   }
 
@@ -29,7 +29,7 @@
     margin: 2rem 0;
 
     p {
-      color: #666;
+      color: $text-light;
       font-size: 1rem;
     }
   }
@@ -47,29 +47,29 @@
     display: inline-block;
 
     &.success {
-      background-color: #e6f7e6;
-      color: #2e7d32;
+      background-color: $success-background-light;
+      color: $success-color-dark;
     }
 
     &.processing {
-      background-color: #fff8e1;
-      color: #f57c00;
+      background-color: $processing-background;
+      color: $processing-color;
     }
 
     &.error {
-      background-color: #ffebee;
-      color: #c62828;
+      background-color: $error-background;
+      color: $error-color-dark;
     }
   }
 
   &__details {
     margin-top: 1.5rem;
     padding: 1rem;
-    background-color: #f5f5f5;
+    background-color: $disabled-background;
     border-radius: 4px;
 
     p {
-      color: #333;
+      color: $text-color;
       font-size: 0.95rem;
       line-height: 1.5;
     }
@@ -81,8 +81,8 @@
 
   &__button {
     display: inline-block;
-    background-color: #3f51b5; // Consider using variables from index.scss
-    color: white;
+    background-color: $button-primary-background;
+    color: $background-color;
     padding: 0.75rem 1.5rem;
     border-radius: 4px;
     text-decoration: none;
@@ -91,19 +91,13 @@
     border: none;
 
     &:hover {
-      background-color: #303f9f;
-    }
-
-    // Add styles for primary and secondary variations if needed
-    &.primary {
-      // Example: background-color: $primary-color;
+      background-color: $button-primary-background-hover;
     }
 
     &.secondary {
-      // Example: background-color: grey;
-      background-color: #6c757d;
+      background-color: $button-secondary-background;
       &:hover {
-        background-color: #5a6268;
+        background-color: $button-secondary-background-hover;
       }
     }
   }

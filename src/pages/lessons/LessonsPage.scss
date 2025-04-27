@@ -8,7 +8,8 @@
   h1 {
     text-align: center;
     margin-bottom: 2rem;
-    color: #333;
+    color: $text-color;
+    font-size: 2.2rem;
   }
 }
 
@@ -30,25 +31,25 @@
   align-items: center;
   height: 50vh;
   font-size: 1.125rem;
-  color: #666;
+  color: $text-light;
 }
 
 .success-message {
   text-align: center;
   padding: 2rem;
-  background-color: #f1f8e9;
+  background-color: $success-background-alt;
   border-radius: 12px;
   max-width: 500px;
   margin: 2rem auto;
   box-shadow: $box-shadow-md;
 
   h2 {
-    color: #4caf50;
+    color: $success-text-alt;
     margin-bottom: 1rem;
   }
 
   p {
-    color: #666;
+    color: $text-light;
     margin-bottom: 1.5rem;
   }
 }

@@ -14,12 +14,12 @@
   h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    color: #333;
+    color: $text-color;
   }
 
   p {
     font-size: 1.1rem;
-    color: #666;
+    color: $text-light;
     max-width: 600px;
     margin: 0 auto;
   }
@@ -36,7 +36,7 @@
 }
 
 .ebooks-message {
-  background-color: #f8f9fa;
+  background-color: $background-light;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 2rem;
@@ -44,7 +44,7 @@
 
   p {
     margin: 0;
-    color: #4a90e2;
+    color: $link-info-color;
     font-weight: 500;
   }
 
@@ -65,18 +65,18 @@
 .ebooks-loading {
   text-align: center;
   padding: 2rem;
-  color: #666;
+  color: $text-light;
   font-size: 1.1rem;
 }
 
 .ebooks-empty {
   text-align: center;
   padding: 3rem 1rem;
-  background-color: #f8f9fa;
+  background-color: $background-light;
   border-radius: 8px;
 
   p {
-    color: #666;
+    color: $text-light;
     font-size: 1.1rem;
     margin: 0;
   }

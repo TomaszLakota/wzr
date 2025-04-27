@@ -15,6 +15,7 @@ $border-color: #ddd;
 // ---
 
 // Primary Color Variants
+$primary-color-light: color.adjust($primary-color, $lightness: 15%);
 $primary-color-dark: color.adjust($primary-color, $lightness: -5%);
 $primary-color-very-dark: color.adjust($primary-color, $lightness: -10%);
 
@@ -26,8 +27,6 @@ $text-light: #666;
 $text-muted: #999;
 $text-dark-gray: #444;
 $text-medium-gray: #555;
-$text-stripe-dark: #32325d;
-$text-stripe-muted: #525f7f;
 $text-table-header: #495057;
 
 // Background Shades
@@ -67,9 +66,9 @@ $button-danger-background-hover: #d32f2f;
 $warning-color: #fd7e14;
 $warning-light-color: #ffc107;
 
-// Info
-$info-color: #17a2b8;
-$link-info-color: #4a90e2; // Often used for informational links
+// Info (Replaced blues with primary greens)
+$info-color: $primary-color-light;
+$link-info-color: $primary-color; // Often used for informational links
 
 // Processing
 $processing-background: #fff8e1;
@@ -78,6 +77,7 @@ $processing-color: #f57c00;
 // Disabled
 $disabled-background: #f5f5f5;
 $disabled-background-alt: #ccc; // Often used for text on disabled backgrounds
+$disabled-primary-background: color.adjust($primary-color, $lightness: 30%, $saturation: -50%);
 
 // Hover
 $hover-color: #f9f9f9;
@@ -101,32 +101,20 @@ $box-shadow-input: 0 0 0 2px rgba($primary-color, 0.25); // Specific for input f
 // Component-Specific Colors
 // ---
 
-// Buttons
-$button-primary-background: #3f51b5;
-$button-primary-background-hover: #303f9f;
+// Buttons (Updated primary and info buttons to use primary green)
+$button-primary-background: $primary-color;
+$button-primary-background-hover: $primary-color-dark;
 $button-secondary-background: #6c757d;
 $button-secondary-background-hover: #5a6268;
-$button-info-background: #4285f4;
-$button-info-background-hover: #2b68cb;
-$button-info-background-hover-alt: #3367d6;
-$button-info-background-disabled: #b0c2e1;
+$button-info-background-disabled: $disabled-primary-background; // Keep specific disabled state
 
-// Links
-$link-primary-background: #007bff; // Often used for link-like buttons
-$link-primary-background-hover: #0056b3;
+// Links (Updated primary links to use primary green)
+$link-primary-background: $primary-color; // Often used for link-like buttons
+$link-primary-background-hover: $primary-color-dark;
 // Info link color is grouped with Info states
 
-// Headings
-$heading-dark-blue: #0c2340;
+// Headings (Updated dark blue heading to dark green)
+$heading-dark-green: color.adjust($primary-color, $lightness: -20%);
 
 // Media
 $video-player-background: #000;
-
-// ---
-// Third-Party / Brand Colors (Example: Stripe)
-// ---
-
-$stripe-button-blue: #5469d4;
-$stripe-button-blue-hover: #4a5fc1;
-$stripe-button-blue-disabled: #b8c2e6;
-$stripe-link-blue: #6772e5;

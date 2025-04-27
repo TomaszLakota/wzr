@@ -5,7 +5,7 @@
 }
 
 .subscribe-button {
-  background-color: $stripe-button-blue;
+  background-color: $button-primary-background;
   color: $background-color;
   padding: 12px 20px;
   border-radius: 4px;
@@ -17,11 +17,11 @@
 }
 
 .subscribe-button:hover {
-  background-color: $stripe-button-blue-hover;
+  background-color: $button-primary-background-hover;
 }
 
 .payment-button {
-  background-color: $stripe-button-blue;
+  background-color: $button-primary-background;
   color: $background-color;
   padding: 12px 20px;
   border-radius: 4px;
@@ -34,7 +34,7 @@
 }
 
 .payment-button:disabled {
-  background-color: $stripe-button-blue-disabled;
+  background-color: $button-info-background-disabled;
   cursor: not-allowed;
 }
 
@@ -179,7 +179,7 @@
 .cancel-button {
   background-color: transparent;
   color: $text-color;
-  border: 1px solid $stripe-link-blue;
+  border: 1px solid $link-primary-background;
   padding: 12px 16px;
   border-radius: 4px;
   font-weight: 600;
@@ -281,7 +281,7 @@
 
 .lesson-link {
   display: inline-block;
-  background-color: $stripe-link-blue;
+  background-color: $link-primary-background;
   color: $background-color;
   padding: 8px 16px;
   border-radius: 4px;
@@ -291,7 +291,7 @@
 }
 
 .lesson-link:hover {
-  background-color: $stripe-button-blue;
+  background-color: $button-primary-background;
 }
 
 .success-message {
@@ -315,7 +315,7 @@
 
 .login-button {
   display: inline-block;
-  background-color: $button-info-background;
+  background-color: $button-primary-background;
   color: $background-color;
   text-decoration: none;
   padding: 0.75rem 1.5rem;
@@ -325,7 +325,7 @@
 }
 
 .login-button:hover {
-  background-color: $button-info-background-hover-alt;
+  background-color: $button-primary-background-hover;
 }
 
 .subscription-form {
@@ -334,7 +334,7 @@
 }
 
 .subscribe-button:disabled {
-  background-color: $stripe-button-blue-disabled;
+  background-color: $button-info-background-disabled;
   cursor: not-allowed;
 }
 

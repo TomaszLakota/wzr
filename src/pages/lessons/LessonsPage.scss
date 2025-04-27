@@ -80,13 +80,13 @@
 
 .promo-content h2 {
   font-size: 32px;
-  color: $text-stripe-dark;
+  color: $text-color;
   margin-bottom: 20px;
 }
 
 .promo-description {
   font-size: 18px;
-  color: $text-stripe-muted;
+  color: $text-muted;
   margin-bottom: 40px;
   max-width: 600px;
 }
@@ -102,14 +102,14 @@
 
 .subscription-card h3 {
   font-size: 24px;
-  color: $text-stripe-dark;
+  color: $text-color;
   margin-bottom: 10px;
 }
 
 .subscription-card .price {
   font-size: 28px;
   font-weight: bold;
-  color: $stripe-button-blue;
+  color: $button-primary-background;
   margin-bottom: 20px;
 }
 
@@ -124,19 +124,19 @@
   margin-bottom: 10px;
   padding-left: 30px;
   position: relative;
-  color: $text-stripe-muted;
+  color: $text-muted;
 }
 
 .feature-list li:before {
   content: '✓';
   position: absolute;
   left: 0;
-  color: $stripe-button-blue;
+  color: $button-primary-background;
   font-weight: bold;
 }
 
 .subscribe-button {
-  background-color: $stripe-button-blue;
+  background-color: $button-primary-background;
   color: $background-color;
   padding: 12px 20px;
   border-radius: 4px;
@@ -148,10 +148,34 @@
 }
 
 .subscribe-button:hover {
-  background-color: $stripe-button-blue-hover;
+  background-color: $button-primary-background-hover;
 }
 
 .subscribe-button:disabled {
-  background-color: $stripe-button-blue-disabled;
+  background-color: $button-info-background-disabled;
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+a,
+.level-link {
+  color: $button-primary-background;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lessons-grid__cta {
+  background-color: $button-primary-background;
+  color: $background-color;
+  padding: 12px 24px;
+}
+
+.lessons-grid__cta:hover:not(:disabled) {
+  background-color: $button-primary-background-hover;
+}
+
+.lessons-grid__cta:disabled {
+  background-color: $button-info-background-disabled;
+  cursor: not-allowed;
+  opacity: 0.6;
 }

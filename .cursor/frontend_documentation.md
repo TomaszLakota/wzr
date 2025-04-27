@@ -1,182 +1,138 @@
 # Frontend Documentation
 
-## Project Overview
+## 1. Project Overview
 
-The frontend is a React application built with Vite, designed to provide an e-book sales platform with subscription management features. It communicates with the backend API for user authentication, e-book listing, purchasing, and subscription management.
+- **Type:** React (Vite) + SCSS application for an e-book sales platform.
+- **Key Features:** E-book browsing/purchasing, user accounts, subscriptions, blog/articles.
+- **Backend:** Communicates with a separate backend API. See [Backend Documentation](mdc:.cursor/backend_documentation.md).
 
-## Tech Stack
+## 2. Getting Started
 
-- **Framework**: React
-- **Build Tool**: Vite
-- **Styling**: SCSS
-- **API Communication**: Fetch API
-- **Payment Processing**: Stripe integration
+1.  **Install Dependencies:**
+    ```bash
+    npm install
+    ```
+2.  **Run Development Server:**
+    ```bash
+    npm run dev
+    ```
+3.  **Environment Variables:**
+    - Create a `.env` file in the root directory (if not present).
+    - Define necessary variables (e.g., `VITE_API_BASE_URL`, `VITE_STRIPE_PUBLISHABLE_KEY`). Check existing code or ask team lead if unsure which variables are required.
 
-## Project Structure
+## 3. Project Structure Highlights
 
-### Root Configuration Files
+```
+src/
+├── App.scss             # Empty - Global styles are in index.scss
+├── App.tsx              # Main application component, routing setup
+├── assets/              # Static assets (e.g., book-icon.svg)
+│   └── book-icon.svg
+├── components/          # Reusable UI components
+│   ├── article-detail/  # ArticleDetail.tsx, ArticleDetail.scss
+│   ├── article-preview/ # ArticlePreview.tsx, ArticlePreview.scss
+│   ├── ebook-card/      # EbookCard.tsx, EbookCard.scss
+│   ├── footer/          # Footer.tsx, Footer.scss
+│   ├── header/          # Header.tsx, Header.scss
+│   ├── layout/          # Layout.tsx, Layout.scss (wraps pages)
+│   ├── lesson/          # Lesson.tsx, Lesson.scss (content within lesson page)
+│   ├── lesson-thumbnail/# LessonThumbnail.tsx, LessonThumbnail.scss
+│   ├── lesson-video/    # LessonVideo.tsx, LessonVideo.scss
+│   └── subscription/    # SubscriptionButton.tsx, SubscriptionPromo.tsx, Subscription.scss
+├── index.scss           # Primary global styles and imports
+├── main.tsx             # Application entry point
+├── pages/               # Top-level page components (mapped to routes)
+│   ├── admin-panel/       # AdminPanel.tsx, AdminPanel.scss
+│   ├── blog/              # Blog.tsx, Blog.scss
+│   ├── ebook-details/     # EbookDetails.tsx, EbookDetails.scss
+│   ├── ebooks/            # Ebooks.tsx, Ebooks.scss
+│   ├── email-activated/   # EmailActivated.tsx, EmailActivated.scss
+│   ├── forgotPassword/    # ForgotPassword.tsx, ForgotPassword.scss
+│   ├── home/              # Home.tsx, Home.scss
+│   ├── language-guide/    # LanguageGuide.tsx (no dedicated SCSS)
+│   ├── lesson/            # LessonPage.tsx, LessonPage.scss (page container)
+│   ├── lessons/           # LessonsPage.tsx, LessonsPage.scss
+│   ├── library/           # Library.tsx, Library.scss
+│   ├── login/             # Login.tsx, Login.scss
+│   ├── payment-success/   # PaymentSuccess.tsx, PaymentSuccess.scss
+│   ├── profile/           # Profile.tsx, Profile.scss
+│   ├── register/          # Register.tsx, Register.scss
+│   ├── registration-success/ # RegistrationSuccess.tsx, RegistrationSuccess.scss
+│   ├── resetPassword/     # ResetPassword.tsx, ResetPassword.scss
+│   └── yoga-trips/        # YogaTrips.tsx, YogaTrips.scss
+├── services/            # API interaction logic
+│   ├── apiClient.ts     # Centralized fetch wrapper for API calls
+│   ├── authService.ts   # Authentication endpoints
+│   ├── ebookService.ts  # E-book related endpoints
+│   ├── stripeService.ts # Stripe checkout/subscription logic
+│   └── userService.ts   # User profile/data endpoints
+├── styles/              # Shared SCSS (variables, forms, page base styles)
+│   ├── form.scss        # Base form styling
+│   ├── page.scss        # Base page layout styling
+│   └── variables.scss   # Core SCSS variables (colors, fonts, spacing, shadows) - NO separate _colors.scss
+└── types/               # TypeScript type definitions
+    ├── article.types.ts
+    ├── auth.types.ts
+    ├── ebook.types.ts
+    ├── lesson.types.ts
+    ├── shared.types.ts
+    ├── stripe.types.ts
+    └── user.types.ts
+```
 
-- `vite.config.ts` - Vite configuration
-- `package.json` - Project dependencies and scripts
-- `index.html` - Main HTML entry point
-- `.env` - Environment variables (not committed to repository)
-- `.prettierrc` & `.prettierignore` - Code formatting configuration
-- `eslint.config.js` - ESLint configuration
+## 4. Core Conventions & Requirements
 
-### Source Code Structure
+1.  **UI Language: POLISH ONLY**
 
-**src/**
+    - All user-facing labels, messages, placeholders, etc., **MUST** be in Polish. No exceptions.
+    - Currency: PLN.
 
-- `main.tsx` - React application entry point
-- `App.tsx` - Main application component with routing
-- `App.scss` - Main component styles (potentially unused, check `index.scss` for global styles)
-- `index.scss` - Global styles and color definitions
+2.  **Styling (SCSS)**
 
-**src/components/**
+    - **Global Styles:** Defined in `src/index.scss`.
+    - **Variables:** Use variables from `src/styles/variables.scss`. **DO NOT** hardcode colors, shadows, fonts, etc. Check `variables.scss` first. (Note: Colors are defined directly in `variables.scss`, not a separate `_colors.scss` file).
+    - **Component Styles:** Each component/page should have its own `.scss` file within its directory (e.g., `src/pages/login/Login.scss`).
+    - **Imports:** Use `@use` for importing SCSS partials/variables.
+    - **Base Styles:** Check `src/styles/form.scss` and `src/styles/page.scss` for common base styles.
 
-- Reusable UI components
-- Each component in its own directory with dedicated SCSS file
-- `layout/`
-- `footer/`
-- `subscription/`
-- `lesson-video/`
-- `lesson-thumbnail/`
-- `header/`
-- `ebook-card/`
-- `article-preview/`
-- `article-detail/`
-- `lesson/`
+3.  **API Communication (`src/services/`)**
 
-**src/pages/**
+    - **`apiClient.ts`:** Use this configured `fetch` wrapper for all backend requests. It automatically adds the auth token from `localStorage` and handles common response scenarios (like 403 redirects). Review its implementation for details.
+    - **Service Files:** Use the specific service files (`authService.ts`, `ebookService.ts`, etc.) for interacting with corresponding API endpoints. Don't call `apiClient` directly from components/pages if a service function exists.
 
-- Page components for different application routes
-- Each page in its own directory with dedicated SCSS file
-- `Home.tsx` & `Home.scss` - Landing page with sections for features, e-books, and call-to-action
-- `email-activated/`
-- `yoga-trips/`
-- `register/`
-- `profile/`
-- `login/`
-- `payment-success/`
-- `library/`
-- `lesson/`
-- `lessons/`
-- `language-guide/`
-- `ebooks/`
-- `ebook-details/` - Detailed view for a single e-book
-- `blog/`
-- `admin-panel/`
-- `forgotPassword/`
-- `resetPassword/`
+4.  **State Management**
 
-**src/services/**
+    - (Currently Undocumented - Describe the primary method here, e.g., Context API, Zustand, Redux Toolkit, or component state, and any patterns to follow).
 
-- API communication logic
-- Stripe integration
-- Authentication handling
+5.  **Routing**
 
-### `apiClient.ts`
+    - Handled in `src/App.tsx` using `react-router-dom`.
+    - **Protected Routes:** Route protection is not handled at the router level in `App.tsx`. It's implemented _within_ individual page components (e.g., `Library`, `Profile`, `AdminPanel`) or `apiClient`
 
-- **Purpose:** A centralized service for making HTTP requests to the backend API.
-- **Features:**
-  - Automatic token handling for authenticated requests
-  - Consistent error handling
-  - Response parsing
-  - Cache control
-  - Methods for common HTTP verbs (GET, POST, PUT, DELETE)
+6.  **Types**
+    - Use types defined in `src/types/` for API data and core domain objects. Keep types specific (e.g., `ebook.types.ts` for e-book data).
 
-### `authService.ts`
+## 5. Key Services Deep Dive
 
-- **Purpose:** Handles authentication-related API calls.
-- **Methods:**
-  - `login(email, password)`: Authenticates a user and returns a token and user data
-  - `forgotPassword(email)`: Sends a password reset email to the user
-  - `resetPassword(token, password)`: Resets the user's password using a valid token
+- **`apiClient.ts`:**
+  - _Purpose:_ Centralized HTTP request handler (using `fetch` API).
+  - _Features:_ Configured base URL (via `VITE_API_BASE_URL` env var), automatically adds `Authorization: Bearer <token>` header from `localStorage`, common response handling (including 403 token expiry redirect), standard methods (get, post, put, delete).
+- **`authService.ts`:**
+  - _Purpose:_ Handles login, registration, password reset flows. Provides functions like `login()`, `register()`, `forgotPassword()`, `resetPassword()`.
+- **`stripeService.ts`:**
+  - _Purpose:_ Manages interactions with Stripe for creating checkout sessions (e-books, subscriptions).
 
-**src/styles/**
+## 6. Important User Flows (API/State Focus)
 
-- SCSS modules
-- Variables
-- Mixins
-- Reusable classes
+- **E-book Purchase:**
+  1. User clicks "Buy" -> `stripeService.createEbookCheckoutSession(ebookId)` called.
+  2. Backend returns Stripe session ID.
+  3. Frontend redirects user to Stripe using the session ID.
+  4. On success redirect (`/payment-success`): Potentially validate payment status with backend via `userService` or dedicated endpoint. Update user state/library access.
+- **Subscription:** Similar flow using `stripeService.createSubscriptionCheckoutSession(planId)`.
 
-**src/assets/**
+## 7. Development Guidelines
 
-- Static assets (images, icons, fonts)
-
-## Core Requirements
-
-1. **User Interface Language**
-
-   - All user-facing text MUST be in Polish
-   - Currency formatting follows Polish standards (PLN)
-
-2. **Styling**
-
-   - SCSS for all styling
-   - Global variables (colors, breakpoints, shadows, etc.) are defined in `src/styles/variables.scss`.
-   - Use variables defined in `src/styles/variables.scss` instead of hardcoding values (e.g., use `$primary-color` instead of `#333`, `$box-shadow-hover` for hover shadows).
-   - Colors defined in `src/styles/_colors.scss` (imported by `variables.scss`)
-   - Import using `@use`
-   - **Important**: Always check `variables.scss` for existing variable names before creating new ones. Variable names should be consistent throughout the application.
-   - do not change my colors without asking
-
-3. **API & Integrations**
-
-   - Stripe for payment processing
-   - Backend communication through dedicated services
-   - Error handling and form validation
-
-4. **Security**
-   - JWT authentication
-   - Protected routes
-   - Secure payment handling via Stripe
-   - Input validation and sanitization
-
-## Development Guidelines
-
-- Application runs through Vite
-- Hot Module Replacement enabled
-- Automatic code formatting with Prettier
-- Code linting with ESLint
-
-## User Flows
-
-### E-book Purchase Flow
-
-1. User browses e-books on the e-book list page
-2. User clicks on an e-book card to view its details on the dedicated EbookDetails page
-3. User can either click "Buy Now" on the list page or on the details page to initiate checkout
-4. User is redirected to Stripe checkout
-5. Upon successful payment, user is redirected to success page
-6. User can access purchased e-book from their dashboard
-
-### Subscription Flow
-
-1. User navigates to subscription page
-2. User selects a subscription plan
-3. User is redirected to Stripe checkout for subscription
-4. Upon successful subscription, user is redirected to success page
-5. User gains access to subscription-only content
-6. User can manage subscription from their dashboard
-
-## Error Handling
-
-- User-friendly error messages (in Polish)
-- Form validation
-- Payment error handling
-- Network error handling
-
-## Responsive Design
-
-- Mobile-first approach
-- Responsive for tablets and desktops
-- Adaptive UI elements based on screen size
-
-## Security Considerations
-
-- Token-based authentication
-- Protected routes
-- Secure payment handling through Stripe
-- Input validation and sanitization
-- HTTPS required for production
+- Follow standard Git flow (feature branches -> PRs).
+- Ensure Prettier/ESLint checks pass before pushing.
+- Keep backend documentation reference handy: [Backend Documentation](mdc:.cursor/backend_documentation.md).

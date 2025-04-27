@@ -118,7 +118,7 @@ The frontend is a React application built with Vite, designed to provide an e-bo
    - Use variables defined in `src/styles/variables.scss` instead of hardcoding values (e.g., use `$primary-color` instead of `#333`, `$box-shadow-hover` for hover shadows).
    - Colors defined in `src/styles/_colors.scss` (imported by `variables.scss`)
    - Import using `@use`
-   - **Important**: Always check `variables.scss` for existing variable names before creating new ones. Variable names should be consistent throughout the application. Recently added variables include: $success-color, $success-background, $text-color-secondary, $disabled-background.
+   - **Important**: Always check `variables.scss` for existing variable names before creating new ones. Variable names should be consistent throughout the application.
    - do not change my colors without asking
 
 3. **API & Integrations**

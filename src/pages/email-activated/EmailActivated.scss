@@ -4,9 +4,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 120px); 
+  min-height: calc(100vh - 120px);
   padding: 32px;
-  background-color: $background-light; 
+  background-color: $background-light;
 
   .activation-card {
     background-color: $background-color;
@@ -18,15 +18,15 @@
     width: 100%;
 
     h1 {
-      color: $primary-color;
+      color: $text-color;
       margin-bottom: 32px;
-      font-size: 2rem; 
+      font-size: 2rem;
     }
 
     p {
-      color: $text-primary;
+      color: $text-color;
       margin-bottom: 0;
-      font-size: 1rem; 
+      font-size: 1rem;
       &:last-of-type {
         margin-bottom: 16px;
       }

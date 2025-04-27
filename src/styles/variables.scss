@@ -6,6 +6,7 @@ $primary-color-dark: color.adjust($primary-color, $lightness: -5%);
 $primary-color-very-dark: color.adjust($primary-color, $lightness: -10%);
 $text-color: #333;
 $text-light: #666;
+$text-muted: #999;
 $background-color: #fff;
 $border-color: #ddd;
 $background-light: #f8f9fa;
@@ -30,13 +31,6 @@ $box-shadow-md: 0 4px 8px $color-shadow-light;
 $box-shadow-lg: 0 8px 16px $color-shadow-light;
 $box-shadow-xl: 0 10px 20px $color-shadow-light;
 $box-shadow-input: 0 0 0 2px rgba($primary-color, 0.25);
-
-// Additional variables for pages
-$text-primary: $text-color;
-$text-secondary: $text-light;
-$text-color-secondary: $text-light;
-
-$text-muted: #999;
 
 // State colors
 $success-background-light: #e6f7e6;

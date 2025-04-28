@@ -1,12 +1,34 @@
-# React + Vite
+# E-commerce Platform for E-books and Language Courses
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a comprehensive platform for selling e-books and language courses with a subscription system.
 
-Currently, two official plugins are available:
+## Purpose
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Please note:** This project is developed primarily as a demonstration of my skills and capabilities. It serves as a portfolio piece and is not intended for direct replication or commercial use without explicit permission.
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Administrative Panel:** Manage products, video lessons, and subscriptions.
+- **Backend:** Serverless architecture built with Node.js and Express.js.
+- **Database:** Utilizes a PostgreSQL database (via Supabase).
+- **Authentication:** Implements JWT authentication.
+- **Payments:** Integrates the Stripe payment system for both one-time purchases and recurring subscriptions.
+
+## Technology Stack
+
+- **Frontend:** React (Vite), SCSS
+- **Backend:** Node.js, Express.js
+- **Database:** PostgreSQL (managed via Supabase)
+- **Payments:** Stripe API
+- **Authentication:** JWT (jsonwebtoken), bcryptjs
+
+## Project Structure
+
+- **Frontend:** Located in the root directory.
+- **Backend:** Located in the `/server` directory.
+
+## License
+
+Copyright (c) 2025 Tomasz Łakota. All Rights Reserved.
+
+Unauthorized copying, distribution, or modification of this code is strictly prohibited.

@@ -8,13 +8,6 @@ Node.js Express server for e-book sales and Stripe subscription management.
 - **Port**: `PORT` env var (default: 3000)
 - **Entry Point**: `src/index.js`
 
-## Important notes
-
-Don't `cd server && some command`, it won't work, it's windows 10. RUN 2 COMMANDS INSTEAD
-
-- db schema in .cursor/rules/db_schema.json
-- any SQL queries you to run, add them in a new file and i will run it. assume db shape is exactly as in the schema
-
 ## Core Technologies
 
 - **Framework**: Express

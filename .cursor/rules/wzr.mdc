@@ -35,6 +35,10 @@ alwaysApply: true
 - available Endpoints are listed in [backend_documentation.md](mdc:.cursor/backend_documentation.md) make sure to keep the file updated 
 - no need to restart server after making changes
 - db schema in [db_schema.json](mdc:.cursor/rules/db_schema.json)
+## Important notes
 
+Don't `cd server && some command`, it won't work, it's windows 10. RUN 2 COMMANDS INSTEAD
+- db schema in .cursor/rules/db_schema.json
+- any SQL queries you to run, add them in a new file and i will run it. assume db shape is exactly as in the schema
 
 

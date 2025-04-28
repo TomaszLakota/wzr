@@ -4,7 +4,7 @@ This is a comprehensive platform for selling e-books and language courses with a
 
 ## Purpose
 
-**Please note:** This project is developed primarily as a demonstration of my skills and capabilities. It serves as a portfolio piece and is not intended for direct replication or commercial use without explicit permission.
+**Please note:** This project is public only to serve as a demonstration of my skills and capabilities. It serves as a portfolio piece and is not intended for direct replication or commercial use without explicit permission.
 
 ## Features
 

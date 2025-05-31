@@ -42,7 +42,7 @@ export interface ApiVerificationData {
   currency?: string;
 }
 
-export type PaymentStatus = 'processing' | 'success' | 'error';
+export type PaymentStatus = 'processing' | 'success' | 'error' | 'info';
 
 export interface SubscriptionCreationResponse {
   clientSecret: string;

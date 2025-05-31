@@ -19,10 +19,7 @@ export const mapBackendUsersToFrontend = (backendUsers: BackendUser[]): User[] =
   return backendUsers.map(mapBackendUserToFrontend);
 };
 
-export const fetchAdminUsers = async (
-  page: number,
-  limit: number
-): Promise<{ users: User[]; pagination: Pagination }> => {
+export const fetchAdminUsers = async (page: number, limit: number): Promise<{ users: User[]; pagination: Pagination }> => {
   const response = await apiClient.get<{ users: BackendUser[]; pagination: Pagination }>(
     `/api/admin/users/subscriptions?page=${page}&limit=${limit}`
   );
@@ -39,6 +36,11 @@ export const fetchUserProfile = async (email: string): Promise<User> => {
 
 export const activateUserAccount = async (token: string): Promise<{ message: string }> => {
   const response = await apiClient.post<{ message: string }>('/api/activate', { token });
+  return response;
+};
+
+export const deleteAccount = async (): Promise<{ message: string }> => {
+  const response = await apiClient.delete<{ message: string }>('/api/users/delete-account');
   return response;
 };
 

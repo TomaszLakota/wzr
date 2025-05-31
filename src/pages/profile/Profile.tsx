@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Profile.scss';
 import apiClient from '../../services/apiClient';
-import { fetchUserProfile } from '../../services/userService';
+import { fetchUserProfile, deleteAccount } from '../../services/userService';
 import { User } from '../../types/user.types';
 
 function Profile() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,9 +50,7 @@ function Profile() {
         } catch (err) {
           console.error('Błąd podczas pobierania danych użytkownika:', err);
           // Keep local storage data but show an error
-          setError(
-            'Nie udało się zaktualizować danych profilu. Wyświetlane dane mogą być nieaktualne.'
-          );
+          setError('Nie udało się zaktualizować danych profilu. Wyświetlane dane mogą być nieaktualne.');
         } finally {
           setLoading(false);
         }
@@ -92,6 +94,33 @@ function Profile() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleteLoading(true);
+      setError(null);
+      setSuccessMessage(null);
+
+      const response = await deleteAccount();
+
+      setSuccessMessage(response.message);
+      setShowDeleteModal(false);
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Błąd podczas usuwania konta:', error);
+      setError('Wystąpił błąd podczas usuwania konta. Spróbuj ponownie.');
+      setShowDeleteModal(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleSuccessConfirm = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.dispatchEvent(new Event('authChange'));
+    navigate('/');
+  };
+
   if (loading) {
     return <div className="profile-container">Ładowanie...</div>;
   }
@@ -117,9 +146,7 @@ function Profile() {
 
             <div className="profile-field">
               <label>Status subskrypcji:</label>
-              <p>
-                {user.subscriptionStatus === 'active' ? 'Aktywna' : 'Brak aktywnej subskrypcji'}
-              </p>
+              <p>{user.subscriptionStatus === 'active' ? 'Aktywna' : 'Brak aktywnej subskrypcji'}</p>
             </div>
 
             {user.isAdmin && (
@@ -132,14 +159,14 @@ function Profile() {
 
           <div className="profile-actions">
             {user.subscriptionStatus === 'active' && (
-              <button
-                className="manage-subscription-button"
-                onClick={handleManageSubscription}
-                disabled={portalLoading}
-              >
+              <button className="manage-subscription-button" onClick={handleManageSubscription} disabled={portalLoading}>
                 {portalLoading ? 'Ładowanie...' : 'Zarządzaj subskrypcją'}
               </button>
             )}
+
+            <button className="delete-account-button" onClick={() => setShowDeleteModal(true)} disabled={deleteLoading}>
+              {deleteLoading ? 'Usuwanie...' : 'Usuń konto'}
+            </button>
 
             <button className="logout-button" onClick={handleLogout}>
               Wyloguj
@@ -151,6 +178,49 @@ function Profile() {
         // but added as a fallback.
         <p>Nie udało się załadować danych profilu.</p>
       )}
+
+      {showDeleteModal && (
+        <div className="delete-confirmation-modal">
+          <div className="delete-modal-content">
+            <h3>Potwierdź usunięcie konta</h3>
+            <p>
+              Czy na pewno chcesz usunąć swoje konto? Ta operacja jest <strong>nieodwracalna</strong>.
+            </p>
+            <div className="warning-text">
+              ⚠️ Po usunięciu konta:
+              <ul>
+                <li>Wszystkie Twoje dane zostaną trwale usunięte</li>
+                <li>Aktywne subskrypcje zostaną automatycznie anulowane</li>
+                <li>Nie będzie możliwości odzyskania konta</li>
+              </ul>
+            </div>
+            <div className="modal-actions">
+              <button className="cancel-button" onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}>
+                Anuluj
+              </button>
+              <button className="delete-button" onClick={handleDeleteAccount} disabled={deleteLoading}>
+                {deleteLoading ? 'Usuwanie...' : 'Tak, usuń konto'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccessModal && (
+        <div className="delete-confirmation-modal">
+          <div className="success-modal-content">
+            <h3>Konto zostało usunięte</h3>
+            <div className="success-info">Twoje konto zostało trwale usunięte</div>
+            <div className="modal-actions">
+              <button className="primary-button" onClick={handleSuccessConfirm}>
+                Przejdź do strony głównej
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {successMessage && !showSuccessModal && <div className="success-message">{successMessage}</div>}
     </div>
   );
 }

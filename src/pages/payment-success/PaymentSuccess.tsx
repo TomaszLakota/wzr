@@ -26,9 +26,9 @@ function PaymentSuccess() {
 
         if (!paymentIntentId && !sessionId) {
           setPaymentStatus({
-            status: 'error',
+            status: 'info',
             success: false,
-            message: 'Brak informacji o płatności',
+            message: 'Przetwarzamy płatność',
           });
           setLoading(false);
           return;
@@ -74,11 +74,7 @@ function PaymentSuccess() {
     <div className="payment-success">
       <div className="payment-success__container">
         <h1 className="payment-success__title">
-          {paymentStatus.status === 'success'
-            ? 'Dziękujemy za zakup!'
-            : paymentStatus.status === 'error'
-              ? 'Błąd Płatności'
-              : 'Status płatności'}
+          {paymentStatus.status === 'success' ? 'Dziękujemy za zakup!' : paymentStatus.status === 'error' ? 'Błąd Płatności' : 'Status płatności'}
         </h1>
 
         {loading ? (
@@ -88,15 +84,12 @@ function PaymentSuccess() {
         ) : (
           <>
             <div className="payment-success__status">
-              <p className={`payment-success__message ${paymentStatus.status}`}>
-                {paymentStatus.message}
-              </p>
+              <p className={`payment-success__message ${paymentStatus.status}`}>{paymentStatus.message}</p>
 
               {paymentStatus.success && (
                 <div className="payment-success__details">
                   <p>
-                    Twoje zamówienie zostało zrealizowane. Na Twój adres email wysłaliśmy
-                    potwierdzenie zakupu wraz z instrukcją pobierania ebooka.
+                    Twoje zamówienie zostało zrealizowane. Na Twój adres email wysłaliśmy potwierdzenie zakupu wraz z instrukcją pobierania ebooka.
                   </p>
                 </div>
               )}

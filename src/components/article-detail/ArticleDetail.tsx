@@ -54,15 +54,14 @@ const ArticleDetail: React.FC = () => {
     });
   };
 
-  if (loading) {
-    return <div className="article-loading">Ładowanie artykułu...</div>;
-  }
-
   if (error) {
     return <div className="article-error">Błąd: {error}</div>;
   }
 
   if (!article) {
+    if (loading) {
+      return;
+    }
     return <div className="article-not-found">Nie znaleziono artykułu.</div>;
   }
 

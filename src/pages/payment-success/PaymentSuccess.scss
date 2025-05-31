@@ -59,6 +59,11 @@
       background-color: $error-background;
       color: $error-color-dark;
     }
+
+    &.info {
+      background-color: $disabled-background;
+      color: $info-color;
+    }
   }
 
   &__details {

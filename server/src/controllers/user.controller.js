@@ -3,9 +3,7 @@ import stripeClient from '../config/stripe.js';
 const syncSubscriptionStatus = async (supabase, userId) => {
   const { data: user, error: fetchError } = await supabase
     .from('users')
-    .select(
-      'id, email, name, stripe_customer_id, stripe_subscription_id, is_admin, subscription_status'
-    )
+    .select('id, email, name, stripe_customer_id, stripe_subscription_id, is_admin, subscription_status')
     .eq('id', userId)
     .single();
 
@@ -16,10 +14,7 @@ const syncSubscriptionStatus = async (supabase, userId) => {
 
   if (!user.stripe_customer_id) {
     if (user.subscription_status !== 'inactive') {
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ subscription_status: 'inactive' })
-        .eq('id', userId);
+      const { error: updateError } = await supabase.from('users').update({ subscription_status: 'inactive' }).eq('id', userId);
       if (updateError) {
         console.error('[SUB-SYNC] Error updating status to inactive:', updateError);
       } else {
@@ -47,10 +42,7 @@ const syncSubscriptionStatus = async (supabase, userId) => {
   const newDbStatus = isStripeSubscribed ? 'active' : 'inactive';
 
   if (currentDbStatus !== isStripeSubscribed) {
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ subscription_status: newDbStatus })
-      .eq('id', userId);
+    const { error: updateError } = await supabase.from('users').update({ subscription_status: newDbStatus }).eq('id', userId);
 
     if (updateError) {
       console.error('[SUB-SYNC] Error updating subscription status in DB:', updateError);
@@ -71,11 +63,7 @@ export const getUserByEmail = async (req, res) => {
   const authenticatedUserId = req.user.userId;
 
   try {
-    const { data: user, error: fetchError } = await supabase
-      .from('users')
-      .select('id, email')
-      .eq('email', requestedEmail)
-      .single();
+    const { data: user, error: fetchError } = await supabase.from('users').select('id, email').eq('email', requestedEmail).single();
 
     if (fetchError && fetchError.code !== 'PGRST116') {
       console.error('Error fetching user by email:', fetchError);
@@ -87,9 +75,7 @@ export const getUserByEmail = async (req, res) => {
     }
 
     if (user.id !== authenticatedUserId) {
-      console.warn(
-        `[GET-USER] Forbidden attempt: User ${authenticatedUserId} tried to access ${requestedEmail} (ID: ${user.id})`
-      );
+      console.warn(`[GET-USER] Forbidden attempt: User ${authenticatedUserId} tried to access ${requestedEmail} (ID: ${user.id})`);
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -117,9 +103,7 @@ export const updateSubscriptionStatus = async (req, res) => {
     const updatedUser = await syncSubscriptionStatus(supabase, authenticatedUserId);
 
     if (!updatedUser) {
-      return res
-        .status(404)
-        .json({ success: false, error: 'User not found or failed to sync status' });
+      return res.status(404).json({ success: false, error: 'User not found or failed to sync status' });
     }
 
     res.json({
@@ -128,10 +112,7 @@ export const updateSubscriptionStatus = async (req, res) => {
       isSubscribed: updatedUser.subscription_status === 'active',
     });
   } catch (error) {
-    console.error(
-      `[UPDATE-SUB] Error forcing subscription update for user ID ${authenticatedUserId}:`,
-      error
-    );
+    console.error(`[UPDATE-SUB] Error forcing subscription update for user ID ${authenticatedUserId}:`, error);
     res.status(500).json({
       success: false,
       error: 'Internal server error during subscription update',
@@ -200,13 +181,9 @@ export const getAllSubscribedUsersAdmin = async (req, res) => {
           }
         }
       } else if (result.error) {
-        console.error(
-          `Error fetching subscription for customer ${result.customerId}:`,
-          result.error.message
-        );
+        console.error(`Error fetching subscription for customer ${result.customerId}:`, result.error.message);
         // Map error state or default subscription object if needed
-        if (result.customerId)
-          subscriptionsByCustomer.set(result.customerId, { error: 'Failed to fetch' });
+        if (result.customerId) subscriptionsByCustomer.set(result.customerId, { error: 'Failed to fetch' });
       }
     });
 
@@ -276,11 +253,7 @@ export const createCustomerPortalSessionAdmin = async (req, res) => {
 
   try {
     // Fetch user by email to get their Stripe Customer ID
-    const { data: user, error: fetchError } = await supabase
-      .from('users')
-      .select('stripe_customer_id')
-      .eq('email', userEmail)
-      .single();
+    const { data: user, error: fetchError } = await supabase.from('users').select('stripe_customer_id').eq('email', userEmail).single();
 
     if (fetchError || !user) {
       if (fetchError && fetchError.code !== 'PGRST116') {
@@ -307,5 +280,53 @@ export const createCustomerPortalSessionAdmin = async (req, res) => {
       return res.status(400).json({ error: `Błąd Stripe: ${error.message}` });
     }
     res.status(500).json({ error: 'Błąd serwera podczas tworzenia sesji portalu' });
+  }
+};
+
+// Delete user account
+export const deleteAccount = async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const authenticatedUserId = req.user.userId;
+
+  try {
+    // First, get user data to check for Stripe subscription
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('id, email, stripe_customer_id, stripe_subscription_id')
+      .eq('id', authenticatedUserId)
+      .single();
+
+    if (fetchError || !user) {
+      console.error('[DELETE-ACCOUNT] Error fetching user:', fetchError);
+      return res.status(404).json({ error: 'Użytkownik nie znaleziony' });
+    }
+
+    // Cancel Stripe subscription if exists
+    if (user.stripe_customer_id && user.stripe_subscription_id) {
+      try {
+        await stripeClient.subscriptions.cancel(user.stripe_subscription_id);
+        console.log(`[DELETE-ACCOUNT] Cancelled Stripe subscription ${user.stripe_subscription_id} for user ${user.email}`);
+      } catch (stripeError) {
+        console.error(`[DELETE-ACCOUNT] Error cancelling Stripe subscription: ${stripeError.message}`);
+      }
+    }
+
+    // Delete user from database
+    const { error: deleteError } = await supabase.from('users').delete().eq('id', authenticatedUserId);
+
+    if (deleteError) {
+      console.error('[DELETE-ACCOUNT] Error deleting user from database:', deleteError);
+      return res.status(500).json({ error: 'Błąd podczas usuwania konta' });
+    }
+
+    console.log(`[DELETE-ACCOUNT] Successfully deleted account for user ${user.email} (ID: ${authenticatedUserId})`);
+
+    res.json({
+      success: true,
+      message: 'Konto zostało pomyślnie usunięte',
+    });
+  } catch (error) {
+    console.error('[DELETE-ACCOUNT] Error in deleteAccount controller:', error);
+    res.status(500).json({ error: 'Błąd serwera podczas usuwania konta' });
   }
 };

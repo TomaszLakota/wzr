@@ -21,19 +21,14 @@ function Home() {
         <div className="instructor-content">
           <h2>Odkryj Tajemnice Włoskiego z Rodowitym Włochem!</h2>
           <p>
-            Mam przyjemność zaprosić Państwa na niezapomnianą przygodę z językiem włoskim,
-            prowadzoną przeze mnie osobiście. Nazywam się Roberto i jestem rodowitym Włochem, który
-            z pasją uczy Polaków piękna i zawiłości mojego ojczystego języka.
+            Mam przyjemność zaprosić Państwa na niezapomnianą przygodę z językiem włoskim, prowadzoną przeze mnie osobiście. Nazywam się Roberto i
+            jestem rodowitym Włochem, który z pasją uczy Polaków piękna i zawiłości mojego ojczystego języka.
           </p>
-          <p>
-            Mieszkam we Włoszech, co pozwala mi na bieżąco czerpać z bogatej kultury i tradycji,
-            które z radością dzielę się z moimi uczniami.
-          </p>
+          <p>Mieszkam we Włoszech, co pozwala mi na bieżąco czerpać z bogatej kultury i tradycji, które z radością dzielę się z moimi uczniami.</p>
           <h3>Dlaczego warto wybrać moje lekcje?</h3>
           <p>
-            Przede wszystkim, stawiam na interaktywność i zaangażowanie. W mojej pracy skupiam się
-            na tym, aby nauka języka była dla Państwa przyjemnością, a nie obowiązkiem. Moje lekcje
-            są ciekawe i dynamiczne, co sprawia, że nauka staje się prawdziwą przygodą.
+            Przede wszystkim, stawiam na interaktywność i zaangażowanie. W mojej pracy skupiam się na tym, aby nauka języka była dla Państwa
+            przyjemnością, a nie obowiązkiem. Moje lekcje są ciekawe i dynamiczne, co sprawia, że nauka staje się prawdziwą przygodą.
           </p>
         </div>
       </section>
@@ -70,8 +65,8 @@ function Home() {
         <div className="yoga-content">
           <h2>Wycieczki do Włoch z jogą</h2>
           <p>
-            Jako Włoch, mogę zaoferować Państwu nie tylko naukę języka, ale również unikalne
-            spojrzenie na włoską kulturę podczas naszych wyjazdów z jogą!
+            Jako Włoch, mogę zaoferować Państwu nie tylko naukę języka, ale również unikalne spojrzenie na włoską kulturę podczas naszych wyjazdów z
+            jogą!
           </p>
           <Link to="/wyjazdy" className="button accent">
             DOWIEDZ SIĘ WIĘCEJ
@@ -84,7 +79,7 @@ function Home() {
 
       <Link to="/lekcje" className="cta-link">
         <section className="cta">
-          <h2>Rozpocznij swoją włoską podróż.</h2>
+          <h2>Rozpocznij swoją włoską podróż</h2>
         </section>
       </Link>
     </div>

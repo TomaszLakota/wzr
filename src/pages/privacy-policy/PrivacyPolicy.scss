@@ -1,0 +1,107 @@
+@use '../../styles/variables.scss' as *;
+
+.privacy-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  h1 {
+    color: $primary-color;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid $accent-color;
+    padding-bottom: 1rem;
+  }
+
+  .privacy-content {
+    section {
+      margin-bottom: 2.5rem;
+
+      h2 {
+        color: $primary-color-dark;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+      }
+
+      h3 {
+        color: $primary-color;
+        margin: 1.5rem 0 0.8rem 0;
+        font-size: 1.1rem;
+      }
+
+      p {
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        text-align: justify;
+
+        strong {
+          color: $primary-color;
+        }
+      }
+
+      ul,
+      ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+
+        li {
+          margin-bottom: 0.6rem;
+          line-height: 1.5;
+
+          strong {
+            color: $primary-color;
+          }
+        }
+      }
+
+      // Wyróżnienie kontaktu UODO
+      p:has(strong:contains('Urząd Ochrony Danych Osobowych')) {
+        background-color: $background-light;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid $accent-color;
+        margin: 1.5rem 0;
+      }
+    }
+
+    .last-updated {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid $border-color;
+      text-align: center;
+
+      p {
+        font-style: italic;
+        color: $text-muted;
+        margin: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .privacy-page {
+    padding: 1rem 0.5rem;
+
+    h1 {
+      font-size: 1.8rem;
+    }
+
+    .privacy-content {
+      section {
+        h2 {
+          font-size: 1.2rem;
+        }
+
+        h3 {
+          font-size: 1.05rem;
+        }
+
+        ul,
+        ol {
+          padding-left: 1.5rem;
+        }
+      }
+    }
+  }
+}

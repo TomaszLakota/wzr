@@ -21,6 +21,8 @@ import EmailActivated from './pages/email-activated/EmailActivated';
 import RegistrationSuccess from './pages/registration-success/RegistrationSuccess';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import ResetPassword from './pages/resetPassword/ResetPassword';
+import TermsOfService from './pages/terms-of-service/TermsOfService';
+import PrivacyPolicy from './pages/privacy-policy/PrivacyPolicy';
 
 // Load Stripe outside of component render to avoid recreating the Stripe object on re-renders
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -104,6 +106,14 @@ const router = createBrowserRouter([
       {
         path: '/reset-hasla',
         element: <ResetPassword />,
+      },
+      {
+        path: '/regulamin',
+        element: <TermsOfService />,
+      },
+      {
+        path: '/polityka-prywatnosci',
+        element: <PrivacyPolicy />,
       },
     ],
   },
